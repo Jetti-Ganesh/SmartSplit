@@ -1,0 +1,1292 @@
+# SplitSmart - Complete Project Documentation
+
+## 📱 APP STRUCTURE & NAVIGATION
+
+### **Page Hierarchy**
+```
+├── Authentication
+│   ├── Landing Page (/)
+│   ├── Login/Signup (/auth)
+│   └── OTP Verification (/verify)
+│
+├── Main Dashboard (/dashboard)
+│   ├── Overview Tab
+│   ├── Groups Tab
+│   ├── Activity Tab
+│   └── Profile Tab
+│
+├── Group Pages
+│   ├── Group Details (/group/:id)
+│   ├── Add Expense (/group/:id/add-expense)
+│   ├── Settlement Page (/group/:id/settle)
+│   ├── Group Settings (/group/:id/settings)
+│   └── Trip Mode (/group/:id/trip)
+│
+├── Expense Management
+│   ├── Expense Details (/expense/:id)
+│   ├── Edit Expense (/expense/:id/edit)
+│   └── Receipt Scanner (/scan-receipt)
+│
+└── User Pages
+    ├── Profile Settings (/profile)
+    ├── Payment History (/history)
+    └── Analytics (/analytics)
+```
+
+---
+
+## 🎨 DETAILED PAGE DESIGNS
+
+### **1. LANDING PAGE** (`/`)
+
+**Purpose**: First impression, explain app value
+
+**Layout:**
+```
+┌─────────────────────────────────────┐
+│  [Logo] SplitSmart                  │
+├─────────────────────────────────────┤
+│                                     │
+│   [Hero Image: Friends celebrating] │
+│                                     │
+│   "Stop Fighting Over Bills"        │
+│   Track. Split. Settle. Simple.     │
+│                                     │
+│   [Get Started] [Learn More]        │
+│                                     │
+├─────────────────────────────────────┤
+│  ✓ Receipt Scanning                 │
+│  ✓ UPI Integration                  │
+│  ✓ Smart Debt Simplification        │
+│  ✓ Trip Mode                        │
+├─────────────────────────────────────┤
+│   [Testimonials/Screenshots]        │
+└─────────────────────────────────────┘
+```
+
+**Components:**
+- Hero section with CTA
+- Feature highlights (icons + text)
+- Screenshot carousel
+- Footer with links
+
+**Colors:**
+- Primary: #10B981 (Green - money/positive)
+- Secondary: #3B82F6 (Blue - trust)
+- Danger: #EF4444 (Red - you owe)
+- Success: #22C55E (Green - you're owed)
+
+---
+
+### **2. LOGIN/SIGNUP PAGE** (`/auth`)
+
+**Layout:**
+```
+┌─────────────────────────────────────┐
+│         [SplitSmart Logo]           │
+│                                     │
+│   Welcome Back!                     │
+│                                     │
+│   ┌─────────────────────────────┐  │
+│   │ +91 |__________________|     │  │
+│   │     Enter Mobile Number      │  │
+│   └─────────────────────────────┘  │
+│                                     │
+│   [Send OTP]                        │
+│                                     │
+│   By continuing, you agree to       │
+│   Terms & Privacy Policy            │
+└─────────────────────────────────────┘
+```
+
+**Features:**
+- Phone number input with country code
+- OTP-based authentication (no password)
+- Auto-detect Indian phone format
+- "Continue with Google" (optional)
+
+**Validation:**
+- Valid 10-digit phone number
+- Rate limiting on OTP requests
+
+---
+
+### **3. DASHBOARD** (`/dashboard`)
+
+**Layout:**
+```
+┌─────────────────────────────────────┐
+│ Hi Rahul! 👋                    [⚙️] │
+├─────────────────────────────────────┤
+│ ┌─────────────┐ ┌─────────────┐    │
+│ │ You Owe     │ │ You're Owed │    │
+│ │   ₹1,240    │ │   ₹850      │    │
+│ │   (red)     │ │   (green)   │    │
+│ └─────────────┘ └─────────────┘    │
+├─────────────────────────────────────┤
+│ Quick Actions:                      │
+│ [➕ Add Expense] [💰 Settle Up]     │
+├─────────────────────────────────────┤
+│ YOUR GROUPS                         │
+│ ┌─────────────────────────────────┐│
+│ │ 🏠 Flat 301 Roommates      [>] ││
+│ │ You owe: ₹1,200                 ││
+│ │ Next due: Rent (5 days)         ││
+│ └─────────────────────────────────┘│
+│ ┌─────────────────────────────────┐│
+│ │ 🎉 Goa Trip 2024           [>] ││
+│ │ You're owed: ₹850               ││
+│ │ Last activity: 2h ago           ││
+│ └─────────────────────────────────┘│
+│                                     │
+│ [+ Create New Group]                │
+├─────────────────────────────────────┤
+│ RECENT ACTIVITY                     │
+│ • Amit paid ₹500 to you             │
+│ • You added "Dinner" (₹240)         │
+│ • Priya settled up (₹1,000)         │
+└─────────────────────────────────────┘
+
+Bottom Nav: [🏠 Home] [👥 Groups] [➕ Add] [📊 Activity] [👤 Profile]
+```
+
+**Features:**
+- Summary cards (owe/owed with color coding)
+- Group list with latest status
+- Quick action buttons (floating +)
+- Recent activity feed
+- Bottom navigation bar
+
+**Data Displayed:**
+- Total you owe (all groups combined)
+- Total you're owed (all groups combined)
+- Per-group balances
+- Notifications badge
+
+---
+
+### **4. GROUP DETAILS PAGE** (`/group/:id`)
+
+**Layout:**
+```
+┌─────────────────────────────────────┐
+│ [<] 🏠 Flat 301 Roommates      [⚙️] │
+├─────────────────────────────────────┤
+│ BALANCES                            │
+│ ┌─────────────────────────────────┐│
+│ │ Rahul    → You:     ₹500 (red) ││
+│ │ Amit     → You:     ₹200 (red) ││
+│ │ You      → Priya:   ₹350 (green)││
+│ └─────────────────────────────────┘│
+│                                     │
+│ [Settle Up] [Simplify Debts]        │
+├─────────────────────────────────────┤
+│ EXPENSES                            │
+│ ┌─────────────────────────────────┐│
+│ │ 🍕 Pizza Party        ₹1,200    ││
+│ │ Paid by Amit • Split 4 ways     ││
+│ │ You owe: ₹300        [Details>] ││
+│ └─────────────────────────────────┘│
+│ ┌─────────────────────────────────┐│
+│ │ 🏠 Rent - March       ₹40,000   ││
+│ │ Paid by You • Split equally     ││
+│ │ Recurring monthly    [Details>] ││
+│ └─────────────────────────────────┘│
+│                                     │
+│ [+ Add Expense]                     │
+├─────────────────────────────────────┤
+│ GROUP MEMBERS (4)                   │
+│ • Rahul (Admin) ✓                   │
+│ • Amit                              │
+│ • Priya                             │
+│ • You                               │
+└─────────────────────────────────────┘
+```
+
+**Features:**
+- Header: Group name, settings icon
+- Balance summary (who owes whom)
+- "Simplify Debts" button
+- Chronological expense list
+- Expense cards showing:
+  - Category icon
+  - Description
+  - Amount
+  - Who paid
+  - Split type
+  - Your share
+- Member list with roles
+- Floating + button (add expense)
+
+**Actions:**
+- Tap expense → View details
+- Tap member → View individual balance
+- Swipe expense → Edit/Delete
+- Long press → Multi-select for bulk actions
+
+---
+
+### **5. ADD EXPENSE PAGE** (`/group/:id/add-expense`)
+
+**Layout:**
+```
+┌─────────────────────────────────────┐
+│ [×] Add Expense                     │
+├─────────────────────────────────────┤
+│ ┌─────────────────────────────────┐│
+│ │ ₹ |_________________________|   ││
+│ │   Enter Amount                   ││
+│ └─────────────────────────────────┘│
+│                                     │
+│ Description                         │
+│ ┌─────────────────────────────────┐│
+│ │ Dinner at Pizza Hut              ││
+│ └─────────────────────────────────┘│
+│                                     │
+│ Category                            │
+│ [🍕Food] [🏠Rent] [🚗Travel] [More]│
+│                                     │
+│ Paid by                             │
+│ ┌─────────────────────────────────┐│
+│ │ You ▼                            ││
+│ └─────────────────────────────────┘│
+│                                     │
+│ Split between                       │
+│ ☑️ Rahul    ☑️ Amit    ☑️ Priya     │
+│ ☑️ You                              │
+│                                     │
+│ Split type                          │
+│ ⭕ Equally                          │
+│ ⚪ Unequally                        │
+│ ⚪ Exact amounts                    │
+│ ⚪ Percentages                      │
+│                                     │
+│ [📷 Scan Receipt]                   │
+│                                     │
+│ [Cancel]           [Add Expense]    │
+└─────────────────────────────────────┘
+```
+
+**Features:**
+- Large numeric input (calculator-style)
+- Description with autocomplete (past expenses)
+- Category selector (with emoji icons)
+- Paid by dropdown
+- Member selection (multi-select with checkboxes)
+- Split type selector:
+  - Equal: Divide by number of people
+  - Unequal: Show sliders/percentage input
+  - Exact: Manual amount per person
+  - Shares: "Rahul ate 2 pizzas, others 1 each"
+- Receipt scanner button
+- Date picker (defaults to today)
+- Notes field (optional)
+
+**Validation:**
+- Amount > 0
+- At least one person selected
+- Split total = expense amount
+
+---
+
+### **6. RECEIPT SCANNER** (`/scan-receipt`)
+
+**Layout:**
+```
+┌─────────────────────────────────────┐
+│ [<] Scan Receipt              [?]   │
+├─────────────────────────────────────┤
+│                                     │
+│    ┌───────────────────────┐       │
+│    │                       │       │
+│    │   [Camera Viewfinder] │       │
+│    │                       │       │
+│    │   Position receipt    │       │
+│    │   within frame        │       │
+│    │                       │       │
+│    └───────────────────────┘       │
+│                                     │
+│    [📷 Capture] [🖼️ From Gallery]  │
+│                                     │
+├─────────────────────────────────────┤
+│ After scan:                         │
+│ ┌─────────────────────────────────┐│
+│ │ ✓ Total: ₹1,245                 ││
+│ │ ✓ Date: 28 Dec 2024             ││
+│ │ ✓ Merchant: Pizza Hut            ││
+│ │                                  ││
+│ │ Items Detected:                  ││
+│ │ • Margherita Pizza  ₹450         ││
+│ │ • Pepsi (2)         ₹120         ││
+│ │ • Garlic Bread      ₹180         ││
+│ │                                  ││
+│ │ [Edit Items] [Confirm & Split]   ││
+│ └─────────────────────────────────┘│
+└─────────────────────────────────────┘
+```
+
+**Features:**
+- Camera interface with guides
+- OCR processing with loading indicator
+- Extracted data preview
+- Manual edit option
+- Item-wise split option
+  - "Rahul gets Pizza + Pepsi"
+  - "Others split Garlic Bread"
+
+**Tech:**
+- Tesseract.js for OCR
+- Image preprocessing (grayscale, contrast)
+- Regex patterns for Indian receipts:
+  - Total: ₹XXX / Rs. XXX / INR XXX
+  - Date: DD/MM/YYYY
+  - GST numbers
+
+---
+
+### **7. SETTLE UP PAGE** (`/group/:id/settle`)
+
+**Layout:**
+```
+┌─────────────────────────────────────┐
+│ [<] Settle Up - Flat 301            │
+├─────────────────────────────────────┤
+│ CURRENT DEBTS                       │
+│ ┌─────────────────────────────────┐│
+│ │ Rahul → You        ₹500         ││
+│ │ [Request via UPI]               ││
+│ └─────────────────────────────────┘│
+│ ┌─────────────────────────────────┐│
+│ │ You → Amit         ₹300         ││
+│ │ [Pay via UPI]                   ││
+│ └─────────────────────────────────┘│
+│                                     │
+│ [✨ Simplify All Debts]             │
+│                                     │
+├─────────────────────────────────────┤
+│ After Simplification:               │
+│ 💡 Save 2 transactions!             │
+│                                     │
+│ ┌─────────────────────────────────┐│
+│ │ You → Amit         ₹200         ││
+│ └─────────────────────────────────┘│
+│                                     │
+│ [Apply Simplification]              │
+├─────────────────────────────────────┤
+│ SETTLEMENT HISTORY                  │
+│ • 15 Dec: You paid Rahul ₹1,000     │
+│ • 10 Dec: Amit paid You ₹450        │
+└─────────────────────────────────────┘
+```
+
+**Features:**
+- Current debt visualization
+- UPI payment buttons (opens UPI app)
+- QR code generation
+- Debt simplification preview
+- Settlement history
+- Confirmation modal after payment
+
+**UPI Integration:**
+```javascript
+// UPI Deep Link Format
+upi://pay?pa=receiver@upi&pn=Name&am=500&cu=INR&tn=SplitSmartSettlement
+```
+
+---
+
+### **8. TRIP MODE** (`/group/:id/trip`)
+
+**Layout:**
+```
+┌─────────────────────────────────────┐
+│ [<] Goa Trip 2024                   │
+├─────────────────────────────────────┤
+│ 📅 25-28 Dec 2024 (4 days)          │
+│ 👥 4 participants                   │
+│                                     │
+│ ┌─────────────────────────────────┐│
+│ │ Total Expenses    ₹18,450       ││
+│ │ Per Person (avg)  ₹4,612        ││
+│ └─────────────────────────────────┘│
+│                                     │
+│ EXPENSE BREAKDOWN                   │
+│ 🏨 Accommodation      ₹8,000 (43%) │
+│ 🍕 Food               ₹6,200 (34%) │
+│ 🚗 Transport          ₹3,000 (16%) │
+│ 🎉 Activities         ₹1,250 (7%)  │
+│                                     │
+│ [View Day-wise] [Export Report]     │
+│                                     │
+├─────────────────────────────────────┤
+│ DAY 1 - Dec 25                      │
+│ • Hotel booking        ₹8,000       │
+│ • Dinner at beach      ₹1,200       │
+│                                     │
+│ DAY 2 - Dec 26                      │
+│ • Scuba diving         ₹4,000       │
+│ • Lunch                ₹800         │
+└─────────────────────────────────────┘
+```
+
+**Features:**
+- Trip header (dates, participants)
+- Total spend summary
+- Category-wise breakdown (pie chart)
+- Per-person average
+- Day-wise expense list
+- Export trip report (PDF)
+- End trip → Final settlement screen
+
+---
+
+### **9. PROFILE PAGE** (`/profile`)
+
+**Layout:**
+```
+┌─────────────────────────────────────┐
+│ [<] Profile                    [✏️] │
+├─────────────────────────────────────┤
+│        [Profile Photo]              │
+│          Rahul Kumar                │
+│       rahul@upi (UPI ID)            │
+│                                     │
+├─────────────────────────────────────┤
+│ ACCOUNT                             │
+│ • Phone Number     +91 98765 43210  │
+│ • Email            rahul@gmail.com  │
+│ • Default UPI      rahul@paytm      │
+│                                     │
+├─────────────────────────────────────┤
+│ STATISTICS                          │
+│ • Total Expenses      ₹1,24,560     │
+│ • Groups Joined       8             │
+│ • Settled This Month  ₹4,200        │
+│ • Fairness Score      92/100 ⭐      │
+│                                     │
+├─────────────────────────────────────┤
+│ PREFERENCES                         │
+│ • Notifications       [ON]          │
+│ • Payment Reminders   [ON]          │
+│ • Weekly Summary      [OFF]         │
+│                                     │
+├─────────────────────────────────────┤
+│ [Payment History]                   │
+│ [Export All Data]                   │
+│ [Help & Support]                    │
+│ [Logout]                            │
+└─────────────────────────────────────┘
+```
+
+**Features:**
+- Editable profile info
+- UPI ID management (multiple UPIs)
+- Statistics dashboard
+- Fairness score calculation
+- Notification preferences
+- Data export (GDPR compliance)
+
+---
+
+### **10. ANALYTICS PAGE** (`/analytics`)
+
+**Layout:**
+```
+┌─────────────────────────────────────┐
+│ [<] Your Spending Insights          │
+├─────────────────────────────────────┤
+│ [This Month▼]                       │
+│                                     │
+│ Total Spent: ₹12,450                │
+│                                     │
+│ ┌─────────────────────────────────┐│
+│ │   [Spending Trend Line Chart]   ││
+│ └─────────────────────────────────┘│
+│                                     │
+│ CATEGORY BREAKDOWN                  │
+│ 🍕 Food               40%  ₹4,980  │
+│ ████████░░░░░░░░░░               ││
+│ 🏠 Rent               35%  ₹4,358  │
+│ ███████░░░░░░░░░░░                ││
+│ 🚗 Transport          15%  ₹1,868  │
+│ ███░░░░░░░░░░░░░░░░               ││
+│ 🎉 Entertainment      10%  ₹1,245  │
+│ ██░░░░░░░░░░░░░░░░░               ││
+│                                     │
+│ TOP EXPENSE: Pizza Party (₹1,200)  │
+│                                     │
+│ SPENDING COMPARISON                 │
+│ You: ₹12,450                        │
+│ Group Avg: ₹10,300                  │
+│ You spent 20% more than average     │
+│                                     │
+│ [Export Report] [Share Insights]    │
+└─────────────────────────────────────┘
+```
+
+**Features:**
+- Time period selector
+- Line chart (spending over time)
+- Category breakdown (pie/bar chart)
+- Group comparison
+- Export to PDF
+- Social sharing (optional)
+
+---
+
+## 🗂️ DATABASE SCHEMA
+
+### **MongoDB Collections**
+
+#### **1. Users Collection**
+```javascript
+{
+  _id: ObjectId,
+  phone: "+919876543210",
+  name: "Rahul Kumar",
+  email: "rahul@gmail.com",
+  upiIds: ["rahul@paytm", "9876543210@ybl"],
+  profilePic: "url",
+  createdAt: Date,
+  preferences: {
+    notifications: true,
+    paymentReminders: true,
+    weeklySummary: false
+  },
+  stats: {
+    totalExpenses: 124560,
+    groupsJoined: 8,
+    fairnessScore: 92
+  }
+}
+```
+
+#### **2. Groups Collection**
+```javascript
+{
+  _id: ObjectId,
+  name: "Flat 301 Roommates",
+  icon: "🏠",
+  createdBy: userId,
+  members: [
+    {
+      userId: ObjectId,
+      role: "admin", // admin or member
+      joinedAt: Date
+    }
+  ],
+  type: "regular", // regular or trip
+  tripDetails: {
+    startDate: Date,
+    endDate: Date,
+    destination: "Goa"
+  },
+  createdAt: Date,
+  isActive: true
+}
+```
+
+#### **3. Expenses Collection**
+```javascript
+{
+  _id: ObjectId,
+  groupId: ObjectId,
+  description: "Pizza Party",
+  amount: 1200,
+  currency: "INR",
+  category: "Food",
+  paidBy: userId,
+  splitType: "equal", // equal, unequal, exact, shares
+  splitDetails: [
+    {
+      userId: ObjectId,
+      amount: 300,
+      percentage: 25, // for unequal
+      shares: 1 // for shares type
+    }
+  ],
+  date: Date,
+  receipt: {
+    imageUrl: "s3-url",
+    ocrData: {
+      merchant: "Pizza Hut",
+      items: [...],
+      total: 1200
+    }
+  },
+  isRecurring: false,
+  recurringConfig: {
+    frequency: "monthly", // weekly, monthly
+    nextDate: Date
+  },
+  createdAt: Date,
+  updatedAt: Date,
+  createdBy: userId
+}
+```
+
+#### **4. Settlements Collection**
+```javascript
+{
+  _id: ObjectId,
+  groupId: ObjectId,
+  from: userId,
+  to: userId,
+  amount: 500,
+  method: "upi", // upi, cash, other
+  upiTransactionId: "string",
+  notes: "Rent payment",
+  settledAt: Date,
+  verifiedBy: [userId1, userId2], // both parties confirm
+  status: "completed" // pending, completed, disputed
+}
+```
+
+#### **5. Notifications Collection**
+```javascript
+{
+  _id: ObjectId,
+  userId: ObjectId,
+  type: "expense_added", // payment_received, reminder, etc
+  title: "New expense added",
+  message: "Amit added 'Dinner' - Your share: ₹250",
+  groupId: ObjectId,
+  expenseId: ObjectId,
+  isRead: false,
+  createdAt: Date
+}
+```
+
+---
+
+## 🏗️ INITIAL PROJECT STRUCTURE
+
+```
+splitsmart/
+│
+├── client/                          # React Frontend
+│   ├── public/
+│   │   ├── index.html
+│   │   └── manifest.json
+│   │
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── common/
+│   │   │   │   ├── Button.jsx
+│   │   │   │   ├── Input.jsx
+│   │   │   │   ├── Modal.jsx
+│   │   │   │   ├── Card.jsx
+│   │   │   │   └── Loading.jsx
+│   │   │   │
+│   │   │   ├── layout/
+│   │   │   │   ├── Navbar.jsx
+│   │   │   │   ├── BottomNav.jsx
+│   │   │   │   └── Sidebar.jsx
+│   │   │   │
+│   │   │   ├── auth/
+│   │   │   │   ├── Login.jsx
+│   │   │   │   ├── OTPVerification.jsx
+│   │   │   │   └── ProtectedRoute.jsx
+│   │   │   │
+│   │   │   ├── dashboard/
+│   │   │   │   ├── DashboardOverview.jsx
+│   │   │   │   ├── BalanceSummary.jsx
+│   │   │   │   ├── GroupCard.jsx
+│   │   │   │   └── RecentActivity.jsx
+│   │   │   │
+│   │   │   ├── group/
+│   │   │   │   ├── GroupDetails.jsx
+│   │   │   │   ├── GroupSettings.jsx
+│   │   │   │   ├── MemberList.jsx
+│   │   │   │   └── BalanceSheet.jsx
+│   │   │   │
+│   │   │   ├── expense/
+│   │   │   │   ├── AddExpense.jsx
+│   │   │   │   ├── ExpenseCard.jsx
+│   │   │   │   ├── ExpenseDetails.jsx
+│   │   │   │   ├── SplitCalculator.jsx
+│   │   │   │   └── ReceiptScanner.jsx
+│   │   │   │
+│   │   │   ├── settlement/
+│   │   │   │   ├── SettlementPage.jsx
+│   │   │   │   ├── DebtSimplifier.jsx
+│   │   │   │   ├── UPIPayment.jsx
+│   │   │   │   └── QRCode.jsx
+│   │   │   │
+│   │   │   ├── trip/
+│   │   │   │   ├── TripMode.jsx
+│   │   │   │   ├── TripDashboard.jsx
+│   │   │   │   └── TripReport.jsx
+│   │   │   │
+│   │   │   └── analytics/
+│   │   │       ├── SpendingChart.jsx
+│   │   │       ├── CategoryBreakdown.jsx
+│   │   │       └── FairnessScore.jsx
+│   │   │
+│   │   ├── pages/
+│   │   │   ├── Landing.jsx
+│   │   │   ├── Auth.jsx
+│   │   │   ├── Dashboard.jsx
+│   │   │   ├── GroupPage.jsx
+│   │   │   ├── Profile.jsx
+│   │   │   └── Analytics.jsx
+│   │   │
+│   │   ├── hooks/
+│   │   │   ├── useAuth.js
+│   │   │   ├── useGroups.js
+│   │   │   ├── useExpenses.js
+│   │   │   └── useNotifications.js
+│   │   │
+│   │   ├── context/
+│   │   │   ├── AuthContext.jsx
+│   │   │   └── GroupContext.jsx
+│   │   │
+│   │   ├── utils/
+│   │   │   ├── api.js              # Axios config
+│   │   │   ├── debtSimplifier.js   # Debt algorithm
+│   │   │   ├── dateFormatter.js
+│   │   │   ├── currencyFormatter.js
+│   │   │   └── validation.js
+│   │   │
+│   │   ├── services/
+│   │   │   ├── authService.js
+│   │   │   ├── groupService.js
+│   │   │   ├── expenseService.js
+│   │   │   └── ocrService.js
+│   │   │
+│   │   ├── App.jsx
+│   │   ├── index.js
+│   │   └── index.css
+│   │
+│   └── package.json
+│
+├── server/                          # Node.js Backend
+│   ├── src/
+│   │   ├── config/
+│   │   │   ├── db.js               # MongoDB connection
+│   │   │   ├── cloudinary.js       # Image upload
+│   │   │   └── env.js              # Environment vars
+│   │   │
+│   │   ├── models/
+│   │   │   ├── User.js
+│   │   │   ├── Group.js
+│   │   │   ├── Expense.js
+│   │   │   ├── Settlement.js
+│   │   │   └── Notification.js
+│   │   │
+│   │   ├── routes/
+│   │   │   ├── auth.routes.js
+│   │   │   ├── user.routes.js
+│   │   │   ├── group.routes.js
+│   │   │   ├── expense.routes.js
+│   │   │   ├── settlement.routes.js
+│   │   │   └── analytics.routes.js
+│   │   │
+│   │   ├── controllers/
+│   │   │   ├── authController.js
+│   │   │   ├── userController.js
+│   │   │   ├── groupController.js
+│   │   │   ├── expenseController.js
+│   │   │   ├── settlementController.js
+│   │   │   └── analyticsController.js
+│   │   │
+│   │   ├── middleware/
+│   │   │   ├── auth.js             # JWT verification
+│   │   │   ├── validation.js       # Request validation
+│   │   │   ├── errorHandler.js
+│   │   │   └── rateLimit.js
+│   │   │
+│   │   ├── services/
+│   │   │   ├── smsService.js       # OTP sending
+│   │   │   ├── ocrService.js       # Receipt scanning
+│   │   │   ├── debtSimplifier.js   # Debt algorithm
+│   │   │   ├── notificationService.js
+│   │   │   └── emailService.js
+│   │   │
+│   │   ├── utils/
+│   │   │   ├── generateOTP.js
+│   │   │   ├── jwtHelper.js
+│   │   │   └── validators.js
+│   │   │
+│   │   └── app.js                  # Express app
+│   │
+│   ├── tests/
+│   │   ├── unit/
+│   │   └── integration/
+│   │
+│   ├── .env
+│   ├── .gitignore
+│   └── package.json
+│
+└── README.md
+```
+
+---
+
+## 🎯 FEATURE IMPLEMENTATION PRIORITY
+
+### **Week 1: Foundation**
+- [ ] Project setup (MERN boilerplate)
+- [ ] Database schema design
+- [ ] Authentication (phone OTP)
+- [ ] Basic UI components library
+
+### **Week 2: Core Group Features**
+- [ ] Create/join groups
+- [ ] Add members
+- [ ] Group dashboard
+- [ ] Member management
+
+### **Week 3: Basic Expense Management**
+- [ ] Add expense form
+- [ ] Equal split only
+- [ ] Expense list view
+- [ ] Basic balance calculation
+
+### **Week 4: Advanced Splits**
+- [ ] Unequal split
+- [ ] Exact amounts
+- [ ] Percentage split
+- [ ] Edit/delete expenses
+
+### **Week 5: Settlement System**
+- [ ] Balance calculation per person
+- [ ] Settlement recording
+- [ ] Payment history
+- [ ] Basic UPI links
+
+### **Week 6: Debt Simplification**
+- [ ] Graph-based algorithm
+- [ ] Simplification preview
+- [ ] Apply simplification
+
+### **Week 7: Receipt Scanner**
+- [ ] Camera integration
+- [ ] OCR implementation
+- [ ] Data extraction
+- [ ] Manual editing
+
+### **Week 8: Polish & Testing**
+- [ ] Responsive design
+- [ ] Loading states
+- [ ] Error handling
+- [ ] User testing
+
+### **Phase 2 (Later)**
+- [ ] Trip mode
+- [ ] Recurring expenses
+- [ ] Analytics dashboard
+- [ ] Notifications
+- [ ] Push notifications
+
+---
+
+## 🎨 UI/UX DESIGN PRINCIPLES
+
+### **Color System**
+```css
+:root {
+  /* Primary Colors */
+  --primary: #10B981;        /* Green - money/positive */
+  --primary-dark: #059669;
+  --primary-light: #D1FAE5;
+
+  /* Status Colors */
+  --success: #22C55E;        /* You're owed */
+  --danger: #EF4444;         /* You owe */
+  --warning: #F59E0B;        /* Pending */
+  --info: #3B82F6;          /* Information */
+
+  /* Neutral Colors */
+  --gray-50: #F9FAFB;
+  --gray-100: #F3F4F6;
+  --gray-200: #E5E7EB;
+  --gray-800: #1F2937;
+  --gray-900: #111827;
+
+  /* Semantic Colors */
+  --background: #FFFFFF;
+  --surface: #F9FAFB;
+  --text-primary: #111827;
+  --text-secondary: #6B7280;
+  --border: #E5E7EB;
+}
+```
+
+### **Typography**
+```css
+/* Font Stack */
+font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+/* Sizes */
+--text-xs: 0.75rem;   /* 12px */
+--text-sm: 0.875rem;  /* 14px */
+--text-base: 1rem;    /* 16px */
+--text-lg: 1.125rem;  /* 18px */
+--text-xl: 1.25rem;   /* 20px */
+--text-2xl: 1.5rem;   /* 24px */
+--text-3xl: 1.875rem; /* 30px */
+```
+
+### **Spacing System**
+```css
+--space-1: 0.25rem;   /* 4px */
+--space-2: 0.5rem;    /* 8px */
+--space-3: 0.75rem;   /* 12px */
+--space-4: 1rem;      /* 16px */
+--space-6: 1.5rem;    /* 24px */
+--space-8: 2rem;      /* 32px */
+```
+
+### **Component Guidelines**
+
+**Buttons:**
+- Primary: Green background, white text
+- Secondary: Gray outline, gray text
+- Danger: Red background, white text
+- Min height: 44px (mobile tap target)
+
+**Cards:**
+- Border radius: 12px
+- Shadow: 0 1px 3px rgba(0,0,0,0.1)
+- Padding: 16px
+- Background: white
+
+**Forms:**
+- Input height: 48px
+- Border radius: 8px
+- Focus state: Blue border
+- Error state: Red border + message
+
+**Modals:**
+- Max width: 480px
+- Backdrop: rgba(0,0,0,0.5)
+- Slide up animation on mobile
+
+---
+
+## 📱 RESPONSIVE BREAKPOINTS
+
+```css
+/* Mobile First Approach */
+/* Base: 320px - 639px (mobile) */
+
+/* Tablet: 640px+ */
+@media (min-width: 640px) { }
+
+/* Desktop: 1024px+ */
+@media (min-width: 1024px) { }
+
+/* Large Desktop: 1280px+ */
+@media (min-width: 1280px) { }
+```
+
+---
+
+## 🔐 SECURITY CONSIDERATIONS
+
+1. **Authentication:**
+   - JWT tokens (access + refresh)
+   - OTP expiry (5 minutes)
+   - Rate limiting on OTP requests (3 per phone per hour)
+
+2. **Data Privacy:**
+   - Encrypt sensitive fields (phone, UPI IDs)
+   - HTTPS only
+   - CORS configuration
+
+3. **Authorization:**
+   - User can only see groups they're part of
+   - Only group members can add expenses
+   - Only expense creator or group admin can delete
+
+4. **Input Validation:**
+   - Sanitize all inputs
+   - Validate amounts (positive numbers only)
+   - Phone number format validation
+
+---
+
+## 🚀 API ENDPOINTS
+
+```
+POST   /api/auth/send-otp              # Send OTP to phone
+POST   /api/auth/verify-otp            # Verify OTP & login
+POST   /api/auth/refresh               # Refresh access token
+
+GET    /api/users/me                   # Get current user
+PUT    /api/users/me                   # Update profile
+GET    /api/users/:id                  # Get user by ID
+
+POST   /api/groups                     # Create group
+GET    /api/groups                     # Get user's groups
+GET    /api/groups/:id                 # Get group details
+PUT    /api/groups/:id                 # Update group
+DELETE /api/groups/:id                 # Delete group
+POST   /api/groups/:id/members         # Add member
+DELETE /api/groups/:id/members/:userId # Remove member
+
+POST   /api/expenses                   # Create expense
+GET    /api/expenses/:id               # Get expense details
+PUT    /api/expenses/:id               # Update expense
+DELETE /api/expenses/:id               # Delete expense
+GET    /api/groups/:id/expenses        # Get group expenses
+POST   /api/expenses/scan-receipt      # Upload & OCR receipt
+
+GET    /api/groups/:id/balances        # Get all balances
+POST   /api/settlements                # Record settlement
+GET    /api/settlements/history        # Settlement history
+POST   /api/settlements/simplify       # Simplify debts
+
+GET    /api/analytics/spending         # User spending analytics
+GET    /api/analytics/group/:id        # Group analytics
+```
+
+---
+
+## 🧮 DEBT SIMPLIFICATION ALGORITHM
+
+```javascript
+/**
+ * Simplifies debts in a group using graph-based algorithm
+ * 
+ * Input: Array of debts
+ * [
+ *   { from: "A", to: "B", amount: 500 },
+ *   { from: "B", to: "C", amount: 300 },
+ *   { from: "C", to: "A", amount: 200 }
+ * ]
+ * 
+ * Output: Simplified debts
+ * [
+ *   { from: "A", to: "C", amount: 100 },
+ *   { from: "B", to: "C", amount: 200 }
+ * ]
+ */
+
+function simplifyDebts(debts) {
+  // Step 1: Calculate net balance for each person
+  const balances = {};
+  
+  debts.forEach(({ from, to, amount }) => {
+    balances[from] = (balances[from] || 0) - amount;
+    balances[to] = (balances[to] || 0) + amount;
+  });
+  
+  // Step 2: Separate creditors and debtors
+  const creditors = [];  // People who are owed money
+  const debtors = [];    // People who owe money
+  
+  Object.entries(balances).forEach(([person, balance]) => {
+    if (balance > 0) creditors.push({ person, amount: balance });
+    if (balance < 0) debtors.push({ person, amount: -balance });
+  });
+  
+  // Step 3: Match debtors with creditors
+  const simplified = [];
+  let i = 0, j = 0;
+  
+  while (i < debtors.length && j < creditors.length) {
+    const debt = debtors[i];
+    const credit = creditors[j];
+    
+    const settleAmount = Math.min(debt.amount, credit.amount);
+    
+    simplified.push({
+      from: debt.person,
+      to: credit.person,
+      amount: settleAmount
+    });
+    
+    debt.amount -= settleAmount;
+    credit.amount -= settleAmount;
+    
+    if (debt.amount === 0) i++;
+    if (credit.amount === 0) j++;
+  }
+  
+  return simplified;
+}
+```
+
+---
+
+## 📊 ANALYTICS CALCULATIONS
+
+### **Fairness Score**
+```javascript
+function calculateFairnessScore(userId, groupId) {
+  // Get all expenses in group
+  const expenses = await Expense.find({ groupId });
+  
+  // Calculate how much user paid vs consumed
+  let totalPaid = 0;
+  let totalConsumed = 0;
+  
+  expenses.forEach(expense => {
+    if (expense.paidBy === userId) {
+      totalPaid += expense.amount;
+    }
+    
+    const userSplit = expense.splitDetails.find(s => s.userId === userId);
+    if (userSplit) {
+      totalConsumed += userSplit.amount;
+    }
+  });
+  
+  // Fairness = (paid / consumed) * 100
+  // 100 = perfectly fair
+  // >100 = paying more than share
+  // <100 = paying less than share
+  
+  const fairness = (totalPaid / totalConsumed) * 100;
+  return Math.round(fairness);
+}
+```
+
+---
+
+## 🔔 NOTIFICATION TRIGGERS
+
+1. **Expense Added**: "Amit added 'Dinner' - Your share: ₹250"
+2. **Payment Request**: "Rahul requested ₹500 for rent"
+3. **Payment Received**: "Amit paid you ₹300"
+4. **Settlement Reminder**: "You owe Priya ₹500 (due in 2 days)"
+5. **Group Invitation**: "Amit added you to 'Goa Trip 2024'"
+6. **Expense Edited**: "Amit updated 'Pizza' expense"
+7. **Recurring Due**: "Monthly rent of ₹10,000 is due tomorrow"
+
+---
+
+## 🧪 TESTING CHECKLIST
+
+### **Unit Tests**
+- [ ] Debt simplification algorithm
+- [ ] Split calculation (equal/unequal/exact)
+- [ ] Balance calculation
+- [ ] Date formatting
+- [ ] Currency formatting
+
+### **Integration Tests**
+- [ ] User registration flow
+- [ ] Create group → Add members → Add expense
+- [ ] Settlement recording
+- [ ] Receipt OCR accuracy
+
+### **E2E Tests**
+- [ ] Complete user journey (signup → create group → add expense → settle)
+- [ ] Multi-user scenarios
+- [ ] Edge cases (negative amounts, zero splits)
+
+---
+
+## 🚀 DEPLOYMENT CHECKLIST
+
+### **Frontend (Vercel/Netlify)**
+- [ ] Environment variables set
+- [ ] Build optimization
+- [ ] PWA manifest
+- [ ] Error tracking (Sentry)
+- [ ] Analytics (Google Analytics)
+
+### **Backend (Heroku/Railway/AWS)**
+- [ ] Environment variables
+- [ ] Database backups
+- [ ] Rate limiting
+- [ ] CORS configuration
+- [ ] Health check endpoint
+- [ ] Logging (Winston/Morgan)
+
+### **Database (MongoDB Atlas)**
+- [ ] Indexes on frequently queried fields
+- [ ] Backup schedule
+- [ ] Connection pooling
+
+### **Media Storage (Cloudinary/AWS S3)**
+- [ ] Upload limits
+- [ ] Image compression
+- [ ] CDN configuration
+
+---
+
+## 💡 FUTURE ENHANCEMENTS (Phase 2+)
+
+1. **Social Features**
+   - Friend requests
+   - Activity feed
+   - Group chat
+
+2. **Advanced Analytics**
+   - Spending predictions
+   - Budget recommendations
+   - Expense trends
+
+3. **Integrations**
+   - Bank statement import
+   - Credit card sync
+   - Google Calendar (trip dates)
+
+4. **Gamification**
+   - Achievement badges
+   - Leaderboards
+   - Streak tracking
+
+5. **Business Features**
+   - Export to accounting software
+   - Tax reports
+   - Vendor management
+
+---
+
+## 📞 SUPPORT & RESOURCES
+
+**Design Inspiration:**
+- Splitwise (competitor analysis)
+- Cred (Indian UI patterns)
+- Paytm (UPI integration)
+
+**Tech Stack:**
+- Frontend: React + Vite + TailwindCSS
+- Backend: Node.js + Express
+- Database: MongoDB
+- File Storage: Cloudinary
+- OCR: Tesseract.js or Google Vision API
+- Charts: Recharts/Chart.js
+- Authentication: JWT + OTP (Twilio/Fast2SMS)
+
+**Learning Resources:**
+- UPI Deep Links: https://www.npci.org.in/
+- Receipt OCR: Tesseract.js docs
+- Debt simplification: Graph algorithms
+
+---
+
+## 🎯 SUCCESS METRICS
+
+**User Engagement:**
+- Daily Active Users (DAU)
+- Expenses added per user per month
+- Settlements completed
+
+**Product Health:**
+- Average group size
+- Expense accuracy (OCR success rate)
+- Settlement completion rate
+- Time to settle (days)
+
+**Growth:**
+- User retention (Week 1, Month 1)
+- Viral coefficient (invites sent per user)
+- App store rating
+
+---
+
+**You now have a complete blueprint. Let's build this! 🚀**
+
+Where do you want to start?
+1. Setting up the project structure?
+2. Building the authentication flow?
+3. Creating the database models?
+4. Designing the UI components?
+
+Let me know and I'll guide you through it!
