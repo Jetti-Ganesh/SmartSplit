@@ -1,5 +1,5 @@
 import '../styles/Howitworks.css'
-
+import { useNavigate } from 'react-router-dom'
 const steps = [
   {
     number: '01',
@@ -32,6 +32,7 @@ const steps = [
 ]
 
 const HowItWorks = () => {
+  const navigate = useNavigate()
   return (
     <section className="hiw" id="how-it-works">
       <div className="hiw-container">
@@ -81,7 +82,7 @@ const HowItWorks = () => {
         {/* Bottom CTA */}
         <div className="hiw-cta">
           <p className="hiw-cta-text">Takes less than 60 seconds to set up your first group.</p>
-          <a href="#get-started" className="hiw-btn">
+          <a href="#get-started" className="hiw-btn" onClick={() => navigate('/signup')} >
             Try It Free <span className="hiw-btn-arrow">→</span>
           </a>
         </div>

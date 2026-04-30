@@ -6,10 +6,10 @@ import HowItWorks from '../components/HowItWorks'
 import Testimonials from '../components/Testimonials'
 import Footer from '../components/Footer'
 
-const LandingPage = () => {
+const LandingPage = ({ isDark, toggleTheme }) => {
   return (
     <>
-      <Navbar />
+      <Navbar isDark={isDark} toggleTheme={toggleTheme}  />
       <main>
         <Hero />
         <Features />

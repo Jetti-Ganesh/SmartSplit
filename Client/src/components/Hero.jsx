@@ -1,6 +1,7 @@
 import '../styles/Hero.css'
-
+import { useNavigate } from 'react-router-dom'
 const Hero = () => {
+  const navigate = useNavigate()
   return (
     <section className="hero" id="home">
       {/* Background orbs */}
@@ -26,7 +27,7 @@ const Hero = () => {
           </p>
 
           <div className="hero-actions">
-            <a href="#get-started" className="btn-primary">
+            <a  className="btn-primary"  onClick={() => navigate('/signup')}>
               Get Started <span className="btn-arrow">→</span>
             </a>
             <a href="#how-it-works" className="btn-secondary">

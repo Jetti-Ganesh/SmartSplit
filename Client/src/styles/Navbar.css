@@ -15,6 +15,39 @@
   --font-body: 'DM Sans', sans-serif;
 }
 
+
+/* ✅ Light mode overrides — only colors change, nothing else */
+body.light {
+  --bg-primary: #f0f4ff;
+  --bg-secondary: #e4eaff;
+  --bg-card: rgba(0, 0, 0, 0.03);
+  --text-primary: #0f172a;
+  --text-muted: #4a5568;
+  --border: rgba(0, 0, 0, 0.09);
+  --glow-cyan: 0 0 30px rgba(0, 180, 220, 0.2);
+}
+
+/* Fix navbar scrolled background for light mode */
+body.light .navbar.scrolled {
+  background: rgba(240, 244, 255, 0.88);
+}
+
+/* Fix phone mockup border for light mode */
+body.light .phone-mockup {
+  background: rgba(0, 0, 0, 0.04);
+  border-color: rgba(0, 0, 0, 0.1);
+  box-shadow:
+    0 0 0 1px rgba(0,0,0,0.05),
+    0 40px 80px rgba(0, 0, 0, 0.12),
+    0 0 60px rgba(0, 229, 255, 0.06);
+}
+
+/* preview items in light mode */
+body.light .preview-item {
+  background: rgba(0, 0, 0, 0.03);
+  border-color: rgba(0, 0, 0, 0.06);
+}
+
 * {
   margin: 0;
   padding: 0;

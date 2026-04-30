@@ -1,6 +1,8 @@
 import '../styles/Footer.css'
-
+import { useNavigate } from 'react-router-dom'
 const Footer = () => {
+  const navigate = useNavigate()
+  
   return (
     <footer className="footer">
       {/* CTA Banner */}
@@ -8,7 +10,9 @@ const Footer = () => {
         <div className="cta-glow"></div>
         <h2 className="cta-title">Ready to split smarter?</h2>
         <p className="cta-subtitle">Join 10,000+ users who stopped fighting over bills.</p>
-        <a href="#get-started" className="cta-btn">Get Started Free →</a>
+        <a href="#get-started" className="cta-btn" onClick={() => navigate('/signup')}>
+          Get Started Free →
+        </a>
       </div>
 
       {/* Footer Bottom */}
