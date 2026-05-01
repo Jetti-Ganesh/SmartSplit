@@ -10,7 +10,7 @@ const Footer = () => {
         <div className="cta-glow"></div>
         <h2 className="cta-title">Ready to split smarter?</h2>
         <p className="cta-subtitle">Join 10,000+ users who stopped fighting over bills.</p>
-        <a href="#get-started" className="cta-btn" onClick={() => navigate('/signup')}>
+        <a  className="cta-btn" onClick={() => navigate('/signup')}>
           Get Started Free →
         </a>
       </div>

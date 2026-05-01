@@ -82,7 +82,7 @@ const HowItWorks = () => {
         {/* Bottom CTA */}
         <div className="hiw-cta">
           <p className="hiw-cta-text">Takes less than 60 seconds to set up your first group.</p>
-          <a href="#get-started" className="hiw-btn" onClick={() => navigate('/signup')} >
+          <a  className="hiw-btn" onClick={() => navigate('/signUp')} >
             Try It Free <span className="hiw-btn-arrow">→</span>
           </a>
         </div>
