@@ -1,7 +1,3 @@
-import { useState, useEffect } from 'react'
-import { Routes, Route } from 'react-router-dom'
-import LandingPage from './pages/LandingPage'
-import SignupPage from './pages/Signup'
 
 function App() {
   const [isDark, setIsDark] = useState(() => {
@@ -21,10 +17,9 @@ function App() {
   const toggleTheme = () => setIsDark(prev => !prev)
 
   return (
-    <Routes>
-      <Route path="/" element={<LandingPage isDark={isDark} toggleTheme={toggleTheme} />} />
-      <Route path="/signup" element={<SignupPage />} />
-    </Routes>
+  <>
+  <h1>Hello App</h1>
+  </>
   )
 }
 
