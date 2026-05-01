@@ -1,0 +1,18 @@
+/* LandingPage.css */
+/* Page-level layout and scroll behavior */
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 80px; /* offset for fixed navbar */
+}
+
+main {
+  width: 100%;
+  overflow: hidden;
+}
+
+/* Divider between sections */
+.features,
+.testimonials {
+  border-top: 1px solid var(--border);
+}

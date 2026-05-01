@@ -1,0 +1,316 @@
+/* ── Section ── */
+.hiw {
+  padding: 100px 0;
+  position: relative;
+  border-top: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.hiw::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 900px;
+  height: 500px;
+  background: radial-gradient(ellipse, rgba(124, 58, 237, 0.07) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.hiw-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
+  position: relative;
+  z-index: 1;
+}
+
+/* ══════════════════════════════════════════
+   STEPPER — desktop horizontal layout
+══════════════════════════════════════════ */
+.hiw-stepper {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 5rem;
+  padding-top: 60px; /* space for the track + node above cards */
+}
+
+/* Continuous horizontal track line */
+.stepper-track {
+  position: absolute;
+  top: 28px;                  /* vertically centered on the node circles */
+  left: calc(12.5% + 0px);   /* starts at center of first node */
+  right: calc(12.5% + 0px);  /* ends at center of last node */
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    #00e5ff55,
+    #7c3aed55,
+    #10b98155,
+    #f59e0b55
+  );
+  z-index: 0;
+}
+
+/* ── Each step column ── */
+.stepper-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.2rem;
+  animation: fadeInUp 0.6s ease both;
+}
+
+/* ── Node circle on the track ── */
+.stepper-node {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 1.5px solid;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;                 /* sits above the track line */
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.stepper-item:hover .stepper-node {
+  transform: scale(1.12);
+}
+
+.node-icon {
+  font-size: 1.4rem;
+  line-height: 1;
+}
+
+/* ── Card below the node ── */
+.stepper-card {
+  width: 100%;
+  position: relative;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 1.6rem 1.4rem;
+  overflow: hidden;
+  transition: transform 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
+  text-align: center;
+}
+
+.stepper-item:hover .stepper-card {
+  transform: translateY(-5px);
+  border-color: color-mix(in srgb, var(--step-color) 30%, transparent);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+}
+
+.stepper-item:hover .stepper-card-glow {
+  opacity: 1;
+}
+
+.stepper-card-glow {
+  position: absolute;
+  inset: 0;
+  border-radius: 18px;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+}
+
+/* Badge */
+.stepper-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3px 10px;
+  border-radius: 6px;
+  border: 1px solid;
+  font-family: var(--font-display);
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  margin-bottom: 0.8rem;
+}
+
+.stepper-title {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+  letter-spacing: -0.3px;
+}
+
+.stepper-desc {
+  color: var(--text-muted);
+  font-size: 0.84rem;
+  line-height: 1.65;
+}
+
+/* ── Bottom CTA ── */
+.hiw-cta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.2rem;
+  text-align: center;
+}
+
+.hiw-cta-text {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}
+
+.hiw-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--accent-gradient);
+  color: #fff;
+  text-decoration: none;
+  padding: 13px 30px;
+  border-radius: 10px;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.97rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 28px rgba(0, 229, 255, 0.2);
+}
+
+.hiw-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 36px rgba(0, 229, 255, 0.42);
+}
+
+.hiw-btn-arrow {
+  display: inline-block;
+  transition: transform 0.3s ease;
+}
+
+.hiw-btn:hover .hiw-btn-arrow {
+  transform: translateX(4px);
+}
+
+/* ══════════════════════════════════════════
+   TABLET ≤ 960px — 2×2 grid, track hidden
+══════════════════════════════════════════ */
+@media (max-width: 960px) {
+  .hiw-stepper {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem 1.5rem;
+    padding-top: 0;
+    margin-bottom: 3.5rem;
+  }
+
+  .stepper-track {
+    display: none;
+  }
+
+  .stepper-item {
+    gap: 1rem;
+  }
+
+  .stepper-card {
+    text-align: left;
+  }
+}
+
+/* ══════════════════════════════════════════
+   MOBILE ≤ 560px — vertical timeline
+══════════════════════════════════════════ */
+@media (max-width: 560px) {
+  .hiw {
+    padding: 70px 0;
+  }
+
+  .hiw-container {
+    padding: 0 1.2rem;
+  }
+
+  .hiw-stepper {
+    grid-template-columns: 1fr;
+    gap: 0;
+    padding-top: 0;
+    margin-bottom: 2.5rem;
+
+    /* Left-side vertical track */
+    padding-left: 28px;
+    border-left: 1px solid rgba(255, 255, 255, 0.07);
+    position: relative;
+  }
+
+  /* Gradient line on the left edge */
+  .hiw-stepper::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -1px;
+    width: 1px;
+    height: 100%;
+    background: linear-gradient(
+      to bottom,
+      #00e5ff55,
+      #7c3aed55,
+      #10b98155,
+      #f59e0b55
+    );
+    pointer-events: none;
+  }
+
+  .stepper-track {
+    display: none;
+  }
+
+  .stepper-item {
+    flex-direction: row;        /* node left, card right */
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 0 0 1.5rem 0;
+  }
+
+  .stepper-item:last-child {
+    padding-bottom: 0;
+  }
+
+  /* Node sits on the left track line */
+  .stepper-node {
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+    margin-left: -50px;        /* pull onto the left border line */
+    background: var(--bg-primary) !important;
+  }
+
+  .node-icon {
+    font-size: 1.1rem;
+  }
+
+  .stepper-card {
+    flex: 1;
+    text-align: left;
+    border-radius: 14px;
+    padding: 1.2rem 1.1rem;
+  }
+
+  .stepper-badge {
+    font-size: 0.65rem;
+    padding: 2px 8px;
+  }
+
+  .stepper-title {
+    font-size: 0.95rem;
+  }
+
+  .stepper-desc {
+    font-size: 0.82rem;
+  }
+
+  .hiw-btn {
+    width: 100%;
+    max-width: 280px;
+    justify-content: center;
+  }
+}

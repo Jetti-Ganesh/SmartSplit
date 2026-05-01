@@ -1,15 +1,26 @@
-import { Routes , Route } from "react-router-dom"
-import { Login } from "./components/Login"
+
 function App() {
+  const [isDark, setIsDark] = useState(() => {
+    return localStorage.getItem('theme') !== 'light'
+  })
+
+  useEffect(() => {
+    if (isDark) {
+      document.body.classList.remove('light')
+      localStorage.setItem('theme', 'dark')
+    } else {
+      document.body.classList.add('light')
+      localStorage.setItem('theme', 'light')
+    }
+  }, [isDark])
+
+  const toggleTheme = () => setIsDark(prev => !prev)
 
   return (
   <>
-   <Routes>
-    <Route path="/" element={<h1>Landing Page here!!</h1>}></Route>
-    <Route path="/login" element={<Login></Login>}></Route>
-   </Routes>
+  <h1>Hello App</h1>
   </>
   )
 }
 
-export default App
+export default App  

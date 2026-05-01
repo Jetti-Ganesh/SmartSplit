@@ -1,3 +1,5 @@
+const app = require('./app');
+//Don't change the code .., Write in app.js file
 //Don't change the code .., Wrie in app.js file
 const app = require('./app');
 const connectDB = require("./db/db");
