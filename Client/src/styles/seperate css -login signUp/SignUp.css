@@ -1,29 +1,15 @@
-/* src/pages/SignupPage.css */
-
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-body {
-  font-family: 'Segoe UI', sans-serif;
-  background: #f0f2f5;
-}
-
-/* Full page centering */
 .signup-container {
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #667eea, #764ba2);
-  padding: 20px;
+  background: var(--bg-primary);
+  padding: 100px 20px 20px; /* ✅ top padding = navbar height (~70-80px) + breathing room */
 }
 
-/* Card */
 .signup-card {
-  background: #ffffff;
+  background: var(--bg-secondary); /* ✅ was #ffffff */
+  border: 1px solid var(--border);
   border-radius: 16px;
   padding: 40px 36px;
   width: 100%;
@@ -31,7 +17,6 @@ body {
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
 }
 
-/* Header */
 .signup-header {
   text-align: center;
   margin-bottom: 28px;
@@ -39,17 +24,16 @@ body {
 
 .signup-header h1 {
   font-size: 28px;
-  color: #1a1a2e;
+  color: var(--text-primary);      /* ✅ was #1a1a2e */
   font-weight: 700;
 }
 
 .signup-header p {
-  color: #888;
+  color: var(--text-muted);        /* ✅ was #888 */
   margin-top: 6px;
   font-size: 14px;
 }
 
-/* Google button */
 .google-btn {
   width: 100%;
   display: flex;
@@ -57,18 +41,18 @@ body {
   justify-content: center;
   gap: 10px;
   padding: 12px;
-  border: 1.5px solid #e0e0e0;
+  border: 1px solid var(--border); /* ✅ was #e0e0e0 */
   border-radius: 10px;
-  background: #fff;
+  background: var(--bg-card);      /* ✅ was #fff */
   font-size: 15px;
   font-weight: 500;
-  color: #333;
+  color: var(--text-primary);      /* ✅ was #333 */
   cursor: pointer;
   transition: background 0.2s, box-shadow 0.2s;
 }
 
 .google-btn:hover {
-  background: #f7f7f7;
+  background: var(--bg-secondary);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
@@ -77,13 +61,12 @@ body {
   height: 20px;
 }
 
-/* Divider */
 .divider {
   display: flex;
   align-items: center;
   text-align: center;
   margin: 24px 0;
-  color: #aaa;
+  color: var(--text-muted);        /* ✅ was #aaa */
   font-size: 13px;
 }
 
@@ -91,22 +74,20 @@ body {
 .divider::after {
   content: '';
   flex: 1;
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: 1px solid var(--border); /* ✅ was #e0e0e0 */
 }
 
 .divider span {
   padding: 0 12px;
 }
 
-/* Error */
 .error-msg {
-  color: #e53e3e;
+  color: #e53e3e; /* ✅ keep — error red doesn't change with theme */
   font-size: 13px;
   margin-bottom: 12px;
   text-align: center;
 }
 
-/* Form */
 .signup-form {
   display: flex;
   flex-direction: column;
@@ -122,27 +103,32 @@ body {
 .input-group label {
   font-size: 13px;
   font-weight: 600;
-  color: #555;
+  color: var(--text-muted);        /* ✅ was #555 */
 }
 
 .input-group input {
   padding: 11px 14px;
-  border: 1.5px solid #e0e0e0;
+  border: 1.5px solid var(--border); /* ✅ was #e0e0e0 */
   border-radius: 8px;
   font-size: 14px;
   outline: none;
+  background: var(--bg-card);       /* ✅ inputs need bg too */
+  color: var(--text-primary);       /* ✅ text inside input */
   transition: border-color 0.2s;
 }
 
-.input-group input:focus {
-  border-color: #667eea;
+.input-group input::placeholder {
+  color: var(--text-muted);
 }
 
-/* Signup button */
+.input-group input:focus {
+  border-color: var(--accent-purple);
+}
+
 .signup-btn {
   width: 100%;
   padding: 13px;
-  background: linear-gradient(135deg, #667eea, #764ba2);
+  background: var(--accent-gradient);
   color: white;
   border: none;
   border-radius: 10px;
@@ -157,16 +143,15 @@ body {
   opacity: 0.9;
 }
 
-/* Login link */
 .login-link {
   text-align: center;
   margin-top: 20px;
   font-size: 13px;
-  color: #888;
+  color: var(--text-muted);         /* ✅ was #888 */
 }
 
 .login-link span {
-  color: #667eea;
+  color: var(--accent-cyan);        /* ✅ was hardcoded purple */
   font-weight: 600;
   cursor: pointer;
 }

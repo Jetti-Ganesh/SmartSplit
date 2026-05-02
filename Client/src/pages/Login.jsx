@@ -1,72 +1,56 @@
-import React, { useState } from 'react'
-import { useGoogleLogin } from '@react-oauth/google'
-import { useNavigate } from 'react-router-dom'
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import '../styles/Login-SignUp.css'
 
-function SignUp() {
-  const navigate = useNavigate()
+function Login() {
   const [showPassword, setShowPassword] = useState(false)
-  const [form, setForm] = useState({ name: '', email: '', password: '' })
+  const [form, setForm] = useState({ email: '', password: '', rememberMe: false })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const navigate = useNavigate()
 
-  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value })
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target
+    setForm({ ...form, [name]: type === 'checkbox' ? checked : value })
+  }
 
-  const handleSignup = async (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault()
-     console.log('API URL:', import.meta.env.VITE_API_URL) ;
     setError('')
 
-    // Client-side validation
-    if (!form.name || !form.email || !form.password)
+    if (!form.email || !form.password)
       return setError('All fields are required.')
-    if (form.password.length < 6)
-      return setError('Password must be at least 6 characters.')
 
     setLoading(true)
     try {
-      
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/signUp`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ email: form.email, password: form.password }),
       })
 
       const data = await res.json()
 
       if (!res.ok) {
-        setError(data.message || 'Signup failed. Please try again.')
+        setError(data.message || 'Login failed. Please try again.')
         return
       }
 
-      // Store token and user info
+      // ✅ Store token and user
       localStorage.setItem('token', data.token)
       localStorage.setItem('user', JSON.stringify(data.user))
-     window.dispatchEvent(new Event('authChange'))
+      window.dispatchEvent(new Event('authChange'))
 
-      navigate('/Home')
+      // ✅ Notify navbar to update
+      window.dispatchEvent(new Event('storage'))
+
+      navigate('/')
     } catch (err) {
       setError('Could not connect to server. Please try again.')
     } finally {
       setLoading(false)
     }
   }
-
-  const handleGoogleSignup = useGoogleLogin({
-    onSuccess: async (tokenResponse) => {
-      try {
-        const res = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
-          headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
-        })
-        const userInfo = await res.json()
-        console.log('Google user:', userInfo)
-        navigate('/Home')
-      } catch {
-        setError('Google sign-up failed. Try again.')
-      }
-    },
-    onError: () => setError('Google sign-up failed. Try again.'),
-  })
 
   return (
     <div className="split-container">
@@ -80,12 +64,12 @@ function SignUp() {
               <div className="logo-icon">⚡</div>
               <h2>SplitSmart</h2>
             </div>
-            <h1 className="welcome-title">Hello, Friend!</h1>
+            <h1 className="welcome-title">Welcome Back!</h1>
             <p className="welcome-desc">
-              Enter your details and start your journey with us today. Split bills, track expenses effortlessly.
+              To stay connected and manage your expenses effortlessly, please log in with your personal info.
             </p>
-            <button className="outline-btn" type="button" onClick={() => navigate('/login')}>
-              SIGN IN
+            <button className="outline-btn" type="button" onClick={() => navigate('/signUp')}>
+              SIGN UP
             </button>
           </div>
         </div>
@@ -99,41 +83,12 @@ function SignUp() {
               <h2>SplitSmart</h2>
             </div>
 
-            <h2 className="signin-title">Create Account</h2>
-            <p className="signin-desc">Join us today — it's free</p>
-
-            <button className="google-btn" type="button" onClick={handleGoogleSignup}>
-              <img
-                src="https://www.svgrepo.com/show/475656/google-color.svg"
-                alt="Google"
-                className="google-icon"
-              />
-              Sign up with Google
-            </button>
-
-            <div className="divider"><span>or sign up with email</span></div>
+            <h2 className="signin-title">Sign In</h2>
+            <p className="signin-desc">Access your account to continue</p>
 
             {error && <p className="error-msg">{error}</p>}
 
-            <form onSubmit={handleSignup} className="login-form">
-
-              {/* Full Name */}
-              <div className="input-wrapper">
-                <div className="input-icon left-icon">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                    <circle cx="12" cy="7" r="4"></circle>
-                  </svg>
-                </div>
-                <input
-                  type="text"
-                  name="name"
-                  className="pill-input has-left-icon"
-                  placeholder="John Doe"
-                  value={form.name}
-                  onChange={handleChange}
-                />
-              </div>
+            <form className="login-form" onSubmit={handleLogin}>
 
               {/* Email */}
               <div className="input-wrapper">
@@ -165,7 +120,7 @@ function SignUp() {
                   type={showPassword ? 'text' : 'password'}
                   name="password"
                   className="pill-input has-both-icons"
-                  placeholder="Min. 6 characters"
+                  placeholder="Password"
                   value={form.password}
                   onChange={handleChange}
                 />
@@ -188,13 +143,28 @@ function SignUp() {
                 </button>
               </div>
 
+              {/* Remember me + Forgot password */}
+              <div className="form-options">
+                <label className="remember-me">
+                  <input
+                    type="checkbox"
+                    name="rememberMe"
+                    checked={form.rememberMe}
+                    onChange={handleChange}
+                  />
+                  <span className="custom-check"></span>
+                  Remember me
+                </label>
+                <a href="#" className="forgot-pass">Forgot password?</a>
+              </div>
+
               <button type="submit" className="solid-btn" disabled={loading}>
-                {loading ? 'Creating...' : 'CREATE ACCOUNT'}
+                {loading ? 'Signing in...' : 'LOG IN'}
               </button>
 
               <p className="signup-prompt">
-                Already have an account?{' '}
-                <a onClick={() => navigate('/login')} style={{ cursor: 'pointer' }}>Log in</a>
+                Don't have an account?{' '}
+                <a onClick={() => navigate('/signUp')} style={{ cursor: 'pointer' }}>Sign up</a>
               </p>
 
             </form>
@@ -206,4 +176,4 @@ function SignUp() {
   )
 }
 
-export default SignUp
+export default Login

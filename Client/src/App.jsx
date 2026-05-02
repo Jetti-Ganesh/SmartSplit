@@ -1,4 +1,7 @@
-
+import { useState, useEffect } from 'react'
+import { Outlet } from "react-router-dom"
+import Navbar from './components/Navbar'  // import Navbar here
+import './index.css'
 function App() {
   const [isDark, setIsDark] = useState(() => {
     return localStorage.getItem('theme') !== 'light'
@@ -17,10 +20,12 @@ function App() {
   const toggleTheme = () => setIsDark(prev => !prev)
 
   return (
-  <>
-  <h1>Hello App</h1>
-  </>
+    <>
+      {/* Navbar now lives here — appears on ALL pages automatically */}
+      <Navbar isDark={isDark} toggleTheme={toggleTheme} />
+      <Outlet />
+    </>
   )
 }
 
-export default App  
+export default App

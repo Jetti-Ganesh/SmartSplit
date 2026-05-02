@@ -1,5 +1,5 @@
 // src/components/ThemeToggle.jsx
-import './ThemeToggle.css'
+import '../styles/ThemeToggle.css'
 
 const ThemeToggle = ({ isDark, toggleTheme }) => {
   return (
