@@ -48,6 +48,11 @@ const Navbar = ({ isDark, toggleTheme }) => {
     navigate(path)
   }
 
+  const authRoutes = ['/Dashboard', '/Profile', '/Groups', '/Activity', '/SettleUp']
+  const isAppRoute = authRoutes.includes(location.pathname)
+
+    if (isLoggedIn) return null
+
   return (
     <nav className={`navbar ${scrolled ? 'scrolled' : ''}`}>
       <div className="nav-container">
@@ -61,13 +66,7 @@ const Navbar = ({ isDark, toggleTheme }) => {
         {/* Nav Links */}
         <ul className={`nav-links ${menuOpen ? 'open' : ''}`}>
           {isLoggedIn ? (
-            <>
-              <li><a onClick={() => handleNavClick('/')} style={{ cursor: 'pointer' }}>Home</a></li>
-              {/* Add more logged-in links here e.g. Dashboard, Groups */}
-              <li className="mobile-only">
-                <a onClick={handleLogout} style={{ cursor: 'pointer', color: '#e53e3e' }}>Logout</a>
-              </li>
-            </>
+           "" /* No links when logged in, or you can add Dashboard/Profile here */
           ) : (
             <>
               <li><a href="#features" onClick={() => setMenuOpen(false)|| handleNavClick('/')}>Features</a></li>
@@ -81,11 +80,8 @@ const Navbar = ({ isDark, toggleTheme }) => {
 
         {/* Right side — theme toggle + CTA (hidden on mobile) */}
         <div className="nav-right">
-
           {isLoggedIn ? (
-            <button className="nav-cta" onClick={handleLogout}>
-              Logout
-            </button>
+           ""
           ) : (
             <a className="nav-cta" onClick={() => handleNavClick('/signUp')} style={{ cursor: 'pointer' }}>
               Get Started
@@ -93,7 +89,9 @@ const Navbar = ({ isDark, toggleTheme }) => {
           )}
         </div>
 
+          {/* Theme toggle is always visible, even on mobile */}
           <ThemeToggle isDark={isDark} toggleTheme={toggleTheme} />
+
         {/* Hamburger — mobile only */}
         <button
           className={`hamburger ${menuOpen ? 'active' : ''}`}

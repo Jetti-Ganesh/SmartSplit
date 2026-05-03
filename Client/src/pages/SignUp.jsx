@@ -63,7 +63,7 @@ function SignUp() {
         localStorage.setItem('user', JSON.stringify(data.user))
         window.dispatchEvent(new Event('authChange'))
         setSuccess('Ready to Login!!')
-        navigate('/login')
+        navigate('/Dashboard')
       }
       else {
         setSuccess('');
@@ -116,7 +116,7 @@ function SignUp() {
       const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/verify-otp`, { enteredOtp: otp })
       // console.log(res, res.status);
       setShowOTPInput(false)
-      setForm({ isVerified: true })
+      setForm({ ...form, isVerified: true })
       setError('')
       setSuccess(res.data.message);
     }
