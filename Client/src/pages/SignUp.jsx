@@ -93,21 +93,26 @@ function SignUp() {
     onError: () => setError('Google sign-up failed. Try again.'),
   })
   const handleEmailVerification = async () => {
+    setError('')
     setSuccess("Sending Email...")
-    setTimer(8)
-    const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/send-otp`, { email: form.email })
-    // console.log(res, res.status);
-
-    console.log(res);
-    if (res.status === 200) {
-      setShowOTPInput(true)
-      setOtp('');
-      setError('')
-      setSuccess(res.data.message);
+    if (form.email) {
+      setTimer(8)
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/send-otp`, { email: form.email })
+      console.log(res);
+      if (res.status === 200) {
+        setShowOTPInput(true)
+        setOtp('');
+        setError('')
+        setSuccess(res.data.message);
+      }
+      else {
+        setSuccess("");
+        setError(res.data.message);
+      }
     }
-    else {
-      setSuccess("");
-      setError(res.data.message);
+    else{
+      setSuccess(''); 
+      setError("Please Enter Email..")
     }
   }
   const handleOTPverification = async () => {
