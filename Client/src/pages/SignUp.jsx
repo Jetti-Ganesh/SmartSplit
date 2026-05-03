@@ -1,21 +1,41 @@
-import React, { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useGoogleLogin } from '@react-oauth/google'
 import { useNavigate } from 'react-router-dom'
+import axios from 'axios';
 import '../styles/Login-SignUp.css'
+axios.defaults.withCredentials = true;
 
 function SignUp() {
   const navigate = useNavigate()
   const [showPassword, setShowPassword] = useState(false)
-  const [form, setForm] = useState({ name: '', email: '', password: '' })
+  const [form, setForm] = useState({ name: '', email: '', password: '', isVerified: false })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [showOTPInput, setShowOTPInput] = useState(false)
+  const [otp, setOtp] = useState('')
+  const [success, setSuccess] = useState('')
+  const [timer, setTimer] = useState(0)
+  // console.log(error);
+
+  useEffect(() => {
+    let interval;
+    if (timer > 0) {
+      interval = setInterval(() => {
+        setTimer((prev) => prev - 1);
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [timer]);
+
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value })
 
   const handleSignup = async (e) => {
     e.preventDefault()
-     console.log('API URL:', import.meta.env.VITE_API_URL) ;
+
+    console.log('API URL:', import.meta.env.VITE_API_URL);
     setError('')
+    setSuccess('')
 
     // Client-side validation
     if (!form.name || !form.email || !form.password)
@@ -25,33 +45,38 @@ function SignUp() {
 
     setLoading(true)
     try {
-      
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/signUp`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
-      })
+      if (form.isVerified) {
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/signUp`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(form),
+        })
+        const data = await res.json()
 
-      const data = await res.json()
+        if (!res.ok) {
+          setError(data.message || 'Signup failed. Please try again.')
+          return
+        }
 
-      if (!res.ok) {
-        setError(data.message || 'Signup failed. Please try again.')
-        return
+        // Store token and user info
+        localStorage.setItem('token', data.token)
+        localStorage.setItem('user', JSON.stringify(data.user))
+        window.dispatchEvent(new Event('authChange'))
+        setSuccess('Ready to Login!!')
+        navigate('/login')
       }
-
-      // Store token and user info
-      localStorage.setItem('token', data.token)
-      localStorage.setItem('user', JSON.stringify(data.user))
-     window.dispatchEvent(new Event('authChange'))
-
-      navigate('/Home')
+      else {
+        setSuccess('');
+        setError("Verify Your Email To Create Account")
+      }
     } catch (err) {
       setError('Could not connect to server. Please try again.')
     } finally {
       setLoading(false)
     }
-  }
 
+
+  }
   const handleGoogleSignup = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
       try {
@@ -67,7 +92,40 @@ function SignUp() {
     },
     onError: () => setError('Google sign-up failed. Try again.'),
   })
+  const handleEmailVerification = async () => {
+    setSuccess("Sending Email...")
+    setTimer(8)
+    const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/send-otp`, { email: form.email })
+    // console.log(res, res.status);
 
+    console.log(res);
+    if (res.status === 200) {
+      setShowOTPInput(true)
+      setOtp('');
+      setError('')
+      setSuccess(res.data.message);
+    }
+    else {
+      setSuccess("");
+      setError(res.data.message);
+    }
+  }
+  const handleOTPverification = async () => {
+    // console.log(otp);
+    try {
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/verify-otp`, { enteredOtp: otp })
+      // console.log(res, res.status);
+      setShowOTPInput(false)
+      setForm({ isVerified: true })
+      setError('')
+      setSuccess(res.data.message);
+    }
+    catch (err) {
+      // console.log(err);
+      setSuccess("");
+      setError(err.response?.data?.message || "Something Went Wrong..");
+    }
+  }
   return (
     <div className="split-container">
       <div className="login-card">
@@ -114,6 +172,7 @@ function SignUp() {
             <div className="divider"><span>or sign up with email</span></div>
 
             {error && <p className="error-msg">{error}</p>}
+            {success && <p className="success-msg">{success}</p>}
 
             <form onSubmit={handleSignup} className="login-form">
 
@@ -146,12 +205,50 @@ function SignUp() {
                 <input
                   type="email"
                   name="email"
-                  className="pill-input has-left-icon"
+                  className="pill-input has-right-btn"
                   placeholder="john@example.com"
                   value={form.email}
                   onChange={handleChange}
                 />
+                {
+                  !form.isVerified &&
+                  <button
+                    type="button"
+                    className="verify-btn-inside"
+                    onClick={handleEmailVerification}
+                    disabled={timer > 0}
+                    style={{ opacity: timer > 0 ? 0.6 : 1, cursor: timer > 0 ? 'not-allowed' : 'pointer', letterSpacing: 'normal' }}
+                  >
+                    {timer > 0 ? `Resend (${timer}s)` : (showOTPInput ? 'Resend' : 'Verify')}
+                  </button>
+                }
               </div>
+
+              {/* OTP */}
+              {showOTPInput && (
+                <div className="input-wrapper" style={{ animation: 'slideUpFade 0.4s ease' }}>
+                  <div className="input-icon left-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                    </svg>
+                  </div>
+                  <input
+                    type="text"
+                    name="otp"
+                    className="pill-input has-left-icon"
+                    placeholder="Enter OTP"
+                    value={otp}
+                    onChange={(e) => setOtp(e.target.value)}
+                  />
+                  <button
+                    type="button"
+                    className="verify-otp-btn-inside"
+                    onClick={handleOTPverification}
+                  >
+                    Verify
+                  </button>
+                </div>
+              )}
 
               {/* Password */}
               <div className="input-wrapper">

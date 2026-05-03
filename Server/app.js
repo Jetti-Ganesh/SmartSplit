@@ -22,11 +22,23 @@ require("dotenv").config();
 const express = require('express');
 const app = express();
 const cors = require('cors');
+const session = require('express-session');
 
 const loginRoutes = require("./routes/login.route");
 const signUpRoutes = require("./routes/signUp.route");        // ← add this
+const verifyUserRoutes = require("./routes/verifyUser.route"); // ← add this
 
-
+app.use(session({
+    secret : "My_Secret",
+    resave : false,
+    saveUninitialized:true,
+    cookie: {
+        secure: false,      // Must be false for non-HTTPS (localhost)
+        sameSite: 'lax',    // Works well for local development
+        httpOnly: true,   
+        maxAge : 600000   // Prevents client-side JS from reading the cookie
+    } //session expires in 10mins
+}));
 app.use(cors({
   origin: 'http://localhost:5173',  // your Vite dev port
   credentials: true
@@ -46,5 +58,5 @@ app.get('/', (req, res) => {
 
 app.use("/api/", loginRoutes);
 app.use("/api/", signUpRoutes);                   // ← add this
-
+app.use("/api/", verifyUserRoutes);              // ← add this 
 module.exports = app;
