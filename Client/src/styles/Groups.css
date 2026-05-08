@@ -1,0 +1,249 @@
+.groups-container {
+  min-height: 100vh;
+  padding: calc(var(--navbar-height) + 40px) 5% 50px;
+  background: var(--bg-color);
+  color: var(--text-color);
+  font-family: var(--font-body);
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Header */
+.groups-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 40px;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.header-text h1 {
+  font-size: 36px;
+  font-weight: 700;
+  margin: 0 0 8px;
+  font-family: var(--font-display);
+}
+
+.header-text p {
+  color: var(--text-muted);
+  margin: 0;
+  font-size: 16px;
+}
+
+.add-group-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 30px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 8px 15px rgba(139, 92, 246, 0.2);
+}
+
+.add-group-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 20px rgba(139, 92, 246, 0.3);
+}
+
+/* Balance Cards */
+.balance-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 24px;
+  margin-bottom: 50px;
+}
+
+.balance-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.balance-card:hover {
+  transform: translateY(-5px);
+}
+
+.balance-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 16px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+}
+
+.balance-card.owe:hover {
+  box-shadow: 0 10px 30px rgba(239, 68, 68, 0.15);
+  border-color: rgba(239, 68, 68, 0.3);
+}
+.balance-card.owe .balance-icon {
+  background: linear-gradient(135deg, #ef4444, #f87171);
+}
+.balance-card.owe .balance-amount {
+  color: #ef4444;
+}
+
+.balance-card.owed:hover {
+  box-shadow: 0 10px 30px rgba(16, 185, 129, 0.15);
+  border-color: rgba(16, 185, 129, 0.3);
+}
+.balance-card.owed .balance-icon {
+  background: linear-gradient(135deg, #10b981, #34d399);
+}
+.balance-card.owed .balance-amount {
+  color: #10b981;
+}
+
+.balance-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.balance-label {
+  color: var(--text-muted);
+  font-size: 14px;
+  margin: 0 0 4px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 600;
+}
+
+.balance-amount {
+  font-size: 32px;
+  font-weight: 700;
+  margin: 0;
+  font-family: var(--font-display);
+}
+
+/* Groups List */
+.section-title {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 24px;
+  font-family: var(--font-display);
+}
+
+.groups-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.group-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  padding: 20px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.group-card:hover {
+  border-color: var(--primary);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  transform: translateX(4px);
+}
+
+.group-info {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.group-avatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 12px;
+  background: rgba(108, 99, 255, 0.1);
+  color: var(--primary);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: 700;
+  font-size: 16px;
+  letter-spacing: 1px;
+  border: 1px solid rgba(108, 99, 255, 0.2);
+}
+
+.group-details h3 {
+  margin: 0 0 4px;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.group-details p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.group-balance {
+  text-align: right;
+}
+
+.amount-owe, .amount-owed, .amount-settled {
+  display: flex;
+  flex-direction: column;
+}
+
+.group-balance span {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 2px;
+}
+
+.group-balance strong {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.amount-owe strong {
+  color: #ef4444;
+}
+
+.amount-owed strong {
+  color: #10b981;
+}
+
+.amount-settled span {
+  color: var(--text-muted);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .groups-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .group-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+  
+  .group-balance {
+    text-align: left;
+    width: 100%;
+    padding-top: 16px;
+    border-top: 1px solid var(--border-color);
+  }
+}

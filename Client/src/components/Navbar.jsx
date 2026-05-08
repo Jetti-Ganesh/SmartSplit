@@ -62,8 +62,8 @@ const Navbar = ({ isDark, toggleTheme }) => {
         <ul className={`nav-links ${menuOpen ? 'open' : ''}`}>
           {isLoggedIn ? (
             <>
-              <li><a onClick={() => handleNavClick('/')} style={{ cursor: 'pointer' }}>Home</a></li>
-              {/* Add more logged-in links here e.g. Dashboard, Groups */}
+              <li><a onClick={() => handleNavClick('/Home')} style={{ cursor: 'pointer' }}>Home</a></li>
+              <li><a onClick={() => handleNavClick('/groups')} style={{ cursor: 'pointer' }}>Groups</a></li>
               <li className="mobile-only">
                 <a onClick={handleLogout} style={{ cursor: 'pointer', color: '#e53e3e' }}>Logout</a>
               </li>

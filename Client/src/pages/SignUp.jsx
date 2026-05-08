@@ -121,7 +121,11 @@ function SignUp() {
       const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/verify-otp`, { enteredOtp: otp })
       // console.log(res, res.status);
       setShowOTPInput(false)
-      setForm({ isVerified: true })
+      setForm((prev)=>
+      ({
+        ...prev,
+        isVerified : true
+      }))
       setError('')
       setSuccess(res.data.message);
     }

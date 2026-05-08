@@ -6,6 +6,7 @@ import App from './App.jsx'
 import LandingPage from './pages/LandingPage.jsx'
 import SignUp from './pages/SignUp.jsx'
 import Login from './pages/Login.jsx'
+import Groups from './pages/Groups.jsx'
 
 const router = createBrowserRouter([
   { 
@@ -27,6 +28,10 @@ const router = createBrowserRouter([
       {
         path: "/Home",
         element: <h1 style={{ textAlign: 'center', marginTop: '8rem' }}>Home Page - Protected Route</h1>
+      },
+      {
+        path: "/groups",
+        element: <Groups />
       }
     ]
   },

@@ -9,7 +9,7 @@ import Footer from '../components/Footer'
 const LandingPage = ({ isDark, toggleTheme }) => {
   return (
     <>
-      
+
       <main>
         <Hero />
         <Features />
