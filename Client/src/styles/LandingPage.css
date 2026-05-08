@@ -1,18 +1,34 @@
 /* LandingPage.css */
-/* Page-level layout and scroll behavior */
 
+/* ── Landing Page Explicit Theme Variables ── */
+body.dark {
+  --lp-bg: #0d1117;
+  --lp-text: #e8edf5;
+  --lp-border: #2a3147;
+}
+
+body.light {
+  --lp-bg: #f4f6fb;
+  --lp-text: #1a2035;
+  --lp-border: #dde3f0;
+}
+
+/* Page-level layout and scroll behavior */
 html {
   scroll-behavior: smooth;
   scroll-padding-top: 80px; /* offset for fixed navbar */
 }
 
-main {
+main.landing-page-main {
   width: 100%;
   overflow: hidden;
+  background-color: var(--lp-bg, var(--bg-primary));
+  color: var(--lp-text, var(--text-primary));
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 /* Divider between sections */
 .features,
 .testimonials {
-  border-top: 1px solid var(--border);
+  border-top: 1px solid var(--lp-border, var(--border));
 }

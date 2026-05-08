@@ -85,9 +85,20 @@ function SettleUp(){
   });
 
     return (
-        <>
+        <div className="dashboard-shell">
 
            {/* ── SIDEBAR (desktop only) ──────────────────────────────────── */}
+      {/* ── MOBILE TOP BAR ────────────────────────────────────────── */}
+      <div className="mobile-top-bar">
+        <div className="mobile-top-logo" onClick={() => navigate("/Dashboard")}>
+          <span className="logo-icon">⚡</span>
+          <span>SplitSmart</span>
+        </div>
+        <button className="mobile-top-settings" onClick={() => navigate("/Settings")}>
+          ⚙️
+        </button>
+      </div>
+
       <aside className="sidebar">
         <div className="sidebar-user">
           <div className="user-avatar">{USER.initial}</div>
@@ -110,21 +121,52 @@ function SettleUp(){
           <div className="sidebar-divider" />
 
           <div
-            className={`nav-item ${active === "settings" ? "active" : ""}`}
+            className={`nav-item ${location.pathname === "/Settings" ? "active" : ""}`}
             onClick={() => navigate("/Settings")}
           >
             <span className="nav-icon">⚙️</span>
             Settings
           </div>
-          <ThemeToggle isDark={isDark} toggleTheme={toggleTheme} />
-
         </nav>
       </aside>
 
+      {/* ── MAIN CONTENT ────────────────────────────────────────────── */}
+      <main className="main-content">
+        <div className="dash-section">
+          <div className="section-header">
+            <h2 className="section-title">Settle Up</h2>
+            <p className="section-subtitle">Clear your dues and record payments instantly.</p>
+          </div>
 
+          <div className="features-grid">
+            <div className="feature-card">
+              <div className="card-glow glow-green" />
+              <div className="panel-header">
+                <div className="panel-label">
+                  <span className="panel-tag">Payments</span>
+                  <div className="panel-title">Pending Settlements</div>
+                </div>
+                <span className="panel-icon">💰</span>
+              </div>
+              <p style={{ color: 'var(--text-muted)', margin: '1rem 0' }}>All clear! You don't have any pending settlements.</p>
+              <button className="btn-primary">Record a Payment</button>
+            </div>
+          </div>
+        </div>
+      </main>
 
         {/* ── MOBILE BOTTOM NAV ───────────────────────────────────────── */}
-      <nav className="mobile-bottom-nav">
+      <nav className="mobile-bottom-nav" data-active-index={
+        active === "dashboard" ? 0 :
+        active === "groups"    ? 1 :
+        active === "settle"    ? 2 :
+        active === "activity"  ? 3 :
+        active === "profile"   ? 4 : 0
+      }>
+        {/* Sliding Indicator Blob */}
+        <div className="mobile-nav-indicator">
+          <div className="nav-indicator-blob" />
+        </div>
 
         {BOTTOM_LEFT.map(({ id, path, Icon, label }) => (
           <button
@@ -134,7 +176,6 @@ function SettleUp(){
             aria-label={label}
           >
             <span className="mobile-nav-svg"><Icon /></span>
-            {active === id && <span className="mobile-nav-pip" />}
           </button>
         ))}
 
@@ -157,12 +198,11 @@ function SettleUp(){
             aria-label={label}
           >
             <span className="mobile-nav-svg"><Icon /></span>
-            {active === id && <span className="mobile-nav-pip" />}
           </button>
         ))}
 
       </nav>
-        </>
+        </div>
     )
 }   
 

@@ -1,12 +1,15 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
+import { useSelector, useDispatch } from 'react-redux'
+import { logout } from '../store/slices/authSlice'
 import ThemeToggle from './ThemeToggle'
 import '../styles/Navbar.css'
 
 const Navbar = ({ isDark, toggleTheme }) => {
   const [scrolled, setScrolled] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
-  const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem('token'))
+  const { isLoggedIn } = useSelector((state) => state.auth)
+  const dispatch = useDispatch()
 
   const navigate = useNavigate()
   const location = useLocation()
@@ -18,28 +21,13 @@ const Navbar = ({ isDark, toggleTheme }) => {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
-  // Re-check auth on every route change
-  useEffect(() => {
-    setIsLoggedIn(!!localStorage.getItem('token'))
-  }, [location.pathname])
-
-  // Listen for login/logout events
-  useEffect(() => {
-    const checkAuth = () => setIsLoggedIn(!!localStorage.getItem('token'))
-    window.addEventListener('authChange', checkAuth)
-    return () => window.removeEventListener('authChange', checkAuth)
-  }, [])
-
   // Close menu on route change
   useEffect(() => {
     setMenuOpen(false)
   }, [location.pathname])
 
   const handleLogout = () => {
-    localStorage.removeItem('token')
-    localStorage.removeItem('user')
-    window.dispatchEvent(new Event('authChange'))
-    setIsLoggedIn(false)
+    dispatch(logout())
     navigate('/')
   }
 
@@ -74,12 +62,24 @@ const Navbar = ({ isDark, toggleTheme }) => {
               <li><a href="#testimonials" onClick={() => setMenuOpen(false) || handleNavClick('/')}>Testimonials</a></li>
               <li><a onClick={() => handleNavClick('/signUp')} style={{ cursor: 'pointer' }}>Sign Up</a></li>
               <li><a onClick={() => handleNavClick('/Login')} style={{ cursor: 'pointer' }}>Login</a></li>
+              
+              {/* Mobile Only Extras */}
+              <li className="mobile-only mobile-theme-row">
+                <span className="mobile-theme-label">Theme</span>
+                <ThemeToggle isDark={isDark} toggleTheme={toggleTheme} />
+              </li>
+              <li className="mobile-only mobile-menu-cta">
+                <a className="nav-cta" onClick={() => handleNavClick('/signUp')} style={{ cursor: 'pointer' }}>
+                  Get Started
+                </a>
+              </li>
             </>
           )}
         </ul>
 
         {/* Right side — theme toggle + CTA (hidden on mobile) */}
         <div className="nav-right">
+          <ThemeToggle isDark={isDark} toggleTheme={toggleTheme} />
           {isLoggedIn ? (
            ""
           ) : (
@@ -88,9 +88,6 @@ const Navbar = ({ isDark, toggleTheme }) => {
             </a>
           )}
         </div>
-
-          {/* Theme toggle is always visible, even on mobile */}
-          <ThemeToggle isDark={isDark} toggleTheme={toggleTheme} />
 
         {/* Hamburger — mobile only */}
         <button

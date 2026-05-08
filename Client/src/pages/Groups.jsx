@@ -85,9 +85,20 @@ function Groups(){
   });
 
     return (
-        <>
+        <div className="dashboard-shell">
 
            {/* ── SIDEBAR (desktop only) ──────────────────────────────────── */}
+      {/* ── MOBILE TOP BAR ────────────────────────────────────────── */}
+      <div className="mobile-top-bar">
+        <div className="mobile-top-logo" onClick={() => navigate("/Dashboard")}>
+          <span className="logo-icon">⚡</span>
+          <span>SplitSmart</span>
+        </div>
+        <button className="mobile-top-settings" onClick={() => navigate("/Settings")}>
+          ⚙️
+        </button>
+      </div>
+
       <aside className="sidebar">
         <div className="sidebar-user">
           <div className="user-avatar">{USER.initial}</div>
@@ -110,21 +121,52 @@ function Groups(){
           <div className="sidebar-divider" />
 
           <div
-            className={`nav-item ${active === "settings" ? "active" : ""}`}
+            className={`nav-item ${location.pathname === "/Settings" ? "active" : ""}`}
             onClick={() => navigate("/Settings")}
           >
             <span className="nav-icon">⚙️</span>
             Settings
           </div>
-          <ThemeToggle isDark={isDark} toggleTheme={toggleTheme} />
-
         </nav>
       </aside>
 
+      {/* ── MAIN CONTENT ────────────────────────────────────────────── */}
+      <main className="main-content">
+        <div className="dash-section">
+          <div className="section-header">
+            <h2 className="section-title">Groups</h2>
+            <p className="section-subtitle">Manage your expense groups and shared balances.</p>
+          </div>
 
+          <div className="features-grid">
+            <div className="feature-card">
+              <div className="card-glow glow-cyan" />
+              <div className="panel-header">
+                <div className="panel-label">
+                  <span className="panel-tag">Overview</span>
+                  <div className="panel-title">Your Groups</div>
+                </div>
+                <span className="panel-icon">👥</span>
+              </div>
+              <p style={{ color: 'var(--text-muted)', margin: '1rem 0' }}>No active groups found. Create one to start splitting!</p>
+              <button className="create-group-btn">+ Create New Group</button>
+            </div>
+          </div>
+        </div>
+      </main>
 
         {/* ── MOBILE BOTTOM NAV ───────────────────────────────────────── */}
-      <nav className="mobile-bottom-nav">
+      <nav className="mobile-bottom-nav" data-active-index={
+        active === "dashboard" ? 0 :
+        active === "groups"    ? 1 :
+        active === "settle"    ? 2 :
+        active === "activity"  ? 3 :
+        active === "profile"   ? 4 : 0
+      }>
+        {/* Sliding Indicator Blob */}
+        <div className="mobile-nav-indicator">
+          <div className="nav-indicator-blob" />
+        </div>
 
         {BOTTOM_LEFT.map(({ id, path, Icon, label }) => (
           <button
@@ -134,7 +176,6 @@ function Groups(){
             aria-label={label}
           >
             <span className="mobile-nav-svg"><Icon /></span>
-            {active === id && <span className="mobile-nav-pip" />}
           </button>
         ))}
 
@@ -157,12 +198,11 @@ function Groups(){
             aria-label={label}
           >
             <span className="mobile-nav-svg"><Icon /></span>
-            {active === id && <span className="mobile-nav-pip" />}
           </button>
         ))}
 
       </nav>
-        </>
+        </div>
     )
 }   
 

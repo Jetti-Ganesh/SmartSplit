@@ -40,8 +40,8 @@
 }
 
 .testimonial-card:hover {
-  border-color: rgba(255, 255, 255, 0.12);
   transform: translateY(-5px);
+  border-color: var(--border);
   box-shadow: 0 24px 60px rgba(0,0,0,0.4);
 }
 
@@ -99,14 +99,15 @@
 }
 
 /* Decorative quote */
-.quote-mark {
+.quote-icon {
   position: absolute;
-  bottom: -10px;
+  top: 20px;
   right: 20px;
-  font-family: Georgia, serif;
-  font-size: 8rem;
-  color: rgba(255, 255, 255, 0.03);
+  font-size: 6rem;
+  font-family: serif;
+  color: var(--border);
   line-height: 1;
+  opacity: 0.5;
   pointer-events: none;
   user-select: none;
 }

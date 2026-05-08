@@ -7,8 +7,10 @@
   cursor: pointer;
   padding: 4px;
   transition: all 0.3s ease;
-  display: flex;
+  display: inline-flex;
   align-items: center;
+  width: fit-content;
+  margin: 10px auto;
   /* Ensures a comfortable touch area for mobile (minimum 44px height) */
   min-height: 44px; 
   outline: none;
@@ -20,16 +22,17 @@
   background: rgba(255, 255, 255, 0.02);
 }
 
-.toggle-track {
+.theme-toggle-track {
   position: relative;
   width: 52px;
   height: 28px;
   background: var(--bg-card);
   border-radius: 50px;
   transition: background 0.3s ease;
+  display: block;
 }
 
-.toggle-thumb {
+.theme-toggle-thumb {
   position: absolute;
   top: 3px;
   left: 3px;
@@ -48,20 +51,20 @@
 }
 
 /* Logic for Dark Mode Position */
-.theme-toggle.dark .toggle-thumb {
+.theme-toggle.dark .theme-toggle-thumb {
   transform: translateX(24px);
 }
 
-.theme-toggle.dark .toggle-track {
+.theme-toggle.dark .theme-toggle-track {
   background: rgba(0, 229, 255, 0.15);
 }
 
 /* Logic for Light Mode Position */
-.theme-toggle.light .toggle-thumb {
+.theme-toggle.light .theme-toggle-thumb {
   transform: translateX(0);
 }
 
-.theme-toggle.light .toggle-track {
+.theme-toggle.light .theme-toggle-track {
   background: rgba(124, 58, 237, 0.1);
 }
 

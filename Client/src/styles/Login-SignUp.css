@@ -5,12 +5,11 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 90px 20px 30px;  /* was 60px — increase to clear the fixed navbar */
+  padding: 100px 20px 30px; /* Increased to ensure it clears the navbar */
   box-sizing: border-box;
   background: var(--bg-primary);
   font-family: var(--font-body);
   overflow: hidden;
-  padding: calc(var(--navbar-height) + 20px) 20px 30px;
   scrollbar-width: none;
 }
 

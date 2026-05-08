@@ -149,6 +149,9 @@ body.light .nav-item.active { color: var(--accent-purple); }
   margin: 8px 18px;
 }
 
+/* Hide mobile top bar by default (desktop) */
+.mobile-top-bar { display: none; }
+
 /* =============================================
    MAIN CONTENT
    ============================================= */
@@ -584,10 +587,10 @@ body.light .create-group-btn:hover {
 /* =============================================
    RESPONSIVE — MOBILE
    ============================================= */
-@media (max-width: 640px) {
+@media (max-width: 768px) {
 
   /* ── Hide sidebar ── */
-  .sidebar { display: none; }
+  .sidebar { display: none !important; }
 
   /* ── Shell & main layout ── */
   .dashboard-shell {
@@ -637,6 +640,73 @@ body.light .create-group-btn:hover {
   .group-item   { padding: 10px; }
 
   /* =============================================
+     MOBILE TOP BAR
+     ============================================= */
+  .mobile-top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 1.2rem;
+    background: rgba(13, 17, 23, 0.8);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 101;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  }
+
+  body.light .mobile-top-bar {
+    background: rgba(244, 246, 251, 0.8);
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.05);
+  }
+
+  .mobile-top-logo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .mobile-top-logo .logo-icon {
+    font-size: 1.2rem;
+    filter: drop-shadow(0 0 8px var(--accent-cyan));
+  }
+
+  .mobile-top-logo span:last-child {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 1.2rem;
+    background: var(--accent-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -0.5px;
+  }
+
+  .mobile-top-settings {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    cursor: pointer;
+    color: var(--text-primary);
+    transition: all 0.2s ease;
+  }
+
+  .mobile-top-settings:active {
+    transform: scale(0.9);
+    background: var(--sidebar-hover-bg);
+  }
+
+  /* =============================================
      MOBILE BOTTOM NAV
      ============================================= */
   .mobile-bottom-nav {
@@ -652,7 +722,59 @@ body.light .create-group-btn:hover {
     -webkit-backdrop-filter: blur(12px);
     z-index: 100;
     align-items: stretch;
+    padding: 0;
   }
+
+  /* ── Sliding Active Indicator ── */
+  .mobile-nav-indicator {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 20%; /* 5 items total */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    z-index: 1;
+  }
+
+  .nav-indicator-blob {
+    width: 52px;
+    height: 52px;
+    background: linear-gradient(135deg, #00e5ff 0%, #7c3aed 100%);
+    border: 4px solid var(--bg-secondary);
+    border-radius: 50%;
+    box-shadow: 0 8px 24px rgba(0, 229, 255, 0.4);
+    transform: translateY(-26px);
+    animation: blobPop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+
+  @keyframes blobPop {
+    0% { transform: translateY(-26px) scale(0.8); }
+    100% { transform: translateY(-26px) scale(1); }
+  }
+
+  body.light .nav-indicator-blob {
+    border-color: var(--bg-secondary);
+    box-shadow: 0 8px 24px rgba(124, 58, 237, 0.3), 0 0 0 4px rgba(124, 58, 237, 0.1);
+  }
+
+  /* Active icons move up into the blob and scale up */
+  [data-active-index] .mobile-nav-tab.active .mobile-nav-svg,
+  .mobile-nav-fab-btn.fab-active .mobile-nav-svg {
+    transform: translateY(-26px) scale(1.15);
+    color: #fff !important;
+    filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.3));
+  }
+
+  /* Position transforms */
+  [data-active-index="0"] .mobile-nav-indicator { transform: translateX(0%); }
+  [data-active-index="1"] .mobile-nav-indicator { transform: translateX(100%); }
+  [data-active-index="2"] .mobile-nav-indicator { transform: translateX(200%); }
+  [data-active-index="3"] .mobile-nav-indicator { transform: translateX(300%); }
+  [data-active-index="4"] .mobile-nav-indicator { transform: translateX(400%); }
 
   /* ── Icon tab ── */
   .mobile-nav-tab {
@@ -661,15 +783,23 @@ body.light .create-group-btn:hover {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 5px;
+    gap: 0;
     border: none;
     background: transparent;
     cursor: pointer;
     padding: 0;
     position: relative;
     color: var(--text-muted);
-    transition: color 0.2s ease;
+    transition: color 0.3s ease;
     -webkit-tap-highlight-color: transparent;
+    z-index: 2;
+  }
+
+  .mobile-nav-svg {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), color 0.3s ease;
   }
 
   .mobile-nav-tab:active {
@@ -682,11 +812,12 @@ body.light .create-group-btn:hover {
 
   /* SVG icon */
   .mobile-nav-svg {
-    width: 22px;
-    height: 22px;
+    width: 24px;
+    height: 24px;
     display: flex;
     align-items: center;
     justify-content: center;
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), color 0.3s ease;
   }
 
   .mobile-nav-svg svg {
@@ -694,60 +825,64 @@ body.light .create-group-btn:hover {
     height: 22px;
   }
 
-  /* Active pip dot below icon */
+  /* Active pip dot below icon — hidden in favor of sliding indicator */
   .mobile-nav-pip {
-    position: absolute;
-    bottom: 6px;
-    width: 4px;
-    height: 4px;
-    border-radius: 50%;
-    background: currentColor;
+    display: none;
   }
 
-  /* ── FAB — centre Settle Up ── */
   .mobile-nav-fab {
     flex: 1;
     display: flex;
     align-items: center;
     justify-content: center;
+    z-index: 2;
   }
 
   .mobile-nav-fab-btn {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    background: var(--accent-gradient);
-    border: 2.5px solid var(--bg-secondary);
+    width: 100%;
+    height: 100%;
+    background: transparent !important;
+    border: none !important;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    margin-top: -22px;
-    color: #fff;
-    box-shadow: 0 4px 18px rgba(0, 229, 255, 0.35);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    color: var(--text-muted);
+    box-shadow: none !important;
+    padding: 0;
+    transition: color 0.3s ease;
     -webkit-tap-highlight-color: transparent;
   }
 
-  .mobile-nav-fab-btn:active { transform: scale(0.9); }
+  .mobile-nav-fab-btn.fab-active {
+    color: #fff !important;
+  }
 
-  .mobile-nav-fab-btn .mobile-nav-svg,
-  .mobile-nav-fab-btn .mobile-nav-svg svg {
-    width: 20px;
-    height: 20px;
+  .mobile-nav-fab-btn:active {
+    transform: scale(0.9);
+  }
+
+  .mobile-nav-fab-btn .mobile-nav-svg {
+    width: 24px;
+    height: 24px;
+    color: var(--text-muted);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+
+  .mobile-nav-fab-btn.fab-active .mobile-nav-svg {
     color: #fff;
-    stroke: #fff;
+  }
+
+  .mobile-nav-fab-btn .mobile-nav-svg svg {
+    width: 100%;
+    height: 100%;
   }
 
   .mobile-nav-fab-btn.fab-active {
-    box-shadow: 0 0 0 3px rgba(0, 229, 255, 0.3), 0 4px 18px rgba(0, 229, 255, 0.4);
-  }
-
-  body.light .mobile-nav-fab-btn {
-    box-shadow: 0 4px 18px rgba(124, 58, 237, 0.3);
+    box-shadow: none; /* Shadow is handled by the blob */
   }
 
   body.light .mobile-nav-fab-btn.fab-active {
-    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.25), 0 4px 18px rgba(124, 58, 237, 0.35);
+    box-shadow: none;
   }
 }

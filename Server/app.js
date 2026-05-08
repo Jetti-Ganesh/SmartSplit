@@ -27,6 +27,7 @@ const session = require('express-session');
 const loginRoutes = require("./routes/login.route");
 const signUpRoutes = require("./routes/signUp.route");        // ← add this
 const verifyUserRoutes = require("./routes/verifyUser.route"); // ← add this
+const googleRoutes = require("./routes/google.route");
 
 app.use(session({
     secret : "My_Secret",
@@ -59,4 +60,5 @@ app.get('/', (req, res) => {
 app.use("/api/", loginRoutes);
 app.use("/api/", signUpRoutes);                   // ← add this
 app.use("/api/", verifyUserRoutes);              // ← add this 
+app.use("/api/", googleRoutes);
 module.exports = app;

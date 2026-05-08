@@ -1,62 +1,32 @@
-import { useState, useEffect } from 'react'
+import { useEffect } from 'react'
 import { Outlet } from "react-router-dom"
+import { useSelector, useDispatch } from 'react-redux'
+import { toggleTheme } from './store/slices/themeSlice'
 import Navbar from './components/Navbar'
 import './index.css'
 
-// ── Validate token synchronously (runs before first render) ──────────────────
-// If token is expired or malformed, wipe it immediately so no page
-// ever flashes the wrong state on load.
-function getInitialAuthState() {
-  const token = localStorage.getItem('token')
-  if (!token) return false
-  try {
-    const payload = JSON.parse(atob(token.split('.')[1]))
-    if (payload.exp * 1000 < Date.now()) {
-      // Expired — clean up
-      localStorage.removeItem('token')
-      localStorage.removeItem('user')
-      return false
-    }
-    return true
-  } catch {
-    // Malformed token — clean up
-    localStorage.removeItem('token')
-    return false
-  }
-}
-
 function App() {
-  const [isDark, setIsDark] = useState(() => {
-    return localStorage.getItem('theme') !== 'light'
-  })
-
-  // ✅ Token is validated synchronously — correct on first render, no flash
-  const [isLoggedIn, setIsLoggedIn] = useState(getInitialAuthState)
+  const dispatch = useDispatch()
+  const { isDark } = useSelector((state) => state.theme)
+  const { isLoggedIn } = useSelector((state) => state.auth)
 
   // Apply theme class to body
   useEffect(() => {
     if (isDark) {
       document.body.classList.remove('light')
-      localStorage.setItem('theme', 'dark')
+      document.body.classList.add('dark')
     } else {
+      document.body.classList.remove('dark')
       document.body.classList.add('light')
-      localStorage.setItem('theme', 'light')
     }
   }, [isDark])
 
-  // Listen for login/logout events fired from Login.jsx / Navbar.jsx
-  useEffect(() => {
-    const checkAuth = () => setIsLoggedIn(!!localStorage.getItem('token'))
-    window.addEventListener('authChange', checkAuth)
-    return () => window.removeEventListener('authChange', checkAuth)
-  }, [])
-
-  const toggleTheme = () => setIsDark(prev => !prev)
+  const handleToggleTheme = () => dispatch(toggleTheme())
 
   return (
     <>
-      <Navbar isDark={isDark} toggleTheme={toggleTheme} />
-      <Outlet context={{ isDark, toggleTheme }} />
+      <Navbar isDark={isDark} toggleTheme={handleToggleTheme} />
+      <Outlet context={{ isDark, toggleTheme: handleToggleTheme }} />
     </>
   )
 }
