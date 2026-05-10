@@ -7,6 +7,7 @@ import LandingPage from './pages/LandingPage.jsx'
 import SignUp from './pages/SignUp.jsx'
 import Login from './pages/Login.jsx'
 import Groups from './pages/Groups.jsx'
+import GroupDetail from './pages/GroupDetail.jsx'
 
 const router = createBrowserRouter([
   { 
@@ -32,6 +33,10 @@ const router = createBrowserRouter([
       {
         path: "/groups",
         element: <Groups />
+      },
+      {
+        path: "/groups/:groupId",
+        element: <GroupDetail />
       }
     ]
   },

@@ -1,0 +1,255 @@
+.group-detail-container {
+  min-height: 100vh;
+  background: var(--bg-color);
+  color: var(--text-color);
+  font-family: var(--font-body);
+  max-width: 600px; /* Mockup is mobile-focused */
+  margin: 0 auto;
+  position: relative;
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.05); /* Optional: distinct borders on desktop */
+}
+
+/* Header */
+.group-detail-header {
+  background: linear-gradient(135deg, #10b981, #059669); /* Using green to match mockup */
+  padding: 24px;
+  padding-bottom: 60px; /* Space for overlapping card */
+  border-bottom-left-radius: 30px;
+  border-bottom-right-radius: 30px;
+  color: white;
+}
+
+.header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.icon-btn {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s;
+  backdrop-filter: blur(4px);
+}
+
+.icon-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px);
+}
+
+.header-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.large-avatar {
+  font-size: 56px;
+  margin-bottom: 12px;
+  text-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.header-info h1 {
+  font-size: 28px;
+  font-weight: 700;
+  margin: 0 0 8px;
+  font-family: var(--font-display);
+}
+
+.header-info p {
+  margin: 0;
+  font-size: 14px;
+  opacity: 0.9;
+  font-weight: 500;
+}
+
+/* Balance Card */
+.balance-summary-card {
+  background: var(--card-bg);
+  border-radius: 20px;
+  margin: -40px 24px 24px;
+  padding: 24px;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  border: 1px solid var(--border-color);
+  position: relative;
+  z-index: 10;
+}
+
+.balance-summary-card p {
+  margin: 0 0 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.balance-summary-card h2 {
+  margin: 0;
+  font-size: 32px;
+  font-weight: 700;
+  font-family: var(--font-display);
+}
+
+.text-owe { color: #ef4444; }
+.text-owed { color: #10b981; }
+
+/* Quick Actions Grid */
+.quick-actions {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  padding: 0 24px 24px;
+}
+
+.action-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  padding: 20px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
+}
+
+.action-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--primary);
+  box-shadow: 0 8px 20px rgba(108, 99, 255, 0.1);
+}
+
+.action-icon {
+  font-size: 28px;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 12px;
+  background: rgba(108, 99, 255, 0.05);
+}
+
+.action-card span {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+/* Tabs */
+.tabs-container {
+  display: flex;
+  padding: 0 24px;
+  border-bottom: 1px solid var(--border-color);
+  margin-bottom: 16px;
+}
+
+.tab-btn {
+  flex: 1;
+  background: none;
+  border: none;
+  padding: 16px 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  position: relative;
+  transition: color 0.3s;
+}
+
+.tab-btn.active {
+  color: var(--primary);
+}
+
+.tab-btn.active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: var(--primary);
+  border-radius: 2px 2px 0 0;
+}
+
+/* Tab Content */
+.tab-content {
+  padding: 0 24px 40px;
+}
+
+.expenses-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.expense-item {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  transition: all 0.3s ease;
+}
+
+.expense-item:hover {
+  border-color: var(--primary);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  transform: translateX(4px);
+}
+
+.expense-icon {
+  font-size: 24px;
+  width: 48px;
+  height: 48px;
+  background: rgba(108, 99, 255, 0.05);
+  border-radius: 12px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.expense-details {
+  flex: 1;
+}
+
+.expense-details h3 {
+  margin: 0 0 4px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.expense-details p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.expense-amount strong {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.members-empty, .activity-empty {
+  text-align: center;
+  padding: 40px 0;
+  color: var(--text-muted);
+  font-size: 14px;
+}
