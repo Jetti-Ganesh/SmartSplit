@@ -44,7 +44,7 @@ function Login() {
       // ✅ Notify navbar to update
       window.dispatchEvent(new Event('storage'))
 
-      navigate('/')
+      navigate('/Dashboard')
     } catch (err) {
       setError('Could not connect to server. Please try again.')
     } finally {

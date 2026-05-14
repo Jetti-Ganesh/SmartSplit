@@ -1,4 +1,4 @@
-// import { StrictMode } from 'react'
+import { StrictMode,useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import { GoogleOAuthProvider } from '@react-oauth/google'
@@ -10,7 +10,11 @@ import Groups from './pages/Groups.jsx'
 import GroupDetail from './pages/GroupDetail.jsx'
 import { Provider } from 'react-redux'
 import { store } from './app/store.js'
-
+import Dashboard from './pages/Dashboard.jsx'
+import Profile from './pages/Profile.jsx'
+import SettleUp from './pages/SettleUp.jsx'
+import Activity from './pages/Activity.jsx'
+import Settings from './pages/settings.jsx'
 const router = createBrowserRouter([
   {
     path: "/",
@@ -29,17 +33,33 @@ const router = createBrowserRouter([
         element: <Login></Login>
       },
       {
-        path: "/Home",
-        element: <h1 style={{ textAlign: 'center', marginTop: '8rem' }}>Home Page - Protected Route</h1>
+        path: "/Dashboard",
+        element: <Dashboard ></Dashboard>
       },
       {
-        path: "/groups",
-        element: <Groups />
+        path: "/Profile",
+        element: <Profile></Profile>
+      },
+      {
+        path: "/SettleUp",
+        element: <SettleUp></SettleUp>
+      },
+      {
+        path: "/Groups",
+        element: <Groups></Groups>
+      },
+      {
+        path: "/Activity",
+        element: <Activity></Activity>
+      },
+     {
+      path: "/Settings",
+      element: <Settings></Settings>
       },
       {
         path: "/groups/:groupId",
         element: <GroupDetail />
-      }
+     }
     ]
   },
 ])
@@ -49,8 +69,7 @@ createRoot(document.getElementById('root')).render(
   <Provider store={store}>
     <GoogleOAuthProvider clientId="YOUR_GOOGLE_CLIENT_ID">
       <RouterProvider router={router} >
-        <App />
-      </RouterProvider>
+        </RouterProvider>
     </GoogleOAuthProvider>
   </Provider >
 )
