@@ -85,9 +85,20 @@ function Settings(){
   });
 
     return (
-        <>
+        <div className="dashboard-shell">
 
            {/* ── SIDEBAR (desktop only) ──────────────────────────────────── */}
+      {/* ── MOBILE TOP BAR ────────────────────────────────────────── */}
+      <div className="mobile-top-bar">
+        <div className="mobile-top-logo" onClick={() => navigate("/Dashboard")}>
+          <span className="logo-icon">⚡</span>
+          <span>SplitSmart</span>
+        </div>
+        <button className="mobile-top-settings" onClick={() => navigate("/Settings")}>
+          ⚙️
+        </button>
+      </div>
+
       <aside className="sidebar">
         <div className="sidebar-user">
           <div className="user-avatar">{USER.initial}</div>
@@ -110,21 +121,69 @@ function Settings(){
           <div className="sidebar-divider" />
 
           <div
-            className={`nav-item ${active === "settings" ? "active" : ""}`}
+            className={`nav-item ${location.pathname === "/Settings" ? "active" : ""}`}
             onClick={() => navigate("/Settings")}
           >
             <span className="nav-icon">⚙️</span>
             Settings
           </div>
-          <ThemeToggle isDark={isDark} toggleTheme={toggleTheme} />
-
         </nav>
       </aside>
+
+      {/* ── MAIN CONTENT ────────────────────────────────────────────── */}
+      <main className="main-content">
+        <div className="dash-section">
+          <div className="section-header">
+            <h2 className="section-title">Settings</h2>
+            <p className="section-subtitle">Manage your account preferences and app display.</p>
+          </div>
+
+          <div className="features-grid" style={{ gridTemplateColumns: '1fr' }}>
+            <div className="feature-card">
+              <div className="card-glow glow-cyan" />
+              <div className="panel-header">
+                <div className="panel-label">
+                  <span className="panel-tag">Display</span>
+                  <div className="panel-title">Appearance</div>
+                </div>
+                <span className="panel-icon">🌓</span>
+              </div>
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '1.5rem' }}>
+                Toggle between light and dark mode for your dashboard.
+              </p>
+              <ThemeToggle isDark={isDark} toggleTheme={toggleTheme} />
+            </div>
+
+            <div className="feature-card" style={{ opacity: 0.7 }}>
+              <div className="panel-header">
+                <div className="panel-label">
+                  <span className="panel-tag">Account</span>
+                  <div className="panel-title">Notifications</div>
+                </div>
+                <span className="panel-icon">🔔</span>
+              </div>
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+                Coming soon — Manage your email and push notification settings.
+              </p>
+            </div>
+          </div>
+        </div>
+      </main>
 
 
 
         {/* ── MOBILE BOTTOM NAV ───────────────────────────────────────── */}
-      <nav className="mobile-bottom-nav">
+      <nav className="mobile-bottom-nav" data-active-index={
+        active === "dashboard" ? 0 :
+        active === "groups"    ? 1 :
+        active === "settle"    ? 2 :
+        active === "activity"  ? 3 :
+        active === "profile"   ? 4 : 0
+      }>
+        {/* Sliding Indicator Blob */}
+        <div className="mobile-nav-indicator">
+          <div className="nav-indicator-blob" />
+        </div>
 
         {BOTTOM_LEFT.map(({ id, path, Icon, label }) => (
           <button
@@ -134,7 +193,6 @@ function Settings(){
             aria-label={label}
           >
             <span className="mobile-nav-svg"><Icon /></span>
-            {active === id && <span className="mobile-nav-pip" />}
           </button>
         ))}
 
@@ -157,12 +215,11 @@ function Settings(){
             aria-label={label}
           >
             <span className="mobile-nav-svg"><Icon /></span>
-            {active === id && <span className="mobile-nav-pip" />}
           </button>
         ))}
 
       </nav>
-        </>
+        </div>
     )
 }   
 

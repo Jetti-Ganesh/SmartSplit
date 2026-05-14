@@ -105,6 +105,17 @@ export default function Dashboard() {
   return (
     <div className="dashboard-shell">
 
+      {/* ── MOBILE TOP BAR ────────────────────────────────────────── */}
+      <div className="mobile-top-bar">
+        <div className="mobile-top-logo" onClick={() => navigate("/Dashboard")}>
+          <span className="logo-icon">⚡</span>
+          <span>SplitSmart</span>
+        </div>
+        <button className="mobile-top-settings" onClick={() => navigate("/Settings")}>
+          ⚙️
+        </button>
+      </div>
+
       {/* ── SIDEBAR (desktop only) ──────────────────────────────────── */}
       <aside className="sidebar">
         <div className="sidebar-user">
@@ -128,14 +139,12 @@ export default function Dashboard() {
           <div className="sidebar-divider" />
 
           <div
-            className={`nav-item ${active === "settings" ? "active" : ""}`}
+            className={`nav-item ${location.pathname === "/Settings" ? "active" : ""}`}
             onClick={() => navigate("/Settings")}
           >
             <span className="nav-icon">⚙️</span>
             Settings
           </div>
-          <ThemeToggle isDark={isDark} toggleTheme={toggleTheme} />
-
         </nav>
       </aside>
 
@@ -234,7 +243,17 @@ export default function Dashboard() {
       </main>
 
       {/* ── MOBILE BOTTOM NAV ───────────────────────────────────────── */}
-      <nav className="mobile-bottom-nav">
+      <nav className="mobile-bottom-nav" data-active-index={
+        active === "dashboard" ? 0 :
+        active === "groups"    ? 1 :
+        active === "settle"    ? 2 :
+        active === "activity"  ? 3 :
+        active === "profile"   ? 4 : 0
+      }>
+        {/* Sliding Indicator Blob */}
+        <div className="mobile-nav-indicator">
+          <div className="nav-indicator-blob" />
+        </div>
 
         {BOTTOM_LEFT.map(({ id, path, Icon, label }) => (
           <button
@@ -244,7 +263,6 @@ export default function Dashboard() {
             aria-label={label}
           >
             <span className="mobile-nav-svg"><Icon /></span>
-            {active === id && <span className="mobile-nav-pip" />}
           </button>
         ))}
 
@@ -267,7 +285,6 @@ export default function Dashboard() {
             aria-label={label}
           >
             <span className="mobile-nav-svg"><Icon /></span>
-            {active === id && <span className="mobile-nav-pip" />}
           </button>
         ))}
 

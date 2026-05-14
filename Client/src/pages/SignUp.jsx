@@ -1,12 +1,15 @@
 import { useState, useEffect } from 'react'
 import { useGoogleLogin } from '@react-oauth/google'
 import { useNavigate } from 'react-router-dom'
+import { useDispatch } from 'react-redux';
+import { loginSuccess } from '../store/slices/authSlice';
 import axios from 'axios';
 import '../styles/Login-SignUp.css'
 axios.defaults.withCredentials = true;
 
 function SignUp() {
   const navigate = useNavigate()
+  const dispatch = useDispatch()
   const [showPassword, setShowPassword] = useState(false)
   const [form, setForm] = useState({ name: '', email: '', password: '', isVerified: false })
   const [error, setError] = useState('')
@@ -58,10 +61,9 @@ function SignUp() {
           return
         }
 
-        // Store token and user info
-        localStorage.setItem('token', data.token)
-        localStorage.setItem('user', JSON.stringify(data.user))
-        window.dispatchEvent(new Event('authChange'))
+        // Dispatch Redux action
+        dispatch(loginSuccess({ token: data.token, user: data.user }))
+
         setSuccess('Ready to Login!!')
         navigate('/Dashboard')
       }
@@ -80,12 +82,32 @@ function SignUp() {
   const handleGoogleSignup = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
       try {
+        // 1. Get user info from Google
         const res = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
           headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
         })
         const userInfo = await res.json()
-        console.log('Google user:', userInfo)
-        navigate('/Home')
+
+        // 2. Send to backend to create/find user & get JWT
+        const backendRes = await fetch(`${import.meta.env.VITE_API_URL}/api/google-auth`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: userInfo.name,
+            email: userInfo.email,
+            googleId: userInfo.sub,
+          }),
+        })
+        const data = await backendRes.json()
+
+        if (!backendRes.ok) {
+          setError(data.message || 'Google sign-up failed.')
+          return
+        }
+
+        // 3. Dispatch Redux login & navigate
+        dispatch(loginSuccess({ token: data.token, user: data.user }))
+        navigate('/Dashboard')
       } catch {
         setError('Google sign-up failed. Try again.')
       }

@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { loginSuccess } from '../store/slices/authSlice';
 import '../styles/Login-SignUp.css'
 
 function Login() {
@@ -8,6 +10,7 @@ function Login() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
+  const dispatch = useDispatch()
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target
@@ -36,13 +39,8 @@ function Login() {
         return
       }
 
-      // ✅ Store token and user
-      localStorage.setItem('token', data.token)
-      localStorage.setItem('user', JSON.stringify(data.user))
-      window.dispatchEvent(new Event('authChange'))
-
-      // ✅ Notify navbar to update
-      window.dispatchEvent(new Event('storage'))
+      // Dispatch Redux action
+      dispatch(loginSuccess({ token: data.token, user: data.user }))
 
       navigate('/Dashboard')
     } catch (err) {

@@ -1,15 +1,15 @@
 @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap');
 
 :root {
-  --bg-primary: #060818;
-  --bg-secondary: #0c1128;
+  --bg-primary: #0d1117;
+  --bg-secondary: #161b24;
   --bg-card: rgba(255, 255, 255, 0.04);
   --accent-cyan: #00e5ff;
   --accent-purple: #7c3aed;
   --accent-gradient: linear-gradient(135deg, #00e5ff, #7c3aed);
-  --text-primary: #f0f4ff;
-  --text-muted: #8892b0;
-  --border: rgba(255, 255, 255, 0.08);
+  --text-primary: #e8edf5;
+  --text-muted: #8b9ab5;
+  --border: #2a3147;
   --glow-cyan: 0 0 30px rgba(0, 229, 255, 0.25);
   --font-display: 'Syne', sans-serif;
   --font-body: 'DM Sans', sans-serif;
@@ -17,12 +17,12 @@
 
 /* ── Light mode overrides ── */
 body.light {
-  --bg-primary: #f0f4ff;
-  --bg-secondary: #e4eaff;
+  --bg-primary: #f4f6fb;
+  --bg-secondary: #ffffff;
   --bg-card: rgba(0, 0, 0, 0.03);
-  --text-primary: #0f172a;
-  --text-muted: #4a5568;
-  --border: rgba(0, 0, 0, 0.09);
+  --text-primary: #1a2035;
+  --text-muted: #5a6a8a;
+  --border: #dde3f0;
   --glow-cyan: 0 0 30px rgba(0, 180, 220, 0.2);
 }
 
