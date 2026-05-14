@@ -477,6 +477,10 @@
 
 /* ── Responsive ── */
 @media (max-width: 768px) {
+  .split-container {
+    padding: 20px 20px 30px;
+  }
+
   .login-card {
     flex-direction: column;
     height: auto;
