@@ -51,12 +51,15 @@ const groupSchema = new mongoose.Schema({
     }
 });
 //genertae unique invite code
-groupSchema.pre('save',function(next)
-{
-    if(!this.inviteCode)
-    {
-        this.inviteCode = Math.random().toString().toUpperCase();
+groupSchema.pre('save', function () {
+
+    if (!this.inviteCode) {
+
+        this.inviteCode = Math.random()
+            .toString(36)
+            .substring(2, 8)
+            .toUpperCase();
     }
-    next();
+
 });
 module.exports = mongoose.model('Group',groupSchema);

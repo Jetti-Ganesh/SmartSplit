@@ -18,6 +18,7 @@ function GroupDetail() {
   };
 
   const [activeTab, setActiveTab] = useState('Expenses');
+  const [showAddMemberModal, setShowAddMemberModal] = useState(false);
 
   const handleBack = () => {
     navigate('/groups');
@@ -45,7 +46,7 @@ function GroupDetail() {
         <div className="header-info">
           <div className="large-avatar">{group.icon || group.name.substring(0,2).toUpperCase()}</div>
           <h1>{group.name}</h1>
-          <p>{group.members} members • Created Dec 15</p>
+          <p>{group.members.length} members • Created Dec 15</p>
         </div>
       </div>
 
@@ -63,18 +64,18 @@ function GroupDetail() {
           <div className="action-icon icon-expense">💰</div>
           <span>Add Expense</span>
         </button>
-        <button className="action-card">
+        {/* <button className="action-card">
           <div className="action-icon icon-settle">⚖️</div>
           <span>Settle Up</span>
-        </button>
-        <button className="action-card">
+        </button> */}
+        <button className="action-card" onClick={() => setShowAddMemberModal(true)}>
           <div className="action-icon icon-member">👥</div>
           <span>Add Member</span>
         </button>
-        <button className="action-card">
+        {/* <button className="action-card">
           <div className="action-icon icon-analytics">📊</div>
           <span>Analytics</span>
-        </button>
+        </button> */}
       </div>
 
       {/* Tabs */}
@@ -127,6 +128,43 @@ function GroupDetail() {
           </div>
         )}
       </div>
+
+      {/* Add Member Modal */}
+      {showAddMemberModal && (
+        <div className="modal-overlay" onClick={() => setShowAddMemberModal(false)}>
+          <div className="add-member-modal" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>Add Member</h2>
+              <button className="close-btn" onClick={() => setShowAddMemberModal(false)}>×</button>
+            </div>
+            
+            <div className="modal-content">
+              <div className="input-group">
+                <label>Phone Number</label>
+                <input type="text" placeholder="Enter 10-digit phone number" />
+              </div>
+
+              <div className="info-banner">
+                💡 The person must have a SmartSplit account. They'll be added to the group immediately.
+              </div>
+
+              <button className="primary-btn">Add Member</button>
+
+              <div className="divider">
+                <span>Or Share Invite Code</span>
+              </div>
+
+              <div className="invite-code-container">
+                <p>Group Code:</p>
+                <h3 className="invite-code">AB7X9K</h3>
+                <button className="copy-code-btn">
+                  📋 Copy Code
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

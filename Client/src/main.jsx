@@ -1,6 +1,6 @@
-import { StrictMode } from 'react'
+// import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import { BrowserRouter,createBrowserRouter,RouterProvider } from 'react-router-dom'
+import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import { GoogleOAuthProvider } from '@react-oauth/google'
 import App from './App.jsx'
 import LandingPage from './pages/LandingPage.jsx'
@@ -8,12 +8,14 @@ import SignUp from './pages/SignUp.jsx'
 import Login from './pages/Login.jsx'
 import Groups from './pages/Groups.jsx'
 import GroupDetail from './pages/GroupDetail.jsx'
+import { Provider } from 'react-redux'
+import { store } from './app/store.js'
 
 const router = createBrowserRouter([
-  { 
-    path: "/", 
-    element: <App /> ,
-    children:[
+  {
+    path: "/",
+    element: <App />,
+    children: [
       {
         path: "/",
         element: <LandingPage></LandingPage>
@@ -41,12 +43,14 @@ const router = createBrowserRouter([
     ]
   },
 ])
-  
+
 
 createRoot(document.getElementById('root')).render(
-   <GoogleOAuthProvider clientId="YOUR_GOOGLE_CLIENT_ID">
-    <RouterProvider router={router} >
-      <App />
-    </RouterProvider>
-  </GoogleOAuthProvider>
+  <Provider store={store}>
+    <GoogleOAuthProvider clientId="YOUR_GOOGLE_CLIENT_ID">
+      <RouterProvider router={router} >
+        <App />
+      </RouterProvider>
+    </GoogleOAuthProvider>
+  </Provider >
 )

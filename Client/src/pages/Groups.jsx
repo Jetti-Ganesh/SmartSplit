@@ -1,46 +1,50 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import EmojiPicker from 'emoji-picker-react';
+import { useCreateGroupMutation, useGetGroupsQuery } from '../services/groupAPI';
 import '../styles/Groups.css';
 
-const mockGroups = [
-  { id: 1, name: 'Goa Trip', description: 'December vacation', owe: 1500, owed: 0, members: 5, icon: '🌴' },
-  { id: 2, name: 'Roommates', description: 'Monthly rent & groceries', owe: 0, owed: 3200, members: 3, icon: '🏠' },
-  { id: 3, name: 'Office Lunch', description: 'Friday team lunch', owe: 450, owed: 0, members: 4, icon: '🍔' },
-];
-
+const PREDEFINED_ICONS = ['🏠', '🏨', '✈️', '🎉', '🛒', '⛱️', '🎓', '⚽', '🎮', '🏪', '🚗', '👥'];
+import '../styles/Groups.css';
 function Groups() {
-  const [groups, setGroups] = useState(mockGroups);
+  const [addGroups, { isLoading: isCreatingGroup }] = useCreateGroupMutation();
+  const { data, isLoading: isFetchingGroups } = useGetGroupsQuery();
+  // const [groups, setGroups] = useState('');
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newGroupName, setNewGroupName] = useState('');
-  const [newGroupIcon, setNewGroupIcon] = useState('👥');
-  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [newGroupIcon, setNewGroupIcon] = useState('🏠');
+  const [newGroupDescription, setNewGroupDescription] = useState('');
 
-  const totalOwe = groups.reduce((acc, g) => acc + g.owe, 0);
-  const totalOwed = groups.reduce((acc, g) => acc + g.owed, 0);
+  // const totalOwe =data ?  data.reduce((acc, g) => acc + g.owe, 0) : "";
+  // const totalOwed =data ? data.reduce((acc, g) => acc + g.owed, 0) : "";
 
-  const handleAddGroup = (e) => {
+  const handleAddGroup = async (e) => {
     e.preventDefault();
     if (!newGroupName.trim()) return;
 
     const newGroup = {
       id: Date.now(),
       name: newGroupName,
-      description: 'Newly created group',
+      description: newGroupDescription || 'Newly created group',
       owe: 0,
       owed: 0,
       members: 1,
       icon: newGroupIcon || '👥'
     };
+    try {
+      await addGroups(newGroup).unwrap();
+      setIsModalOpen(false);
+      setNewGroupName('');
+      setNewGroupDescription('');
+      setNewGroupIcon('🏠');
+    }
+    catch (err) {
+      console.log(err);
+    }
 
-    setGroups([newGroup, ...groups]);
-    setIsModalOpen(false);
-    setNewGroupName('');
-    setNewGroupIcon('👥');
-    setShowEmojiPicker(false);
   };
-
+  console.log(data);
+  
   return (
     <div className="groups-container">
       <div className="groups-header">
@@ -67,7 +71,7 @@ function Groups() {
           </div>
           <div className="balance-info">
             <p className="balance-label">You Owe</p>
-            <h2 className="balance-amount">₹{totalOwe}</h2>
+            <h2 className="balance-amount">₹{1000}</h2>
           </div>
         </div>
 
@@ -80,22 +84,22 @@ function Groups() {
           </div>
           <div className="balance-info">
             <p className="balance-label">You are Owed</p>
-            <h2 className="balance-amount">₹{totalOwed}</h2>
+            <h2 className="balance-amount">₹{3200}</h2>
           </div>
         </div>
       </div>
 
       <div className="groups-list">
         <h2 className="section-title">Recent Groups</h2>
-        {groups.map(group => (
-          <div key={group.id} className="group-card" onClick={() => navigate(`/groups/${group.id}`, { state: { group } })}>
+        {data?.data?.map(group => (
+          <div key={group._id} className="group-card" onClick={() => navigate(`/groups/${group.id}`, { state: { group } })}>
             <div className="group-info">
               <div className="group-avatar" style={group.icon ? { fontSize: '24px' } : {}}>
                 {group.icon ? group.icon : group.name.substring(0, 2).toUpperCase()}
               </div>
               <div className="group-details">
                 <h3>{group.name}</h3>
-                <p>{group.description} • {group.members} members</p>
+                <p>{group.description} • {group.members.length} members</p>
               </div>
             </div>
             <div className="group-balance">
@@ -134,48 +138,40 @@ function Groups() {
               </button>
             </div>
             <form onSubmit={handleAddGroup} className="add-group-form">
-              <div className="form-group" style={{ position: 'relative' }}>
-                <label>Group Icon</label>
-                <div className="icon-input-wrapper">
-                  <input 
-                    type="text" 
-                    value={newGroupIcon} 
-                    readOnly
-                    onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-                    placeholder="Click to select an emoji"
-                    className="icon-input"
-                    style={{ cursor: 'pointer', caretColor: 'transparent' }}
-                  />
-                  <span className="icon-preview">{newGroupIcon || '👥'}</span>
-                </div>
-                {showEmojiPicker && (
-                  <>
-                    <div 
-                      style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 9 }}
-                      onClick={() => setShowEmojiPicker(false)}
-                    />
-                    <div style={{ position: 'absolute', top: '100%', left: 0, zIndex: 10, marginTop: '8px' }}>
-                      <EmojiPicker 
-                        onEmojiClick={(emojiObject) => {
-                          setNewGroupIcon(emojiObject.emoji);
-                          setShowEmojiPicker(false);
-                        }} 
-                      />
-                    </div>
-                  </>
-                )}
-              </div>
               <div className="form-group">
                 <label>Group Name</label>
-                <input 
-                  type="text" 
-                  value={newGroupName} 
+                <input
+                  type="text"
+                  value={newGroupName}
                   onChange={(e) => setNewGroupName(e.target.value)}
-                  placeholder="e.g. Weekend Trip"
+                  placeholder="e.g., Roommates, Office Lunch..."
                   required
                 />
               </div>
-              <button type="submit" className="submit-group-btn">Create Group</button>
+              <div className="form-group">
+                <label>Description</label>
+                <input
+                  type="text"
+                  value={newGroupDescription}
+                  onChange={(e) => setNewGroupDescription(e.target.value)}
+                  placeholder="e.g., Weekend trip expenses"
+                />
+              </div>
+              <div className="form-group">
+                <label>Choose an Icon</label>
+                <div className="icons-grid">
+                  {PREDEFINED_ICONS.map(icon => (
+                    <div
+                      key={icon}
+                      className={`icon-option ${newGroupIcon === icon ? 'selected' : ''}`}
+                      onClick={() => setNewGroupIcon(icon)}
+                    >
+                      {icon}
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <button type="submit" className="submit-group-btn" disabled={isCreatingGroup}>{isCreatingGroup ? "Creating.." : "Create Group"}</button>
             </form>
           </div>
         </div>
