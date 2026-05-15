@@ -5,13 +5,7 @@ import { logout } from "../store/slices/authSlice";
 import ThemeToggle from "./ThemeToggle";
 import "../styles/Navbar.css";
 
-const APP_ROUTES = [
-  "/Dashboard",
-  "/Profile",
-  "/Groups",
-  "/Activity",
-  "/SettleUp",
-];
+// Navbar shows on all routes now
 
 const Navbar = ({ isDark, toggleTheme, forceShow }) => {
   const [scrolled, setScrolled] = useState(false);
@@ -34,8 +28,7 @@ const Navbar = ({ isDark, toggleTheme, forceShow }) => {
     setMenuOpen(false);
   }, [location.pathname]);
 
-  // Hide navbar on app shell routes (sidebar/bottom nav takes over there)
-  if (!forceShow && APP_ROUTES.includes(location.pathname)) return null;
+  // Navbar always displays on all routes
 
   const handleNavClick = (path) => {
     setMenuOpen(false);

@@ -7,10 +7,10 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation, useOutletContext } from "react-router-dom";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../store/slices/authSlice";
+import { fetchUserProfile, updateUserProfile, clearSuccess, clearError } from "../store/slices/profileSlice";
 import ThemeToggle from "../components/ThemeToggle";
-import Navbar from "../components/Navbar";
 import BottomNavbareM from "../components/BottomNavbareM";
 import "../styles/Profile.css";
 // ─────────────────────────────────────────────────────
@@ -20,11 +20,11 @@ import "../styles/Profile.css";
 
 
 const INITIAL_USER = {
-  name: "Rahul Kumar",
-  phone: "+91 98765 43210",
-  email: "rahul@gmail.com",
-  defaultUpi: "rahul@paytm",
-  upiList: ["rahul@paytm", "rahul@okicici", "8765432100@ybl"],
+  name: "Loading...",
+  phone: "",
+  email: "Loading...",
+  defaultUpi: "",
+  upiList: [],
   avatar: null,
 };
 
@@ -82,6 +82,8 @@ function InfoRow({ icon, iconClass, label, value, onClick }) {
       </div>
     </div>
   );
+
+
 }
 
 function ActionBtn({ icon, iconClass, label, onClick, variant }) {
@@ -100,13 +102,110 @@ function ActionBtn({ icon, iconClass, label, onClick, variant }) {
 
 function EditModal({ user, onSave, onClose }) {
   const [form, setForm] = useState({ name: user.name, phone: user.phone, email: user.email });
+  const [avatar, setAvatar] = useState(user.avatar);
+  const [previewImage, setPreviewImage] = useState(user.avatar);
+  const fileInputRef = useRef(null);
+
   const set = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }));
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Validate file size (max 2MB)
+      if (file.size > 2 * 1024 * 1024) {
+        alert('Image size must be less than 2MB');
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        // Compress image using canvas
+        const img = new Image();
+        img.src = reader.result;
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let { width, height } = img;
+          
+          // Resize if larger than 500px
+          if (width > 500 || height > 500) {
+            const ratio = Math.min(500 / width, 500 / height);
+            width = Math.round(width * ratio);
+            height = Math.round(height * ratio);
+          }
+          
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+          
+          // Convert to base64 with compression (JPEG at 0.8 quality)
+          const compressedImage = canvas.toDataURL('image/jpeg', 0.8);
+          console.log('📸 Original size:', file.size, 'bytes');
+          console.log('📸 Compressed size:', compressedImage.length, 'bytes');
+          
+          setPreviewImage(compressedImage);
+          setAvatar(compressedImage);
+        };
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleSave = () => {
+    onSave({ ...form, avatar });
+  };
 
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-sheet" onClick={(e) => e.stopPropagation()}>
         <div className="modal-handle" />
         <div className="modal-title">Edit Personal Details</div>
+        
+        {/* Image Upload Section */}
+        <div className="modal-field" style={{ textAlign: 'center', marginBottom: '20px' }}>
+          <label style={{ display: 'block', marginBottom: '10px' }}>Profile Picture</label>
+          <div style={{
+            width: '100px',
+            height: '100px',
+            margin: '0 auto 10px',
+            borderRadius: '50%',
+            overflow: 'hidden',
+            border: '2px solid #e5e7eb',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            background: '#f9fafb',
+            cursor: 'pointer'
+          }} onClick={() => fileInputRef.current?.click()}>
+            {previewImage ? (
+              <img src={previewImage} alt="preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            ) : (
+              <span style={{ fontSize: '40px' }}>📸</span>
+            )}
+          </div>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleImageChange}
+            style={{ display: 'none' }}
+          />
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            style={{
+              background: '#3b82f6',
+              color: 'white',
+              border: 'none',
+              padding: '8px 16px',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '14px'
+            }}
+          >
+            Change Photo
+          </button>
+        </div>
         
         <div className="modal-field">
           <label>Full Name</label>
@@ -125,7 +224,7 @@ function EditModal({ user, onSave, onClose }) {
         
         <div className="modal-actions">
           <button className="modal-btn modal-cancel" onClick={onClose}>Cancel</button>
-          <button className="modal-btn modal-save" onClick={() => onSave(form)}>Save Changes</button>
+          <button className="modal-btn modal-save" onClick={handleSave}>Save Changes</button>
         </div>
       </div>
     </div>
@@ -203,15 +302,34 @@ export default function ProfilePage() {
   const navigate  = useNavigate();
   const location  = useLocation();
   const { isDark, toggleTheme } = useOutletContext();
+  const dispatch = useDispatch();
 
   const active = getActiveId(location.pathname);
 
-  const [user,  setUser]  = useState(INITIAL_USER);
+  // Redux selectors
+  const { user: profileUser, loading, error, success } = useSelector(state => state.profile);
+
   const [prefs, setPrefs] = useState(() =>
     Object.fromEntries(PREFERENCES.map((p) => [p.id, p.defaultOn]))
   );
   const [modal, setModal] = useState(null); // "edit" | "upi" | null
   const fillRef = useRef(null);
+
+  // Fetch user profile on component mount
+  useEffect(() => {
+    console.log('📍 Profile page mounted, fetching user profile...');
+    dispatch(fetchUserProfile());
+  }, [dispatch]);
+
+  // Clear success message after 3 seconds
+  useEffect(() => {
+    if (success) {
+      const timer = setTimeout(() => {
+        dispatch(clearSuccess());
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [success, dispatch]);
 
   // Animate fairness progress bar after mount
   useEffect(() => {
@@ -221,15 +339,44 @@ export default function ProfilePage() {
     return () => clearTimeout(t);
   }, []);
 
-  const togglePref        = (id)        => setPrefs((p) => ({ ...p, [id]: !p[id] }));
-  const handleSaveProfile = (form)      => { setUser((u) => ({ ...u, ...form })); setModal(null); };
-  const handleSaveUpi     = (list, def) => { setUser((u) => ({ ...u, upiList: list, defaultUpi: def })); setModal(null); };
+  const togglePref = (id) => setPrefs((p) => ({ ...p, [id]: !p[id] }));
+  
+  const handleSaveProfile = async (form) => {
+    console.log('💾 Saving profile:', form);
+    try {
+      // Dispatch the update action and wait for it
+      const result = await dispatch(updateUserProfile(form));
+      console.log('✅ Profile save result:', result);
+      // Wait a moment for state to update, then close modal
+      setTimeout(() => {
+        setModal(null);
+      }, 300);
+    } catch (err) {
+      console.error('❌ Error saving profile:', err);
+    }
+  };
+  
+  const handleSaveUpi = async (list, def) => {
+    console.log('💾 Saving UPI:', { list, def });
+    try {
+      // Use .unwrap() to correctly throw errors from createAsyncThunk
+      await dispatch(updateUserProfile({ upiList: list, defaultUpi: def })).unwrap();
+      // Wait for state update before closing
+      setTimeout(() => {
+        setModal(null);
+      }, 300);
+    } catch (err) {
+      console.error('❌ Error saving UPI:', err);
+    }
+  };
 
-  const dispatch = useDispatch();
   const handleLogout = () => {
     dispatch(logout());
     navigate('/');
   };
+
+  // Use actual user data from Redux, or fallback to INITIAL_USER
+  const displayUser = profileUser || INITIAL_USER;
 
   return (
     <div className="dashboard-shell">
@@ -245,8 +392,52 @@ export default function ProfilePage() {
         </button>
       </div>
 
-        {/* ── DESKTOP NAVBAR ────────────────────────────────────────── */}
-     <Navbar isDark={isDark} toggleTheme={toggleTheme} forceShow />
+      {/* ── Status Messages ────────────────────────────────────────── */}
+      {loading && (
+        <div style={{
+          position: 'fixed',
+          top: '20px',
+          right: '20px',
+          background: '#3b82f6',
+          color: 'white',
+          padding: '12px 16px',
+          borderRadius: '8px',
+          zIndex: 1000,
+          boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+        }}>
+          Loading profile...
+        </div>
+      )}
+      {error && (
+        <div style={{
+          position: 'fixed',
+          top: '20px',
+          right: '20px',
+          background: '#ef4444',
+          color: 'white',
+          padding: '12px 16px',
+          borderRadius: '8px',
+          zIndex: 1000,
+          boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+        }}>
+          {error}
+        </div>
+      )}
+      {success && (
+        <div style={{
+          position: 'fixed',
+          top: '20px',
+          right: '20px',
+          background: '#10b981',
+          color: 'white',
+          padding: '12px 16px',
+          borderRadius: '8px',
+          zIndex: 1000,
+          boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+        }}>
+          Profile updated successfully!
+        </div>
+      )}
 
 
       {/* ════════════════════════════════════════
@@ -258,22 +449,22 @@ export default function ProfilePage() {
           {/* ── 1. Hero Section ── */}
           <section className="profile-hero-premium">
             <div className="avatar-wrapper">
-              <div className="avatar-main">
-                {user.avatar
-                  ? <img src={user.avatar} alt="avatar" />
-                  : getInitials(user.name)
+              <div className="avatar-main" key={displayUser.avatar}>
+                {displayUser.avatar
+                  ? <img src={displayUser.avatar} alt="avatar" key={displayUser.avatar} />
+                  : getInitials(displayUser.name)
                 }
               </div>
               <button
                 className="edit-avatar-btn"
-                onClick={() => alert("Upload functionality would go here.")}
+                onClick={() => setModal("edit")}
               >
                 📸
               </button>
             </div>
             <div className="hero-info">
-              <h1>{user.name}</h1>
-              <p>{user.email}</p>
+              <h1>{displayUser.name}</h1>
+              <p>{displayUser.email}</p>
               <div className="user-badge-stack">
                 <span className="premium-badge">Verified User</span>
                 <span className="premium-badge" style={{ borderColor: 'rgba(124, 58, 237, 0.2)', color: '#7c3aed' }}>Beta Tester</span>
@@ -315,15 +506,15 @@ export default function ProfilePage() {
               </div>
               <div className="info-item-premium">
                 <label>Full Name</label>
-                <p>{user.name}</p>
+                <p>{displayUser.name}</p>
               </div>
               <div className="info-item-premium">
                 <label>Mobile Number</label>
-                <p>{user.phone}</p>
+                <p>{displayUser.phone}</p>
               </div>
               <div className="info-item-premium">
                 <label>Email Address</label>
-                <p>{user.email}</p>
+                <p>{displayUser.email}</p>
               </div>
             </section>
 
@@ -334,13 +525,13 @@ export default function ProfilePage() {
                 <span className="edit-link" onClick={() => setModal("upi")}>Manage</span>
               </div>
               <div className="upi-scroll">
-                {user.upiList.map(upi => (
+                {displayUser.upiList.map(upi => (
                   <div key={upi} className="upi-card-mini">
                     <div className="upi-icon-box">⚡</div>
                     <div className="upi-details">
                       <div className="upi-id-text">
                         {upi}
-                        {user.defaultUpi === upi && <span className="default-tag">PRIMARY</span>}
+                        {displayUser.defaultUpi === upi && <span className="default-tag">PRIMARY</span>}
                       </div>
                       <div className="upi-status">UPI ID • Active</div>
                     </div>
@@ -353,6 +544,11 @@ export default function ProfilePage() {
           {/* ── 4. Danger Zone ── */}
           <section className="danger-zone">
             <button className="logout-btn-premium" onClick={handleLogout}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                <polyline points="16 17 21 12 16 7"></polyline>
+                <line x1="21" y1="12" x2="9" y2="12"></line>
+              </svg>
               Secure Logout
             </button>
           </section>
@@ -366,12 +562,12 @@ export default function ProfilePage() {
 
       {/* ── Modals (rendered outside main so they overlay everything) ── */}
       {modal === "edit" && (
-        <EditModal user={user} onSave={handleSaveProfile} onClose={() => setModal(null)} />
+        <EditModal user={displayUser} onSave={handleSaveProfile} onClose={() => setModal(null)} />
       )}
       {modal === "upi" && (
         <UpiModal
-          upiList={user.upiList}
-          defaultUpi={user.defaultUpi}
+          upiList={displayUser.upiList}
+          defaultUpi={displayUser.defaultUpi}
           onSave={handleSaveUpi}
           onClose={() => setModal(null)}
         />
@@ -380,3 +576,4 @@ export default function ProfilePage() {
     </div>
   );
 }
+

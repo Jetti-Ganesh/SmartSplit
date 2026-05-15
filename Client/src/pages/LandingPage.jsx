@@ -1,19 +1,17 @@
 import '../styles/LandingPage.css'
-import { useNavigate } from 'react-router-dom'
-import Navbar from '../components/Navbar'
+import { useNavigate, useOutletContext } from 'react-router-dom'
 import Hero from '../components/Hero'
 import Features from '../components/Features'
 import HowItWorks from '../components/HowItWorks'
 import Testimonials from '../components/Testimonials'
 import Footer from '../components/Footer'
 
-const LandingPage = ({ isDark, toggleTheme }) => {
+const LandingPage = () => {
+  const { isDark, toggleTheme } = useOutletContext()
   const navigate = useNavigate()
 
   return (
     <>
-      <Navbar isDark={isDark} toggleTheme={toggleTheme} />
-
        {/* ── MOBILE TOP BAR ── */} 
       <div className="mobile-top-bar">
         <div className="mobile-top-logo" onClick={() => navigate("/")}>
