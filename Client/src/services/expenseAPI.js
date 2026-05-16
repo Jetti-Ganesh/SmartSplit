@@ -1,6 +1,6 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 const baseQuery = fetchBaseQuery({
-    baseUrl: 'http://localhost:3000/api',
+    baseUrl: 'http://localhost:3000/api ',
 
     prepareHeaders: (headers) => {
         const token = localStorage.getItem('token');
@@ -32,31 +32,23 @@ const baseQueryWithAuth = async (args, api, extraOptions) => {
     return result;
 };
 
-export const groupAPI = createApi({
-    reducerPath: 'groupAPI',
+export const expenseAPI = createApi({
+    reducerPath: 'expenseAPI',
     baseQuery: baseQueryWithAuth,
     endpoints: (builder) =>
     ({
-        getGroups: builder.query({
-            query: () => 'getgroups',
-            providesTags: ['Groups']
+        getExpenses: builder.query({
+            query: () => 'getexpenses',
+            providesTags: ['Expenses']
         }),
-        createGroup: builder.mutation({
-            query: (newGroup) => ({
-                url: 'create-group',
+        createExpense: builder.mutation({
+            query: (newExpense) => ({
+                url: 'create-expense',
                 method: 'POST',
-                body: newGroup
+                body: newExpense
             }),
-            invalidatesTags: ['Groups']
-        }),
-        addMember: builder.mutation({
-            query: ({ groupId, email }) => ({
-                url: `add-member/${groupId}`,
-                method: 'POST',
-                body: { email }
-            }),
-            invalidatesTags: ['Groups']
+            invalidatesTags: ['Expenses']
         })
     })
 })
-export const { useCreateGroupMutation, useGetGroupsQuery, useAddMemberMutation } = groupAPI;
+export const {useCreateExpenseMutation,useGetExpensesQuery}= expenseAPI;

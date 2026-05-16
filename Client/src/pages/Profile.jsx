@@ -8,7 +8,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation, useOutletContext } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { logout } from "../store/slices/authSlice";
+import { logout } from "../services/authSlice";
 import ThemeToggle from "../components/ThemeToggle";
 import Navbar from "../components/Navbar";
 import BottomNavbareM from "../components/BottomNavbareM";

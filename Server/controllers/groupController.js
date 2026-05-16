@@ -1,4 +1,5 @@
 const Group = require('../models/group.model');
+const User = require('../models/user.model');
 exports.getUserGroups = async (req, res, next) => {
   try {
     const userId = req.user.id;
@@ -7,7 +8,7 @@ exports.getUserGroups = async (req, res, next) => {
       'members.userId': userId,
       isActive: true
     })
-      .populate('members.userId', 'name')
+      .populate('members.userId', 'name email')
       .populate('createdBy', 'name')
       .sort({ createdAt: -1 });
     // console.log(groups);
@@ -51,7 +52,7 @@ exports.createGroup = async (req, res, next) => {
     });
 
     const populatedGroup = await Group.findById(group._id)
-      .populate('members.userId', 'name');
+      .populate('members.userId', 'name email');
 
     res.status(201).json({
       success: true,
@@ -69,6 +70,7 @@ exports.addMember = async (req, res, next) => {
     const { groupId } = req.params;
     const { email } = req.body;
     const userId = req.user.id;
+    console.log(email);
     
     // Find group
     const group = await Group.findById(groupId);
@@ -91,7 +93,7 @@ exports.addMember = async (req, res, next) => {
     }
     
     // Find user by email
-    const User = require('../models/User');
+    // const User = require('../models/User');
     const newUser = await User.findOne({ email });
     if (!newUser) {
       return res.status(404).json({
@@ -117,9 +119,9 @@ exports.addMember = async (req, res, next) => {
       role: 'member'
     });
     await group.save();
-    
+
     const updatedGroup = await Group.findById(groupId)
-      .populate('members.userId', 'name phone profilePic');
+      .populate('members.userId', 'name email');
     
     res.json({
       success: true,

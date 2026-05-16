@@ -29,6 +29,7 @@ const signUpRoutes = require("./routes/signUp.route");        // ← add this
 const verifyUserRoutes = require("./routes/verifyUser.route"); // ← add this
 const groupRoutes = require("./routes/group.route"); // ← add this
 const googleRoutes = require("./routes/google.route");
+const expensesRoutes = require("./routes/expenses.route"); // ← add this
 
 app.use(session({
     secret : "My_Secret",
@@ -63,4 +64,5 @@ app.use("/api/", signUpRoutes);                   // ← add this
 app.use("/api/", verifyUserRoutes);              // ← add this 
 app.use("/api/", groupRoutes);                   // ← add this
 app.use("/api/", googleRoutes);
+app.use("/api/", expensesRoutes);                // ← add this
 module.exports = app;

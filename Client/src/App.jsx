@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { Outlet } from "react-router-dom"
 import { useSelector, useDispatch } from 'react-redux'
-import { toggleTheme } from './store/slices/themeSlice'
+import { toggleTheme } from './services/themeSlice'
 import Navbar from './components/Navbar'
 import './index.css'
 

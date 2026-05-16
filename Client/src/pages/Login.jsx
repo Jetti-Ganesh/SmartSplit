@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
-import { loginSuccess } from '../store/slices/authSlice';
+import { loginSuccess } from '../services/authSlice';
 import '../styles/Login-SignUp.css'
 
 function Login() {

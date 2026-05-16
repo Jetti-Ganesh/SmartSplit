@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useGoogleLogin } from '@react-oauth/google'
 import { useNavigate } from 'react-router-dom'
 import { useDispatch } from 'react-redux';
-import { loginSuccess } from '../store/slices/authSlice';
+import { loginSuccess } from '../services/authSlice';
 import axios from 'axios';
 import '../styles/Login-SignUp.css'
 axios.defaults.withCredentials = true;
