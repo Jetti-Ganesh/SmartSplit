@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, useLocation, useOutletContext } from 'react-router-dom';
+import { useNavigate, useOutletContext } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { fetchAnalytics, seedDummyExpenses } from '../services/analytics.service';
 import TrendChart from '../components/activity/TrendChart';
@@ -8,6 +8,13 @@ import SpendHeatmap from '../components/activity/SpendHeatmap';
 import BottomNavbareM from '../components/BottomNavbareM';
 import SettingsDrawer from '../components/SettingsDrawer';
 import '../styles/Activity.css';
+
+// Chevron icon
+const ChevronDown = ({ className }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="6 9 12 15 18 9" />
+  </svg>
+);
 
 export default function Activity() {
   const { isDark, toggleTheme } = useOutletContext();
@@ -20,21 +27,19 @@ export default function Activity() {
   const [activeCat, setActiveCat] = useState(null);
   const [loading, setLoading] = useState(true);
   const [seedLoading, setSeedLoading] = useState(false);
-  
-  // Settings Drawer state
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
-  useEffect(() => {
-    loadData();
-  }, [period, customRange]);
+  // Collapsible state
+  const [groupsOpen, setGroupsOpen] = useState(false);
+  const [expensesOpen, setExpensesOpen] = useState(false);
+
+  useEffect(() => { loadData(); }, [period, customRange]);
 
   const loadData = async () => {
     setLoading(true);
     try {
       const res = await fetchAnalytics(period, customRange);
-      if (res.success) {
-        setData(res.data);
-      }
+      if (res.success) setData(res.data);
     } catch (err) {
       console.error('Failed to load analytics', err);
     }
@@ -47,66 +52,68 @@ export default function Activity() {
       await seedDummyExpenses();
       await loadData();
     } catch (err) {
-      alert("Error seeding data");
+      alert('Error seeding data. Check console.');
     }
     setSeedLoading(false);
   };
 
-  const handlePeriodChange = (newPeriod) => {
-    setPeriod(newPeriod);
-    setActiveCat(null);
-  };
+  const handlePeriodChange = (newPeriod) => { setPeriod(newPeriod); setActiveCat(null); };
 
   const renderSkeleton = () => (
-    <div style={{ padding: 20, textAlign: 'center', color: 'var(--text-muted)' }}>
-      Loading analytics...
+    <div style={{ padding: 40, textAlign: 'center', color: 'var(--text-muted)', fontSize: 14 }}>
+      ⏳ Loading analytics...
     </div>
   );
 
   const renderEmptyState = () => (
-    <div style={{ padding: 20, textAlign: 'center' }}>
-      <p style={{ color: 'var(--text-muted)', marginBottom: 15 }}>No data found for this period.</p>
-      <button 
-        onClick={handleSeed} 
-        disabled={seedLoading}
-        style={{
-          padding: '8px 16px', borderRadius: 8, background: 'var(--primary, #10B981)',
-          color: '#fff', border: 'none', cursor: 'pointer'
-        }}
-      >
-        {seedLoading ? 'Seeding...' : 'Seed Dummy Data'}
+    <div style={{ padding: 40, textAlign: 'center' }}>
+      <div style={{ fontSize: 48, marginBottom: 16 }}>📊</div>
+      <p style={{ color: 'var(--text-muted)', marginBottom: 20, fontSize: 15, fontWeight: 600 }}>No spending data for this period.</p>
+      <button onClick={handleSeed} disabled={seedLoading} style={{
+        padding: '10px 24px', borderRadius: 12, background: '#10B981',
+        color: '#fff', border: 'none', cursor: 'pointer', fontSize: 14, fontWeight: 700, fontFamily: "'DM Sans', sans-serif",
+        boxShadow: '0 4px 16px rgba(16,185,129,0.3)', transition: 'opacity 0.2s',
+        opacity: seedLoading ? 0.7 : 1
+      }}>
+        {seedLoading ? '⏳ Seeding...' : '🌱 Seed Demo Data'}
       </button>
     </div>
   );
 
+  const filteredExpenses = data ? data.expenses.filter(e => !activeCat || e.cat === activeCat) : [];
+  const maxGroupAmt = data && data.groups.length > 0 ? data.groups[0].amount : 1;
+  const maxCatAmt = data && data.categories.length > 0 ? data.categories[0].amount : 1;
+
   return (
     <div className="dashboard-shell activity-page">
-      {/* ── MOBILE TOP BAR ────────────────────────────────────────── */}
+      {/* ── MOBILE TOP BAR ── */}
       <div className="mobile-top-bar">
-        <div className="mobile-top-logo" onClick={() => navigate("/Dashboard")}>
+        <div className="mobile-top-logo" onClick={() => navigate('/Dashboard')} style={{ cursor: 'pointer' }}>
           <span className="logo-icon">⚡</span>
           <span>SplitSmart</span>
         </div>
-        <button className="mobile-top-settings" onClick={() => setIsSettingsOpen(true)}>
-          ⚙️
-        </button>
+        <button className="mobile-top-settings" onClick={() => setIsSettingsOpen(true)}>⚙️</button>
       </div>
-    
+
       <main className="main-content">
+        {/* Page Header */}
         <div className="dash-section" style={{ paddingBottom: 0 }}>
-          <div className="section-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div>
-              <h2 className="section-title" style={{ fontSize: 22, textTransform: 'none' }}>Activity</h2>
-              <p className="section-subtitle">Your spending overview</p>
+              <h2 style={{ fontSize: 22, fontWeight: 800, color: 'var(--text-color)', margin: 0 }}>Activity</h2>
+              <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: '4px 0 0', fontWeight: 500 }}>Your spending overview</p>
             </div>
-            {/* Hidden seed button for debugging/demo */}
-            <button onClick={handleSeed} title="Seed Dummy Data" style={{ background: 'transparent', border: 'none', fontSize: 20, cursor: 'pointer' }}>
-                🌱
+            <button onClick={handleSeed} title="Seed Demo Data" disabled={seedLoading} style={{
+              background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.2)',
+              borderRadius: 10, padding: '8px 12px', cursor: 'pointer', fontSize: 13,
+              color: '#10B981', fontWeight: 700, fontFamily: "'DM Sans', sans-serif", display: 'flex', alignItems: 'center', gap: 6
+            }}>
+              {seedLoading ? '⏳' : '🌱'} {seedLoading ? 'Seeding...' : 'Demo Data'}
             </button>
           </div>
         </div>
 
-        {/* ── Period selector ── */}
+        {/* Period selector */}
         <div className="period-wrap fade-up">
           <div className="period-tabs glass-panel">
             <button className={`period-tab ${period === '7d' ? 'active' : ''}`} onClick={() => handlePeriodChange('7d')}>Last 7 days</button>
@@ -117,11 +124,11 @@ export default function Activity() {
             <div className="custom-range fade-up">
               <div className="date-field">
                 <label>From</label>
-                <input type="date" value={customRange.startDate} onChange={e => setCustomRange({...customRange, startDate: e.target.value})} />
+                <input type="date" value={customRange.startDate} onChange={e => setCustomRange({ ...customRange, startDate: e.target.value })} />
               </div>
               <div className="date-field">
                 <label>To</label>
-                <input type="date" value={customRange.endDate} onChange={e => setCustomRange({...customRange, endDate: e.target.value})} />
+                <input type="date" value={customRange.endDate} onChange={e => setCustomRange({ ...customRange, endDate: e.target.value })} />
               </div>
             </div>
           )}
@@ -129,7 +136,7 @@ export default function Activity() {
 
         {loading ? renderSkeleton() : !data || data.expenses.length === 0 ? renderEmptyState() : (
           <>
-            {/* Insight banner */}
+            {/* Insight */}
             <div className="insight-banner fade-up delay-1">
               <div className="insight-emoji">💡</div>
               <div className="insight-text">
@@ -157,14 +164,14 @@ export default function Activity() {
               </div>
             </div>
 
-            {/* Monthly bar chart */}
+            {/* Trend chart */}
             <div className="analytics-section fade-up delay-3">
               <div className="section-title">Spending trend</div>
               <div className="analytics-card glass-card">
                 <div className="bar-chart-wrap">
                   <div className="chart-legend">
                     <div className="legend-item"><div className="legend-dot" style={{ background: '#10B981' }} /> You</div>
-                    <div className="legend-item"><div className="legend-dot" style={{ background: '#BFDBFE' }} /> Group avg</div>
+                    <div className="legend-item"><div className="legend-dot" style={{ background: '#60A5FA' }} /> Group avg</div>
                   </div>
                   <div className="bar-canvas-wrap">
                     <TrendChart labels={data.trend.labels} mine={data.trend.mine} avg={data.trend.avg} />
@@ -181,93 +188,136 @@ export default function Activity() {
               </div>
             </div>
 
-            {/* Category donut */}
+            {/* ── CATEGORY DONUT — Full Redesign ── */}
             <div className="analytics-section fade-up delay-4">
               <div className="section-title">Where your money goes</div>
-              <div className="analytics-card glass-card">
-                <div className="donut-wrap">
-                  <div className="donut-row">
-                    <div className="donut-canvas-wrap">
-                      <CategoryDonut categories={data.categories} onCategoryClick={setActiveCat} />
-                      <div className="donut-center">
-                        <div className="dc-label">{activeCat || 'Total'}</div>
-                        <div className="dc-value">
-                           {activeCat 
-                             ? `₹${data.categories.find(c => c.name === activeCat)?.amount.toLocaleString('en-IN')}` 
-                             : data.summary.spent}
-                        </div>
-                      </div>
+              <div className="donut-section-card glass-card">
+                <div className="donut-chart-block">
+                  {/* Large centered donut */}
+                  <div className="donut-canvas-wrap">
+                    <CategoryDonut categories={data.categories} onCategoryClick={setActiveCat} />
+                    <div className="donut-center">
+                      {activeCat ? (
+                        <>
+                          <div className="dc-emoji">{data.categories.find(c => c.name === activeCat)?.emoji}</div>
+                          <div className="dc-label">{activeCat}</div>
+                          <div className="dc-value">₹{data.categories.find(c => c.name === activeCat)?.amount.toLocaleString('en-IN')}</div>
+                        </>
+                      ) : (
+                        <>
+                          <div className="dc-emoji">💳</div>
+                          <div className="dc-label">Total Spent</div>
+                          <div className="dc-value">{data.summary.spent}</div>
+                        </>
+                      )}
                     </div>
-                    <div className="cat-legend">
-                      {data.categories.map(c => (
-                        <div key={c.name} className={`cat-row ${activeCat === c.name ? 'active' : ''}`} onClick={() => setActiveCat(activeCat === c.name ? null : c.name)}>
-                          <div className="cat-dot" style={{ background: c.color }} />
-                          <span className="cat-name">{c.name}</span>
-                          <span className="cat-pct">{c.pct}%</span>
+                  </div>
+
+                  {/* Horizontal legend bars below the chart */}
+                  <div className="cat-legend-grid">
+                    {data.categories.map(c => (
+                      <div
+                        key={c.name}
+                        className={`cat-legend-row ${activeCat === c.name ? 'active' : ''}`}
+                        onClick={() => setActiveCat(activeCat === c.name ? null : c.name)}
+                      >
+                        <div className="cat-color-pill" style={{ background: c.color, width: 10, height: 10 }} />
+                        <span className="cat-legend-name">{c.emoji} {c.name}</span>
+                        <div className="cat-legend-bar-wrap">
+                          <div className="cat-legend-bar" style={{ width: `${Math.round((c.amount / maxCatAmt) * 100)}%`, background: c.color }} />
+                        </div>
+                        <span className="cat-legend-amt">₹{c.amount.toLocaleString('en-IN')}</span>
+                        <span className="cat-legend-pct">{c.pct}%</span>
+                      </div>
+                    ))}
+                    {activeCat && (
+                      <button className="clear-filter" onClick={() => setActiveCat(null)}>✕ Clear filter</button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* ── GROUP BREAKDOWN — Collapsible ── */}
+            <div className="analytics-section fade-up delay-5">
+              <div className="section-title">By group</div>
+              <div className="collapsible-card">
+                <div className="collapsible-header" onClick={() => setGroupsOpen(o => !o)}>
+                  <div className="collapsible-icon">👥</div>
+                  <div className="collapsible-header-info">
+                    <div className="collapsible-title">{data.groups.length} Group{data.groups.length !== 1 ? 's' : ''}</div>
+                    <div className="collapsible-subtitle">
+                      Top: {data.groups[0]?.name} · ₹{data.groups[0]?.amount.toLocaleString('en-IN')}
+                    </div>
+                  </div>
+                  <div className="collapsible-meta-badge">
+                    ₹{data.groups.reduce((s, g) => s + g.amount, 0).toLocaleString('en-IN')}
+                  </div>
+                  <ChevronDown className={`collapsible-chevron ${groupsOpen ? 'open' : ''}`} />
+                </div>
+                <div className={`collapsible-body ${groupsOpen ? 'open' : ''}`}>
+                  <div className="collapsible-body-inner">
+                    <div className="group-list">
+                      {data.groups.map((g, i) => (
+                        <div className="group-row" key={i}>
+                          <div className="group-icon">{g.icon || '👥'}</div>
+                          <div className="group-info">
+                            <div className="group-name-row">
+                              <span className="group-name">{g.name}</span>
+                              <span className="group-amt">₹{g.amount.toLocaleString('en-IN')}</span>
+                            </div>
+                            <div className="progress-track">
+                              <div className="progress-fill" style={{ width: `${Math.round((g.amount / maxGroupAmt) * 100)}%` }} />
+                            </div>
+                            <div className="group-meta">{g.count} expense{g.count !== 1 && 's'} this period</div>
+                          </div>
                         </div>
                       ))}
                     </div>
                   </div>
-                  {activeCat && (
-                    <button className="clear-filter" onClick={() => setActiveCat(null)}>Clear filter ×</button>
-                  )}
                 </div>
               </div>
             </div>
 
-            {/* Group breakdown */}
-            <div className="analytics-section fade-up delay-5">
-              <div className="section-title">By group</div>
-              <div className="analytics-card glass-card">
-                <div className="group-list">
-                  {data.groups.map((g, i) => {
-                    const maxAmount = data.groups[0].amount || 1;
-                    return (
-                      <div className="group-row" key={i}>
-                        <div className="group-icon">{g.icon}</div>
-                        <div className="group-info">
-                          <div className="group-name-row">
-                            <span className="group-name">{g.name}</span>
-                            <span className="group-amt">₹{g.amount.toLocaleString('en-IN')}</span>
-                          </div>
-                          <div className="progress-track">
-                            <div className="progress-fill" style={{ width: `${Math.round((g.amount / maxAmount) * 100)}%` }} />
-                          </div>
-                          <div className="group-meta">{g.count} expense{g.count !== 1 && 's'} this period</div>
-                        </div>
-                      </div>
-                    )
-                  })}
-                </div>
-              </div>
-            </div>
-
-            {/* Top expenses */}
+            {/* ── TOP EXPENSES — Collapsible ── */}
             <div className="analytics-section fade-up delay-6" style={{ marginBottom: 40 }}>
-              <div className="section-title">Top expenses {activeCat ? `· ${activeCat}` : ''}</div>
-              <div className="analytics-card glass-card">
-                <div className="expense-list">
-                  {data.expenses.filter(e => !activeCat || e.cat === activeCat).length === 0 ? (
-                    <div style={{ padding: 20, textAlign: 'center', fontSize: 13, color: 'var(--text-muted)' }}>
-                      No expenses found.
+              <div className="section-title">Top expenses{activeCat ? ` · ${activeCat}` : ''}</div>
+              <div className="collapsible-card">
+                <div className="collapsible-header" onClick={() => setExpensesOpen(o => !o)}>
+                  <div className="collapsible-icon">🧾</div>
+                  <div className="collapsible-header-info">
+                    <div className="collapsible-title">{filteredExpenses.length} Transaction{filteredExpenses.length !== 1 ? 's' : ''}</div>
+                    <div className="collapsible-subtitle">
+                      {filteredExpenses[0] ? `Latest: ${filteredExpenses[0].desc} · ${filteredExpenses[0].date}` : 'No transactions'}
                     </div>
-                  ) : (
-                    data.expenses.filter(e => !activeCat || e.cat === activeCat).map((e, i) => (
-                      <div className="expense-row" key={i}>
-                        <div className="expense-icon" style={{ background: `${e.color}18` }}>
-                          <span>{e.emoji}</span>
+                  </div>
+                  <div className="collapsible-meta-badge">
+                    ₹{filteredExpenses.reduce((s, e) => s + (e.share || 0), 0).toLocaleString('en-IN')}
+                  </div>
+                  <ChevronDown className={`collapsible-chevron ${expensesOpen ? 'open' : ''}`} />
+                </div>
+                <div className={`collapsible-body ${expensesOpen ? 'open' : ''}`}>
+                  <div className="collapsible-body-inner">
+                    <div className="expense-list">
+                      {filteredExpenses.length === 0 ? (
+                        <div style={{ padding: 20, textAlign: 'center', fontSize: 13, color: 'var(--text-muted)' }}>No expenses found.</div>
+                      ) : filteredExpenses.map((e, i) => (
+                        <div className="expense-row" key={i}>
+                          <div className="expense-icon" style={{ background: `${e.color}18` }}>
+                            <span>{e.emoji}</span>
+                          </div>
+                          <div className="expense-info">
+                            <div className="expense-desc">{e.desc}</div>
+                            <div className="expense-meta">Paid by {e.paid} · {e.date}</div>
+                          </div>
+                          <div className="expense-amounts">
+                            <div className="expense-share">₹{e.share.toLocaleString('en-IN')}</div>
+                            <div className="expense-total">of ₹{e.total.toLocaleString('en-IN')}</div>
+                          </div>
                         </div>
-                        <div className="expense-info">
-                          <div className="expense-desc">{e.desc}</div>
-                          <div className="expense-meta">Paid by {e.paid} · {e.date}</div>
-                        </div>
-                        <div className="expense-amounts">
-                          <div className="expense-share">₹{e.share.toLocaleString('en-IN')}</div>
-                          <div className="expense-total">of ₹{e.total.toLocaleString('en-IN')}</div>
-                        </div>
-                      </div>
-                    ))
-                  )}
+                      ))}
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -275,15 +325,13 @@ export default function Activity() {
         )}
       </main>
 
-      {/* ── MOBILE BOTTOM NAV ───────────────────────────────────────── */}
       {isLoggedIn && <BottomNavbareM />}
 
-      {/* ── SETTINGS DRAWER ───────────────────────────────────────── */}
-      <SettingsDrawer 
-        isOpen={isSettingsOpen} 
-        onClose={() => setIsSettingsOpen(false)} 
-        isDark={isDark} 
-        toggleTheme={toggleTheme} 
+      <SettingsDrawer
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+        isDark={isDark}
+        toggleTheme={toggleTheme}
       />
     </div>
   );
