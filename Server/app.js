@@ -25,11 +25,12 @@ const cors = require('cors');
 const session = require('express-session');
 
 const loginRoutes = require("./routes/login.route");
-const signUpRoutes = require("./routes/signUp.route");        // ← add this
-const verifyUserRoutes = require("./routes/verifyUser.route"); // ← add this
-const groupRoutes = require("./routes/group.route"); // ← add this
+const signUpRoutes = require("./routes/signUp.route");
+const verifyUserRoutes = require("./routes/verifyUser.route");
+const groupRoutes = require("./routes/group.route");
 const googleRoutes = require("./routes/google.route");
 const profileRoutes = require("./routes/profile.route");
+const analyticsRoutes = require("./routes/analytics.routes"); // ← add this
 
 app.use(session({
     secret : "My_Secret",
@@ -62,9 +63,10 @@ app.get('/', (req, res) => {
 
 
 app.use("/api/", loginRoutes);
-app.use("/api/", signUpRoutes);                   // ← add this
-app.use("/api/", verifyUserRoutes);              // ← add this 
-app.use("/api/", groupRoutes);                   // ← add this
+app.use("/api/", signUpRoutes);
+app.use("/api/", verifyUserRoutes);
+app.use("/api/", groupRoutes);
 app.use("/api/", googleRoutes);
 app.use("/api/profile", profileRoutes);
+app.use("/api/", analyticsRoutes);
 module.exports = app;
