@@ -78,14 +78,29 @@ function externalTooltipHandler(context, categories) {
 
   const { offsetLeft, offsetTop } = chart.canvas;
   const canvasWidth = chart.canvas.offsetWidth;
+  const canvasHeight = chart.canvas.offsetHeight;
+  const isMobile = window.innerWidth < 768;
 
-  // Place tooltip to the RIGHT of the chart, vertically centered at cursor
-  const x = offsetLeft + canvasWidth + 8;
-  const y = offsetTop + tooltip.caretY - 50;
-
-  tooltipEl.style.opacity = '1';
-  tooltipEl.style.left = x + 'px';
-  tooltipEl.style.top = Math.max(0, y) + 'px';
+  if (isMobile) {
+    // Mobile: Show at the BOTTOM of the chart area as a fixed-position pill
+    const tooltipWidth = tooltipEl.offsetWidth || 180;
+    const x = offsetLeft + (canvasWidth / 2) - (tooltipWidth / 2);
+    const y = offsetTop + canvasHeight + 10; // 10px below the canvas
+    
+    tooltipEl.style.opacity = '1';
+    tooltipEl.style.left = x + 'px';
+    tooltipEl.style.top = y + 'px';
+    tooltipEl.style.whiteSpace = 'normal'; // Allow wrapping if needed
+  } else {
+    // Desktop: Place tooltip to the RIGHT of the chart
+    const x = offsetLeft + canvasWidth + 8;
+    const y = offsetTop + tooltip.caretY - 50;
+    
+    tooltipEl.style.opacity = '1';
+    tooltipEl.style.left = x + 'px';
+    tooltipEl.style.top = Math.max(0, y) + 'px';
+    tooltipEl.style.whiteSpace = 'nowrap';
+  }
 }
 
 export default function CategoryDonut({ categories, onCategoryClick }) {
@@ -96,11 +111,7 @@ export default function CategoryDonut({ categories, onCategoryClick }) {
         data: categories.map((c) => c.amount),
         backgroundColor: categories.map((c) => c.color),
         hoverBackgroundColor: categories.map((c) => c.color),
-        borderWidth: 3,
-        borderColor: 'transparent',
-        hoverBorderColor: '#fff',
-        hoverBorderWidth: 3,
-        hoverOffset: 10,
+        hoverOffset: 0,
         spacing: 2,
       },
     ],
@@ -109,11 +120,11 @@ export default function CategoryDonut({ categories, onCategoryClick }) {
   const options = {
     responsive: true,
     maintainAspectRatio: true,
-    cutout: '70%',
+    cutout: '80%',
     plugins: {
       legend: { display: false },
       tooltip: {
-        enabled: false, // Disable built-in tooltip
+        enabled: false,
         external: (context) => externalTooltipHandler(context, categories),
       },
     },

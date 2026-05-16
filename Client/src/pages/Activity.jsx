@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useOutletContext } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { fetchAnalytics, seedDummyExpenses } from '../services/analytics.service';
@@ -10,11 +10,44 @@ import SettingsDrawer from '../components/SettingsDrawer';
 import '../styles/Activity.css';
 
 // Chevron icon
-const ChevronDown = ({ className }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+const ChevronDown = ({ className, size = 20 }) => (
+  <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
     <polyline points="6 9 12 15 18 9" />
   </svg>
 );
+
+// Wrapper for scroll-reveal animations
+const FadeInSection = ({ children, className = "" }) => {
+  const [isVisible, setVisible] = useState(false);
+  const domRef = useRef();
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          setVisible(true);
+          observer.unobserve(domRef.current);
+        }
+      });
+    }, { threshold: 0.15 });
+
+    const currentRef = domRef.current;
+    if (currentRef) observer.observe(currentRef);
+    
+    return () => {
+      if (currentRef) observer.unobserve(currentRef);
+    };
+  }, []);
+
+  return (
+    <div
+      className={`${className} reveal-on-scroll ${isVisible ? 'revealed' : ''}`}
+      ref={domRef}
+    >
+      {children}
+    </div>
+  );
+};
 
 export default function Activity() {
   const { isDark, toggleTheme } = useOutletContext();
@@ -30,6 +63,7 @@ export default function Activity() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   // Collapsible state
+  const [categoriesOpen, setCategoriesOpen] = useState(true);
   const [groupsOpen, setGroupsOpen] = useState(false);
   const [expensesOpen, setExpensesOpen] = useState(false);
 
@@ -80,7 +114,7 @@ export default function Activity() {
     </div>
   );
 
-  const filteredExpenses = data ? data.expenses.filter(e => !activeCat || e.cat === activeCat) : [];
+  const filteredExpenses = data ? data.expenses.filter(e => !activeCat || e.category === activeCat) : [];
   const maxGroupAmt = data && data.groups.length > 0 ? data.groups[0].amount : 1;
   const maxCatAmt = data && data.categories.length > 0 ? data.categories[0].amount : 1;
 
@@ -97,7 +131,7 @@ export default function Activity() {
 
       <main className="main-content">
         {/* Page Header */}
-        <div className="dash-section" style={{ paddingBottom: 0 }}>
+        <div className="dash-section">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div>
               <h2 style={{ fontSize: 22, fontWeight: 800, color: 'var(--text-color)', margin: 0 }}>Activity</h2>
@@ -137,16 +171,16 @@ export default function Activity() {
         {loading ? renderSkeleton() : !data || data.expenses.length === 0 ? renderEmptyState() : (
           <>
             {/* Insight */}
-            <div className="insight-banner fade-up delay-1">
+            <FadeInSection className="insight-banner">
               <div className="insight-emoji">💡</div>
               <div className="insight-text">
                 <div className="t1">This period's insight</div>
                 <div className="t2">{data.insight}</div>
               </div>
-            </div>
+            </FadeInSection>
 
             {/* Summary cards */}
-            <div className="summary-grid fade-up delay-2">
+            <FadeInSection className="summary-grid">
               <div className="summary-card card-neutral">
                 <div className="s-label">Spent</div>
                 <div className="s-value">{data.summary.spent}</div>
@@ -162,10 +196,10 @@ export default function Activity() {
                 <div className="s-value">{data.summary.owe}</div>
                 <div className="s-sub">to settle</div>
               </div>
-            </div>
+            </FadeInSection>
 
             {/* Trend chart */}
-            <div className="analytics-section fade-up delay-3">
+            <FadeInSection className="analytics-section">
               <div className="section-title">Spending trend</div>
               <div className="analytics-card glass-card">
                 <div className="bar-chart-wrap">
@@ -178,22 +212,22 @@ export default function Activity() {
                   </div>
                 </div>
               </div>
-            </div>
+            </FadeInSection>
 
             {/* Spend Heatmap */}
-            <div className="analytics-section fade-up delay-3">
+            <FadeInSection className="analytics-section">
               <div className="section-title">Activity Heatmap</div>
               <div className="analytics-card glass-card p-16">
                 <SpendHeatmap data={data.trend} />
               </div>
-            </div>
+            </FadeInSection>
 
-            {/* ── CATEGORY DONUT — Full Redesign ── */}
-            <div className="analytics-section fade-up delay-4">
+            {/* ── CATEGORY ANALYSIS — Chart + Collapsible List ── */}
+            <FadeInSection className="analytics-section">
               <div className="section-title">Where your money goes</div>
-              <div className="donut-section-card glass-card">
-                <div className="donut-chart-block">
-                  {/* Large centered donut */}
+              <div className="analytics-card glass-card" style={{ padding: '32px 24px' }}>
+                {/* Donut Chart — Always Visible */}
+                <div className="donut-chart-block" style={{ marginBottom: 24 }}>
                   <div className="donut-canvas-wrap">
                     <CategoryDonut categories={data.categories} onCategoryClick={setActiveCat} />
                     <div className="donut-center">
@@ -201,7 +235,7 @@ export default function Activity() {
                         <>
                           <div className="dc-emoji">{data.categories.find(c => c.name === activeCat)?.emoji}</div>
                           <div className="dc-label">{activeCat}</div>
-                          <div className="dc-value">₹{data.categories.find(c => c.name === activeCat)?.amount.toLocaleString('en-IN')}</div>
+                          <div className="dc-value">₹{data.categories.find(c => c.name === activeCat)?.amount?.toLocaleString('en-IN')}</div>
                         </>
                       ) : (
                         <>
@@ -212,34 +246,82 @@ export default function Activity() {
                       )}
                     </div>
                   </div>
+                </div>
 
-                  {/* Horizontal legend bars below the chart */}
-                  <div className="cat-legend-grid">
-                    {data.categories.map(c => (
-                      <div
-                        key={c.name}
-                        className={`cat-legend-row ${activeCat === c.name ? 'active' : ''}`}
-                        onClick={() => setActiveCat(activeCat === c.name ? null : c.name)}
-                      >
-                        <div className="cat-color-pill" style={{ background: c.color, width: 10, height: 10 }} />
-                        <span className="cat-legend-name">{c.emoji} {c.name}</span>
-                        <div className="cat-legend-bar-wrap">
-                          <div className="cat-legend-bar" style={{ width: `${Math.round((c.amount / maxCatAmt) * 100)}%`, background: c.color }} />
+                {/* Category List Expander */}
+                <div 
+                  className={`cat-summary-expander ${categoriesOpen ? 'open' : ''}`}
+                  onClick={() => setCategoriesOpen(!categoriesOpen)}
+                >
+                  <div className="cse-info">
+                    <div className="cse-title">View Categories</div>
+                    <div className="cse-subtitle">
+                      {data.categories.slice(0, 3).map(c => `${c.emoji} ${c.name}`).join(' · ')}...
+                    </div>
+                  </div>
+                  <ChevronDown className={`cse-chevron ${categoriesOpen ? 'open' : ''}`} />
+                </div>
+
+                {/* The Full List — Collapsible */}
+                <div className={`cat-list-collapsible ${categoriesOpen ? 'open' : ''}`}>
+                  <div className="cat-legend-grid" style={{ marginTop: 20 }}>
+                    {data.categories.map(c => {
+                      const catExpenses = data.expenses.filter(e => e.category === c.name);
+                      const isActive = activeCat === c.name;
+                      
+                      return (
+                        <div key={c.name} className={`cat-summary-wrap ${isActive ? 'active' : ''}`}>
+                          <div
+                            className={`cat-legend-row ${isActive ? 'active' : ''}`}
+                            onClick={() => setActiveCat(isActive ? null : c.name)}
+                          >
+                            <div className="cat-color-pill" style={{ background: c.color, width: 10, height: 10 }} />
+                            <span className="cat-legend-name">{c.emoji} {c.name}</span>
+                            <div className="cat-legend-bar-wrap">
+                              <div className="cat-legend-bar" style={{ width: `${Math.round((c.amount / maxCatAmt) * 100)}%`, background: c.color }} />
+                            </div>
+                            <span className="cat-legend-amt">₹{c.amount.toLocaleString('en-IN')}</span>
+                            <span className="cat-legend-pct">{c.pct}%</span>
+                            <ChevronDown className={`cat-chevron ${isActive ? 'open' : ''}`} size={16} />
+                          </div>
+                          
+                          <div className={`cat-expanded-content ${isActive ? 'open' : ''}`}>
+                            <div className="cat-expense-list">
+                              <div className="cat-expense-header">Transactions in {c.name}</div>
+                              {catExpenses.length > 0 ? (
+                                catExpenses.map((e, idx) => (
+                                  <div key={idx} className="cat-expense-mini-row" style={{ borderLeftColor: c.color }}>
+                                    <div className="cem-info">
+                                      <div className="cem-desc">{e.desc}</div>
+                                      <div className="cem-meta">
+                                        <span className="cem-date">{e.date}</span>
+                                        <span className="cem-sep">·</span>
+                                        <span className="cem-group">{e.groupName}</span>
+                                      </div>
+                                    </div>
+                                    <div className="cem-amt" style={{ color: c.color }}>
+                                      ₹{e.share?.toLocaleString('en-IN')}
+                                    </div>
+                                  </div>
+                                ))
+                              ) : (
+                                <div className="cat-empty-msg">No transactions found in this period</div>
+                              )}
+                            </div>
+                          </div>
                         </div>
-                        <span className="cat-legend-amt">₹{c.amount.toLocaleString('en-IN')}</span>
-                        <span className="cat-legend-pct">{c.pct}%</span>
-                      </div>
-                    ))}
+                      );
+                    })}
                     {activeCat && (
-                      <button className="clear-filter" onClick={() => setActiveCat(null)}>✕ Clear filter</button>
+                      <button className="clear-filter" onClick={() => setActiveCat(null)}>✕ Close summary</button>
                     )}
                   </div>
                 </div>
               </div>
-            </div>
+            </FadeInSection>
 
             {/* ── GROUP BREAKDOWN — Collapsible ── */}
-            <div className="analytics-section fade-up delay-5">
+            <FadeInSection className="analytics-section">
               <div className="section-title">By group</div>
               <div className="collapsible-card">
                 <div className="collapsible-header" onClick={() => setGroupsOpen(o => !o)}>
@@ -277,10 +359,10 @@ export default function Activity() {
                   </div>
                 </div>
               </div>
-            </div>
+            </FadeInSection>
 
             {/* ── TOP EXPENSES — Collapsible ── */}
-            <div className="analytics-section fade-up delay-6" style={{ marginBottom: 40 }}>
+            <FadeInSection className="analytics-section" style={{ marginBottom: 40 }}>
               <div className="section-title">Top expenses{activeCat ? ` · ${activeCat}` : ''}</div>
               <div className="collapsible-card">
                 <div className="collapsible-header" onClick={() => setExpensesOpen(o => !o)}>
@@ -320,7 +402,7 @@ export default function Activity() {
                   </div>
                 </div>
               </div>
-            </div>
+            </FadeInSection>
           </>
         )}
       </main>
