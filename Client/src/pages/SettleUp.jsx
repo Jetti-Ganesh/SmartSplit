@@ -1,70 +1,14 @@
 import { useNavigate, useLocation, useOutletContext } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import '../styles/SettleUp.css'
-import ThemeToggle from '../components/ThemeToggle';
 import { useState, useEffect } from 'react';
-
-const SIDEBAR_NAV = [
-  { id: "dashboard", icon: "🏡", label: "Dashboard", path: "/Dashboard" },
-  { id: "groups",    icon: "👥", label: "Groups",    path: "/Groups"    },
-  { id: "activity",  icon: "📊", label: "Activity",  path: "/Activity"  },
-  { id: "settle",    icon: "💰", label: "Settle Up", path: "/SettleUp"  },
-  { id: "profile",   icon: "👤", label: "Profile",   path: "/Profile"   },
-];
-
-// SVG icon components — clean stroke icons, no emoji
-const IconDashboard = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <rect x="3" y="3" width="8" height="8" rx="1.5"/>
-    <rect x="13" y="3" width="8" height="8" rx="1.5"/>
-    <rect x="3" y="13" width="8" height="8" rx="1.5"/>
-    <rect x="13" y="13" width="8" height="8" rx="1.5"/>
-  </svg>
-);
-
-const IconGroups = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <circle cx="8" cy="7" r="3"/>
-    <path d="M2 21v-1a6 6 0 0 1 6-6v0a6 6 0 0 1 6 6v1"/>
-    <circle cx="18" cy="7" r="2.5"/>
-    <path d="M22 21v-1a4 4 0 0 0-3-3.87"/>
-  </svg>
-);
-
-const IconActivity = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
-  </svg>
-);
-
-const IconProfile = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <circle cx="12" cy="8" r="4"/>
-    <path d="M4 20c0-4 3.582-7 8-7s8 3 8 7"/>
-  </svg>
-);
-
-const IconSettle = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-  </svg>
-);
-
-// Bottom nav config — left and right of FAB, no labels
-const BOTTOM_LEFT  = [
-  { id: "dashboard", path: "/Dashboard", Icon: IconDashboard, label: "Dashboard" },
-  { id: "groups",    path: "/Groups",    Icon: IconGroups,    label: "Groups"    },
-];
-const BOTTOM_RIGHT = [
-  { id: "activity",  path: "/Activity",  Icon: IconActivity,  label: "Activity"  },
-  { id: "profile",   path: "/Profile",   Icon: IconProfile,   label: "Profile"   },
-];
-
-const USER = { name: "Rahul", email: "rahul@email.com", initial: "R" };
+import BottomNavbareM from '../components/BottomNavbareM';
 
 
 function SettleUp(){
 
  const { isDark, toggleTheme } = useOutletContext();
+  const { isLoggedIn } = useSelector((state) => state.auth);
   const navigate  = useNavigate();
   const location  = useLocation();
 
@@ -99,37 +43,6 @@ function SettleUp(){
         </button>
       </div>
 
-      <aside className="sidebar">
-        <div className="sidebar-user">
-          <div className="user-avatar">{USER.initial}</div>
-          <div className="user-name">{USER.name}</div>
-          <div className="user-email">{USER.email}</div>
-        </div>
-
-        <nav className="sidebar-nav">
-          {SIDEBAR_NAV.map((item) => (
-            <div
-              key={item.id}
-              className={`nav-item ${active === item.id ? "active" : ""}`}
-              onClick={() => navigate(item.path)}
-            >
-              <span className="nav-icon">{item.icon}</span>
-              {item.label}
-            </div>
-          ))}
-
-          <div className="sidebar-divider" />
-
-          <div
-            className={`nav-item ${location.pathname === "/Settings" ? "active" : ""}`}
-            onClick={() => navigate("/Settings")}
-          >
-            <span className="nav-icon">⚙️</span>
-            Settings
-          </div>
-        </nav>
-      </aside>
-
       {/* ── MAIN CONTENT ────────────────────────────────────────────── */}
       <main className="main-content">
         <div className="dash-section">
@@ -155,53 +68,8 @@ function SettleUp(){
         </div>
       </main>
 
-        {/* ── MOBILE BOTTOM NAV ───────────────────────────────────────── */}
-      <nav className="mobile-bottom-nav" data-active-index={
-        active === "dashboard" ? 0 :
-        active === "groups"    ? 1 :
-        active === "settle"    ? 2 :
-        active === "activity"  ? 3 :
-        active === "profile"   ? 4 : 0
-      }>
-        {/* Sliding Indicator Blob */}
-        <div className="mobile-nav-indicator">
-          <div className="nav-indicator-blob" />
-        </div>
-
-        {BOTTOM_LEFT.map(({ id, path, Icon, label }) => (
-          <button
-            key={id}
-            className={`mobile-nav-tab ${active === id ? "active" : ""}`}
-            onClick={() => navigate(path)}
-            aria-label={label}
-          >
-            <span className="mobile-nav-svg"><Icon /></span>
-          </button>
-        ))}
-
-        {/* Centre FAB */}
-        <div className="mobile-nav-fab">
-          <button
-            className={`mobile-nav-fab-btn ${active === "settle" ? "fab-active" : ""}`}
-            onClick={() => navigate("/SettleUp")}
-            aria-label="Settle Up"
-          >
-            <span className="mobile-nav-svg"><IconSettle /></span>
-          </button>
-        </div>
-
-        {BOTTOM_RIGHT.map(({ id, path, Icon, label }) => (
-          <button
-            key={id}
-            className={`mobile-nav-tab ${active === id ? "active" : ""}`}
-            onClick={() => navigate(path)}
-            aria-label={label}
-          >
-            <span className="mobile-nav-svg"><Icon /></span>
-          </button>
-        ))}
-
-      </nav>
+      {/* ── MOBILE BOTTOM NAV ───────────────────────────────────────── */}
+      {isLoggedIn && <BottomNavbareM />}
         </div>
     )
 }   

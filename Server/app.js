@@ -29,6 +29,7 @@ const signUpRoutes = require("./routes/signUp.route");        // ← add this
 const verifyUserRoutes = require("./routes/verifyUser.route"); // ← add this
 const groupRoutes = require("./routes/group.route"); // ← add this
 const googleRoutes = require("./routes/google.route");
+const profileRoutes = require("./routes/profile.route");
 const expensesRoutes = require("./routes/expenses.route"); // ← add this
 
 app.use(session({
@@ -47,7 +48,9 @@ app.use(cors({
   credentials: true
 }))
 
-app.use(express.json());
+// Increase JSON payload limit to handle base64 images (up to 5MB)
+app.use(express.json({ limit: '5mb' }));
+app.use(express.urlencoded({ limit: '5mb', extended: true }));
 
 const path = require('path');
 app.use(express.static(path.join(__dirname, '..', 'Client', 'dist')));
@@ -64,5 +67,6 @@ app.use("/api/", signUpRoutes);                   // ← add this
 app.use("/api/", verifyUserRoutes);              // ← add this 
 app.use("/api/", groupRoutes);                   // ← add this
 app.use("/api/", googleRoutes);
+app.use("/api/profile", profileRoutes);
 app.use("/api/", expensesRoutes);                // ← add this
 module.exports = app;

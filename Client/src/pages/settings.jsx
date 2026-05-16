@@ -2,7 +2,6 @@ import { useNavigate, useLocation, useOutletContext } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import '../styles/Settings.css'
 import ThemeToggle from '../components/ThemeToggle';
-import Navbar from '../components/Navbar';
 import BottomNavbareM from '../components/BottomNavbareM';
 import { useState, useEffect } from 'react';
 
@@ -40,7 +39,7 @@ function Settings(){
            {/* ── SIDEBAR (desktop only) ──────────────────────────────────── */}
       {/* ── MOBILE TOP BAR ────────────────────────────────────────── */}
       <div className="mobile-top-bar">
-        <div className="mobile-top-logo" onClick={() => navigate("/Dashboard")}>
+        <div className="mobile-top-logo" onClick={() => navigate("/")}>
           <span className="logo-icon">⚡</span>
           <span>SplitSmart</span>
         </div>
@@ -49,8 +48,7 @@ function Settings(){
         </button>
       </div>
 
-      {/* Desktop navbar  */}
-      <Navbar isDark={isDark} toggleTheme={toggleTheme} forceShow />
+
 
       {/* ── MAIN CONTENT ────────────────────────────────────────────── */}
       <main className="main-content">

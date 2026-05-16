@@ -1,7 +1,6 @@
 import { useOutletContext, useNavigate, useLocation } from "react-router-dom";
 import "../styles/Dashboard.css";
 import BottomNavbareM from "../components/BottomNavbareM";
-import Navbar from "../components/Navbar";
 
 // ── Static data ───────────────────────────────────────────────────────────────
 const USER = { name: "Rahul", email: "rahul@email.com", initial: "R" };
@@ -47,9 +46,6 @@ export default function Dashboard() {
 
   return (
     <div className="dashboard-shell">
-
-      {/* ── DESKTOP NAVBAR (forceShow bypasses APP_ROUTES check) ── */}
-      <Navbar isDark={isDark} toggleTheme={toggleTheme} forceShow />
 
       {/* ── MOBILE TOP BAR ── */}
       <div className="mobile-top-bar">
