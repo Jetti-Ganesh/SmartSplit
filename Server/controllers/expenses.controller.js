@@ -1,5 +1,5 @@
-const Expense = require('../models/Expense');
-const Group = require('../models/Group');
+const Expense = require('../models/expense.model');
+const Group = require('../models/group.model');
 
 // Create new expense
 exports.createExpense = async (req, res, next) => {
