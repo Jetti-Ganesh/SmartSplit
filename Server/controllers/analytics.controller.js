@@ -5,7 +5,7 @@ const mongoose = require('mongoose');
 // Seed some dummy expenses for the logged in user
 exports.seedExpenses = async (req, res) => {
     try {
-        const userId = req.session.userId;
+        const userId = req.user._id;
         if (!userId) return res.status(401).json({ success: false, message: 'Not logged in' });
 
         // Check if user has groups, if not we can't seed properly, but let's try to get one
@@ -54,7 +54,7 @@ exports.seedExpenses = async (req, res) => {
 
 exports.getAnalytics = async (req, res) => {
     try {
-        const userId = new mongoose.Types.ObjectId(req.session.userId);
+        const userId = new mongoose.Types.ObjectId(req.user._id);
         const { period } = req.query; // '7d', 'month', 'custom'
         
         let startDate = new Date();

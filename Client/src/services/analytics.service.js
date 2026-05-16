@@ -10,9 +10,12 @@ export const fetchAnalytics = async (period = 'month', customRange = null) => {
             params.endDate = customRange.endDate;
         }
 
+        const token = localStorage.getItem('token');
         const response = await axios.get(API_URL, {
             params,
-            withCredentials: true // For session
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
         });
 
         return response.data;
@@ -24,8 +27,11 @@ export const fetchAnalytics = async (period = 'month', customRange = null) => {
 
 export const seedDummyExpenses = async () => {
     try {
+        const token = localStorage.getItem('token');
         const response = await axios.post(`${API_URL}/seed`, {}, {
-            withCredentials: true
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
         });
         return response.data;
     } catch (error) {
