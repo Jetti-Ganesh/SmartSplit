@@ -83,8 +83,8 @@ function InfoRow({ icon, iconClass, label, value, onClick }) {
     </div>
   );
 
-
 }
+
 
 function ActionBtn({ icon, iconClass, label, onClick, variant }) {
   return (
@@ -359,8 +359,7 @@ export default function ProfilePage() {
   const handleSaveUpi = async (list, def) => {
     console.log('💾 Saving UPI:', { list, def });
     try {
-      // Use .unwrap() to correctly throw errors from createAsyncThunk
-      await dispatch(updateUserProfile({ upiList: list, defaultUpi: def })).unwrap();
+      await dispatch(updateUserProfile({ upiList: list, defaultUpi: def }));
       // Wait for state update before closing
       setTimeout(() => {
         setModal(null);
@@ -368,7 +367,7 @@ export default function ProfilePage() {
     } catch (err) {
       console.error('❌ Error saving UPI:', err);
     }
-  };
+    };
 
   const handleLogout = () => {
     dispatch(logout());
@@ -544,11 +543,11 @@ export default function ProfilePage() {
           {/* ── 4. Danger Zone ── */}
           <section className="danger-zone">
             <button className="logout-btn-premium" onClick={handleLogout}>
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-                <polyline points="16 17 21 12 16 7"></polyline>
-                <line x1="21" y1="12" x2="9" y2="12"></line>
-              </svg>
+               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+              <polyline points="16 17 21 12 16 7"></polyline>
+              <line x1="21" y1="12" x2="9" y2="12"></line>
+            </svg>
               Secure Logout
             </button>
           </section>
@@ -576,4 +575,3 @@ export default function ProfilePage() {
     </div>
   );
 }
-

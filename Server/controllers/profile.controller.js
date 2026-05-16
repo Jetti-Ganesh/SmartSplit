@@ -36,6 +36,7 @@ exports.getProfile = async (req, res) => {
 
 // Update user profile details
 exports.updateProfile = async (req, res) => {
+  try {
     const fs = require('fs');
     fs.appendFileSync('profile_update.log', JSON.stringify({ body: req.body, time: new Date() }) + '\n');
     
@@ -97,3 +98,4 @@ exports.updateProfile = async (req, res) => {
     res.status(500).json({ message: 'Server error. Please try again.', error: err.message });
   }
 };
+
