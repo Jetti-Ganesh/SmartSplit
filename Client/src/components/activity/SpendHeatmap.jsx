@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import '../styles/Activity.css'; // Relies on shared activity styles
+import '../../styles/Activity.css'; // Relies on shared activity styles
 
 export default function SpendHeatmap({ data }) {
   // data.labels and data.mine expected from the backend trend
