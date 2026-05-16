@@ -158,6 +158,5 @@ body.light .nav-item.active { color: var(--accent-purple); }
    RESPONSIVE — TABLET
    ============================================= */
 @media (max-width: 900px) {
-  .sidebar         { width: 190px; min-237, 0.25), 0 4px 18px rgba(124, 58, 237, 0.35);
-  }
+  .sidebar         { width: 190px; min-width: 190px; }
 }

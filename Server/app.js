@@ -1,22 +1,3 @@
-// require("dotenv").config();
-// const express = require('express');
-// const app = express();
-// const cors = require('cors');
-// const loginRoutes = require("./routes/login.route")
-// app.use(cors());
-// app.use(express.json());
-// // Write all the code for backend Here..
-
-// const path = require('path');
-// app.use(express.static(path.join(__dirname, '..','Client','dist')));
-
-// app.get('/', (req, res) => {
-//     res.sendFile(path.join(__dirname, '..','Client','dist','index.html'));
-// });
-
-// app.use("/login", loginRoutes);
-// module.exports = app;
-
 
 require("dotenv").config();
 const express = require('express');
@@ -25,11 +6,12 @@ const cors = require('cors');
 const session = require('express-session');
 
 const loginRoutes = require("./routes/login.route");
-const signUpRoutes = require("./routes/signUp.route");        // ← add this
-const verifyUserRoutes = require("./routes/verifyUser.route"); // ← add this
-const groupRoutes = require("./routes/group.route"); // ← add this
+const signUpRoutes = require("./routes/signUp.route");
+const verifyUserRoutes = require("./routes/verifyUser.route");
+const groupRoutes = require("./routes/group.route");
 const googleRoutes = require("./routes/google.route");
 const profileRoutes = require("./routes/profile.route");
+const analyticsRoutes = require("./routes/analytics.routes"); // ← add this
 const expensesRoutes = require("./routes/expenses.route"); // ← add this
 
 app.use(session({
@@ -63,10 +45,11 @@ app.get('/', (req, res) => {
 
 
 app.use("/api/", loginRoutes);
-app.use("/api/", signUpRoutes);                   // ← add this
-app.use("/api/", verifyUserRoutes);              // ← add this 
-app.use("/api/", groupRoutes);                   // ← add this
+app.use("/api/", signUpRoutes);
+app.use("/api/", verifyUserRoutes);
+app.use("/api/", groupRoutes);
 app.use("/api/", googleRoutes);
 app.use("/api/profile", profileRoutes);
+app.use("/api/", analyticsRoutes);
 app.use("/api/", expensesRoutes);                // ← add this
 module.exports = app;
