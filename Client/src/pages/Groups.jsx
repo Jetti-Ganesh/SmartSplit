@@ -4,7 +4,6 @@ import { useCreateGroupMutation, useGetGroupsQuery } from '../services/groupAPI'
 import '../styles/Groups.css';
 
 const PREDEFINED_ICONS = ['🏠', '🏨', '✈️', '🎉', '🛒', '⛱️', '🎓', '⚽', '🎮', '🏪', '🚗', '👥'];
-import '../styles/Groups.css';
 function Groups() {
   const [addGroups, { isLoading: isCreatingGroup }] = useCreateGroupMutation();
   const { data, isLoading: isFetchingGroups } = useGetGroupsQuery();
