@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:3000/api/analytics'; // Adjust if backend runs on different port
+const API_URL = `${import.meta.env.VITE_API_URL}/api/analytics`;
 
 export const fetchAnalytics = async (period = 'month', customRange = null) => {
     try {
