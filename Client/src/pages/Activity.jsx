@@ -4,8 +4,9 @@ import { useSelector } from 'react-redux';
 import { fetchAnalytics, seedDummyExpenses } from '../services/analytics.service';
 import TrendChart from '../components/activity/TrendChart';
 import CategoryDonut from '../components/activity/CategoryDonut';
+import SpendHeatmap from '../components/activity/SpendHeatmap';
 import BottomNavbareM from '../components/BottomNavbareM';
-import SidebarNavbar from '../components/SidebarNavbar'; // Assumed from structure
+import SettingsDrawer from '../components/SettingsDrawer';
 import '../styles/Activity.css';
 
 export default function Activity() {
@@ -19,6 +20,9 @@ export default function Activity() {
   const [activeCat, setActiveCat] = useState(null);
   const [loading, setLoading] = useState(true);
   const [seedLoading, setSeedLoading] = useState(false);
+  
+  // Settings Drawer state
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -59,7 +63,6 @@ export default function Activity() {
     </div>
   );
 
-  // If no data and not loading, might need seed
   const renderEmptyState = () => (
     <div style={{ padding: 20, textAlign: 'center' }}>
       <p style={{ color: 'var(--text-muted)', marginBottom: 15 }}>No data found for this period.</p>
@@ -84,11 +87,11 @@ export default function Activity() {
           <span className="logo-icon">⚡</span>
           <span>SplitSmart</span>
         </div>
-        <button className="mobile-top-settings" onClick={() => navigate("/Settings")}>
+        <button className="mobile-top-settings" onClick={() => setIsSettingsOpen(true)}>
           ⚙️
         </button>
       </div>
-
+    
       <main className="main-content">
         <div className="dash-section" style={{ paddingBottom: 0 }}>
           <div className="section-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -105,7 +108,7 @@ export default function Activity() {
 
         {/* ── Period selector ── */}
         <div className="period-wrap fade-up">
-          <div className="period-tabs">
+          <div className="period-tabs glass-panel">
             <button className={`period-tab ${period === '7d' ? 'active' : ''}`} onClick={() => handlePeriodChange('7d')}>Last 7 days</button>
             <button className={`period-tab ${period === 'month' ? 'active' : ''}`} onClick={() => handlePeriodChange('month')}>This month</button>
             <button className={`period-tab ${period === 'custom' ? 'active' : ''}`} onClick={() => handlePeriodChange('custom')}>Custom</button>
@@ -157,7 +160,7 @@ export default function Activity() {
             {/* Monthly bar chart */}
             <div className="analytics-section fade-up delay-3">
               <div className="section-title">Spending trend</div>
-              <div className="analytics-card">
+              <div className="analytics-card glass-card">
                 <div className="bar-chart-wrap">
                   <div className="chart-legend">
                     <div className="legend-item"><div className="legend-dot" style={{ background: '#10B981' }} /> You</div>
@@ -170,10 +173,18 @@ export default function Activity() {
               </div>
             </div>
 
+            {/* Spend Heatmap */}
+            <div className="analytics-section fade-up delay-3">
+              <div className="section-title">Activity Heatmap</div>
+              <div className="analytics-card glass-card p-16">
+                <SpendHeatmap data={data.trend} />
+              </div>
+            </div>
+
             {/* Category donut */}
             <div className="analytics-section fade-up delay-4">
               <div className="section-title">Where your money goes</div>
-              <div className="analytics-card">
+              <div className="analytics-card glass-card">
                 <div className="donut-wrap">
                   <div className="donut-row">
                     <div className="donut-canvas-wrap">
@@ -207,7 +218,7 @@ export default function Activity() {
             {/* Group breakdown */}
             <div className="analytics-section fade-up delay-5">
               <div className="section-title">By group</div>
-              <div className="analytics-card">
+              <div className="analytics-card glass-card">
                 <div className="group-list">
                   {data.groups.map((g, i) => {
                     const maxAmount = data.groups[0].amount || 1;
@@ -234,7 +245,7 @@ export default function Activity() {
             {/* Top expenses */}
             <div className="analytics-section fade-up delay-6" style={{ marginBottom: 40 }}>
               <div className="section-title">Top expenses {activeCat ? `· ${activeCat}` : ''}</div>
-              <div className="analytics-card">
+              <div className="analytics-card glass-card">
                 <div className="expense-list">
                   {data.expenses.filter(e => !activeCat || e.cat === activeCat).length === 0 ? (
                     <div style={{ padding: 20, textAlign: 'center', fontSize: 13, color: 'var(--text-muted)' }}>
@@ -266,6 +277,14 @@ export default function Activity() {
 
       {/* ── MOBILE BOTTOM NAV ───────────────────────────────────────── */}
       {isLoggedIn && <BottomNavbareM />}
+
+      {/* ── SETTINGS DRAWER ───────────────────────────────────────── */}
+      <SettingsDrawer 
+        isOpen={isSettingsOpen} 
+        onClose={() => setIsSettingsOpen(false)} 
+        isDark={isDark} 
+        toggleTheme={toggleTheme} 
+      />
     </div>
   );
 }

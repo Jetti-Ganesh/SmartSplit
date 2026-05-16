@@ -8,6 +8,9 @@
   --border-color: #2a3147;
   --primary: #f0b429;
   --navbar-height: 72px;
+  
+  --card-bg-rgb: 22, 27, 36;
+  --text-color-rgb: 232, 237, 245;
 }
 
 body.light {
@@ -16,6 +19,9 @@ body.light {
   --text-muted: #5a6a8a;
   --card-bg: #ffffff;
   --border-color: #dde3f0;
+
+  --card-bg-rgb: 255, 255, 255;
+  --text-color-rgb: 26, 32, 53;
 }
 
 body {
