@@ -70,7 +70,7 @@ body.dark .settings-header {
 .close-btn {
   background: none;
   border: none;
-  color: var(--text-muted);
+  color: var(--text-color);
   cursor: pointer;
   padding: 8px;
   border-radius: 50%;
@@ -81,8 +81,8 @@ body.dark .settings-header {
 }
 
 .close-btn:hover {
-  background: rgba(0, 0, 0, 0.05);
-  color: var(--text-primary);
+  background: rgba(0, 0, 0, 0.08);
+  color: var(--text-color);
 }
 
 body.dark .close-btn:hover {
