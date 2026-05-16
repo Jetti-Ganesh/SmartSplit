@@ -8,13 +8,13 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation, useOutletContext } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { logout } from "../store/slices/authSlice";
-import { fetchUserProfile, updateUserProfile, clearSuccess, clearError } from "../store/slices/profileSlice";
+import { logout } from "../services/authSlice";
+import { fetchUserProfile, updateUserProfile, clearSuccess } from "../services/profileSlice";
 import ThemeToggle from "../components/ThemeToggle";
 import BottomNavbareM from "../components/BottomNavbareM";
 import "../styles/Profile.css";
 // ─────────────────────────────────────────────────────
-// ── CONSTANTS
+// ── CONSTANTS 
 // ─────────────────────────────────────────────────────
 
 

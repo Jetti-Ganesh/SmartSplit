@@ -3,7 +3,7 @@ import authReducer from '../services/authSlice';
 import themeReducer from '../services/themeSlice';
 import { groupAPI } from '../services/groupAPI';
 import {expenseAPI} from '../services/expenseAPI';
-import profileReducer from './slices/profileSlice';
+import profileReducer from '../services/profileSlice';
 
 export const store = configureStore({
   reducer: {

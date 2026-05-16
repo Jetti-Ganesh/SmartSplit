@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { logout } from "../store/slices/authSlice";
+import { logout } from "../services/authSlice";
 import ThemeToggle from "./ThemeToggle";
 import "../styles/SettingsDrawer.css";
 

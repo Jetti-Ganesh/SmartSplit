@@ -298,6 +298,7 @@
     border: none;
     padding: 0;
     outline: none;
+    text-align: end;
 }
 
 .right-icon:hover {
