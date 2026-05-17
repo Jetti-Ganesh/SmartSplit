@@ -14,9 +14,10 @@ function Groups() {
   const [newGroupIcon, setNewGroupIcon] = useState('🏠');
   const [newGroupDescription, setNewGroupDescription] = useState('');
   const [formError, setFormError] = useState('');
+  console.log(data);
 
-  // const totalOwe =data ?  data.reduce((acc, g) => acc + g.owe, 0) : "";
-  // const totalOwed =data ? data.reduce((acc, g) => acc + g.owed, 0) : "";
+  const totalOwe = data ? data.data.reduce((acc, g) => acc + g.userBalance.owing, 0) : "";
+  const totalOwed = data ? data.data.reduce((acc, g) => acc + g.userBalance.owed, 0) : "";
 
   const handleAddGroup = async (e) => {
     e.preventDefault();
@@ -74,7 +75,7 @@ function Groups() {
           </div>
           <div className="balance-info">
             <p className="balance-label">You Owe</p>
-            <h2 className="balance-amount">₹{1000}</h2>
+            <h2 className="balance-amount">₹{totalOwe}</h2>
           </div>
         </div>
 
@@ -87,7 +88,7 @@ function Groups() {
           </div>
           <div className="balance-info">
             <p className="balance-label">You are Owed</p>
-            <h2 className="balance-amount">₹{3200}</h2>
+            <h2 className="balance-amount">₹{totalOwed}</h2>
           </div>
         </div>
       </div>
@@ -127,7 +128,7 @@ function Groups() {
                 )}
                 {group.owe === 0 && group.owed === 0 && (
                   <div className="amount-settled">
-                    <span>Settled</span>
+                    <span>{totalOwed}</span>
                   </div>
                 )}
               </div>
@@ -189,7 +190,7 @@ function Groups() {
               </div>
 
               {formError && <p className="error-text">{formError}</p>}
-              
+
               <button type="submit" className="submit-btn" disabled={isCreatingGroup}>
                 {isCreatingGroup ? 'Creating...' : 'Create Group'}
               </button>

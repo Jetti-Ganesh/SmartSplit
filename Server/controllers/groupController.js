@@ -1,5 +1,6 @@
 const Group = require('../models/group.model');
 const User = require('../models/user.model');
+const Expense = require('../models/expense.model');
 exports.getUserGroups = async (req, res, next) => {
   try {
     const userId = req.user.id;
@@ -14,20 +15,20 @@ exports.getUserGroups = async (req, res, next) => {
     // console.log(groups);
 
     // Calculate balance for each group
-    // const groupsWithBalances = await Promise.all(
-    //   groups.map(async (group) => {
-    //     const balance = await calculateUserBalanceInGroup(group._id, userId);
-    //     return {
-    //       ...group.toObject(),
-    //       userBalance: balance
-    //     };
-    // })
-    // );
+    const groupsWithBalances = await Promise.all(
+      groups.map(async (group) => {
+        const balance = await calculateUserBalanceInGroup(group._id, userId);
+        return {
+          ...group.toObject(),
+          userBalance: balance
+        };
+    })
+    );
 
     res.json({
       success: true,
-      // data: groupsWithBalances
-      data: groups
+      data: groupsWithBalances
+      // data: groups
     });
   } catch (error) {
     next(error);
@@ -132,3 +133,34 @@ exports.addMember = async (req, res, next) => {
     next(error);
   }
 };
+// Helper: Calculate user balance in a group
+async function calculateUserBalanceInGroup(groupId, userId) {
+  const expenses = await Expense.find({ groupId });
+  
+  let totalOwed = 0;
+  let totalOwing = 0;
+  
+  expenses.forEach(expense => {
+    expense.splitDetails.forEach(split => {
+      if (split.userId.toString() === userId.toString()) {
+        if (expense.paidBy.toString() === userId.toString()) {
+          // User paid, calculate what others owe to user
+          const othersOwed = expense.amount - split.amount;
+          totalOwed += othersOwed;
+        } else {
+          // User owes to the person who paid
+          totalOwing += split.amount;
+        }
+      } else if (expense.paidBy.toString() === userId.toString()) {
+        // User paid, others owe to user
+        totalOwed += split.amount;
+      }
+    });
+  });
+  
+  return {
+    owed: totalOwed,
+    owing: totalOwing,
+    net: totalOwed - totalOwing
+  };
+}

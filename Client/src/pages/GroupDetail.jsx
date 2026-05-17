@@ -16,9 +16,9 @@ function GroupDetail() {
   const location = useLocation();
   const navigate = useNavigate();
   const { groupId } = useParams();
-  
+
   const [addMemberFn, { isLoading: isAddingMember }] = useAddMemberMutation();
-  const [addExpenseFn , {isLoading : isCreatingExpense}] = useCreateExpenseMutation();
+  const [addExpenseFn, { isLoading: isCreatingExpense }] = useCreateExpenseMutation();
   const { data: expensesRes, isLoading: isLoadingExpenses } = useGetExpensesQuery(groupId);
   // Try to get group from state, otherwise provide a fallback or fetch it
   const group = location.state?.group || {
@@ -43,6 +43,19 @@ function GroupDetail() {
   const [paidBy, setPaidBy] = useState('');
   const [splitBetween, setSplitBetween] = useState([]);
   const [exactAmounts, setExactAmounts] = useState({});
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (expandedExpenseId !== null) {
+        if (!event.target.closest('.expense-card')) {
+          setExpandedExpenseId(null);
+        }
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [expandedExpenseId]);
+
   const handleBack = () => {
     navigate('/groups');
   };
@@ -83,7 +96,7 @@ function GroupDetail() {
   const handleAddExpense = async () => {
     const splitTypeLower = splitType === 'Equally' ? 'equal' : 'exact';
     let finalSplitBetween = splitBetween;
-    
+
     if (splitType === 'Exact') {
       finalSplitBetween = splitBetween.map(userId => ({
         userId: userId,
@@ -142,8 +155,8 @@ function GroupDetail() {
       {/* Balance Card */}
       <div className="balance-summary-card">
         <p>YOUR BALANCE</p>
-        <h2 className={group.owe > 0 ? 'text-owe' : group.owed > 0 ? 'text-owed' : ''}>
-          {group.owe > 0 ? `You owe ₹${group.owe}` : group.owed > 0 ? `You are owed ₹${group.owed}` : 'Settled Up'}
+        <h2 className={group.userBalance.owing > 0 ? 'text-owe' : group.userBalance.owed > 0 ? 'text-owed' : ''}>
+          {group.userBalance.owed > 0 ? `You owe ₹${group.userBalance.owed}` : group.userBalance.owing > 0 ? `You are owed ₹${group.userBalance.owing}` : 'Settled Up'}
         </h2>
       </div>
 
@@ -185,7 +198,7 @@ function GroupDetail() {
         {activeTab === 'Expenses' && (
           <div className="expenses-list">
             {isLoadingExpenses ? (
-              <p style={{textAlign: 'center', padding: '20px'}}>Loading expenses...</p>
+              <p style={{ textAlign: 'center', padding: '20px' }}>Loading expenses...</p>
             ) : expensesRes?.data?.length > 0 ? (
               expensesRes.data.map(expense => {
                 const isExpanded = expandedExpenseId === expense._id;
@@ -193,10 +206,11 @@ function GroupDetail() {
                 const payerSplit = expense.splitDetails?.find(split => split.userId?._id === expense.paidBy?._id);
                 const settledAmount = payerSplit ? payerSplit.amount : 0;
                 const progressPercentage = expense.amount > 0 ? (settledAmount / expense.amount) * 100 : 0;
-                
+                const isSettled = progressPercentage >= 100;
+
                 return (
-                  <div className={`expense-card ${isExpanded ? 'expanded' : ''}`} key={expense._id}>
-                    <div className="expense-item" onClick={() => toggleExpenseDetails(expense._id)} style={{cursor: 'pointer'}}>
+                  <div className={`expense-card ${isExpanded ? 'expanded' : ''} ${isSettled ? 'settled' : ''}`} key={expense._id}>
+                    <div className="expense-item" onClick={() => toggleExpenseDetails(expense._id)} style={{ cursor: 'pointer' }}>
                       <div className="expense-icon">
                         {categories.find(c => c.name === (expense.category === 'Entertainment' ? 'Fun' : expense.category))?.icon || '➕'}
                       </div>
@@ -208,7 +222,7 @@ function GroupDetail() {
                         <strong>₹{expense.amount}</strong>
                       </div>
                     </div>
-                    
+
                     {isExpanded && (
                       <div className="expense-expanded-content">
                         <div className="settlement-progress-section">
@@ -222,7 +236,7 @@ function GroupDetail() {
                             </div>
                           </div>
                         </div>
-                        
+
                         <div className="expense-split-details">
                           <div className="paid-by-section">
                             <h4>Paid By</h4>
@@ -243,6 +257,15 @@ function GroupDetail() {
                               <p className="no-owes-msg">No one else owes for this expense.</p>
                             )}
                           </div>
+                        </div>
+
+                        <div className="expense-actions-row" style={{ display: 'flex', gap: '12px', marginTop: '20px', paddingTop: '16px', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+                          <button className="primary-btn enhanced-btn" style={{ flex: 1, padding: '10px', fontSize: '14px', background: 'rgba(255,255,255,0.1)', color: 'var(--text-color)' }} onClick={() => alert("Update feature coming soon!")}>
+                            ✏️ Update Expense
+                          </button>
+                          <button className="primary-btn enhanced-btn" style={{ flex: 1, padding: '10px', fontSize: '14px', background: 'rgba(239, 68, 68, 0.2)', color: '#ef4444' }} onClick={() => alert("Delete feature coming soon!")}>
+                            🗑️ Delete Expense
+                          </button>
                         </div>
                       </div>
                     )}
@@ -343,8 +366,8 @@ function GroupDetail() {
                     return (
                       <div className="split-member-item" key={i}>
                         <label className="checkbox-container">
-                          <input 
-                            type="checkbox" 
+                          <input
+                            type="checkbox"
                             checked={splitBetween.includes(memberId)}
                             onChange={(e) => {
                               if (e.target.checked) {
@@ -391,11 +414,11 @@ function GroupDetail() {
                           <span className="member-name">{memberName}</span>
                           <div className="exact-amount-wrapper">
                             <span className="currency-symbol">₹</span>
-                            <input 
-                              type="number" 
-                              placeholder="0" 
+                            <input
+                              type="number"
+                              placeholder="0"
                               value={exactAmounts[userId] || ''}
-                              onChange={(e) => setExactAmounts({...exactAmounts, [userId]: e.target.value})}
+                              onChange={(e) => setExactAmounts({ ...exactAmounts, [userId]: e.target.value })}
                             />
                           </div>
                         </div>

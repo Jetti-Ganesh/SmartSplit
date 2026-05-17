@@ -1,77 +1,185 @@
-import { useNavigate, useLocation, useOutletContext } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import '../styles/SettleUp.css'
 import { useState, useEffect } from 'react';
 import BottomNavbareM from '../components/BottomNavbareM';
+import { useGetGroupsQuery } from '../services/groupAPI';
+import { useGetBalancesQuery, useRecordSettlementMutation } from '../services/settleUpAPI';
 
+function SettleUp() {
+  const { isLoggedIn, user: currentUser } = useSelector((state) => state.auth);
+  const currentUserId = currentUser?._id || currentUser?.id || currentUser?.userId;
+  const navigate = useNavigate();
 
-function SettleUp(){
+  const { data: groupsResponse, isLoading: groupsLoading } = useGetGroupsQuery();
+  const groups = groupsResponse?.data || [];
 
- const { isDark, toggleTheme } = useOutletContext();
-  const { isLoggedIn } = useSelector((state) => state.auth);
-  const navigate  = useNavigate();
-  const location  = useLocation();
+  const [selectedGroupId, setSelectedGroupId] = useState(null);
 
-  // Derive active tab from URL — stays in sync on direct navigation too
-  const getActiveId = () => {
-    const p = location.pathname;
-    if (p === "/Dashboard") return "dashboard";
-    if (p === "/Groups")    return "groups";
-    if (p === "/Activity")  return "activity";
-    if (p === "/SettleUp")  return "settle";
-    if (p === "/Profile")   return "profile";
-    return "dashboard";
-  };
-  const active = getActiveId();
+  useEffect(() => {
+    if (!selectedGroupId && groups.length > 0) {
+      setSelectedGroupId(groups[0]._id || groups[0].id);
+    }
+  }, [groups, selectedGroupId]);
 
-  const today = new Date().toLocaleDateString("en-IN", {
-    weekday: "long", day: "numeric", month: "long", year: "numeric",
+  const {
+    data: balancesResponse,
+    error: balancesError,
+    isLoading: balancesLoading,
+    refetch: refetchBalances,
+  } = useGetBalancesQuery(selectedGroupId, {
+    skip: !selectedGroupId,
   });
 
-    return (
-        <div className="dashboard-shell">
+  const [recordSettlement, { isLoading: isRecording }] = useRecordSettlementMutation();
 
-           {/* ── SIDEBAR (desktop only) ──────────────────────────────────── */}
-      {/* ── MOBILE TOP BAR ────────────────────────────────────────── */}
+  const balanceData = balancesResponse?.data;
+  const debts = balanceData?.balances || [];
+  const settlements = balanceData?.settlements || [];
+  const currentGroup = balanceData?.group || groups.find((g) => g._id === selectedGroupId || g.id === selectedGroupId);
+
+  const youOwe = debts
+    .filter((debt) => debt.from === currentUserId)
+    .reduce((sum, debt) => sum + debt.amount, 0);
+  const youAreOwed = debts
+    .filter((debt) => debt.to === currentUserId)
+    .reduce((sum, debt) => sum + debt.amount, 0);
+
+  const handlePayViaUpi = (debt) => {
+    const recipientName = debt.toName || debt.to;
+    const upiUrl = `upi://pay?pa=demo@upi&pn=${encodeURIComponent(recipientName)}&am=${debt.amount}&cu=INR`;
+    window.open(upiUrl, '_blank');
+  };
+
+  const handleRecordSettlement = async (debt) => {
+    const payload = {
+      groupId: selectedGroupId,
+      to: debt.to,
+      amount: debt.amount,
+      method: 'upi',
+      notes: debt.toName ? `Settled with ${debt.toName}` : 'Settled debt',
+    };
+
+    if (debt.from !== currentUserId) {
+      payload.from = debt.from;
+    }
+
+    try {
+      await recordSettlement(payload).unwrap();
+      await refetchBalances();
+    } catch (error) {
+      console.error('Failed to record settlement', error);
+      alert(error?.data?.message || 'Unable to record settlement');
+    }
+  };
+
+  return (
+    <div className="dashboard-shell">
       <div className="mobile-top-bar">
-        <div className="mobile-top-logo" onClick={() => navigate("/Dashboard")}>
+        <div className="mobile-top-logo" onClick={() => navigate('/Dashboard')}>
           <span className="logo-icon">⚡</span>
           <span>SplitSmart</span>
         </div>
-        <button className="mobile-top-settings" onClick={() => navigate("/Settings")}>
+        <button className="mobile-top-settings" onClick={() => navigate('/Settings')}>
           ⚙️
         </button>
       </div>
 
-      {/* ── MAIN CONTENT ────────────────────────────────────────────── */}
       <main className="main-content">
         <div className="dash-section">
           <div className="section-header">
             <h2 className="section-title">Settle Up</h2>
-            <p className="section-subtitle">Clear your dues and record payments instantly.</p>
+            <p className="section-subtitle">Clear your dues, record payments, and keep recent settlements in one place.</p>
           </div>
 
-          <div className="features-grid">
-            <div className="feature-card">
-              <div className="card-glow glow-green" />
-              <div className="panel-header">
-                <div className="panel-label">
-                  <span className="panel-tag">Payments</span>
-                  <div className="panel-title">Pending Settlements</div>
+          <div className="group-selector-row">
+            <label htmlFor="group-selector">Select group</label>
+            <select
+              id="group-selector"
+              value={selectedGroupId || ''}
+              onChange={(e) => setSelectedGroupId(e.target.value)}
+              disabled={groupsLoading}
+            >
+              {groups.map((group) => (
+                <option key={group._id} value={group._id}>
+                  {group.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="settle-container">
+            <div className="balance-card">
+              <div className="balance-title">{currentGroup?.name || 'Group'} balance</div>
+              <div className="balance-grid">
+                <div className="balance-box owe">
+                  <div className="box-label">You Owe</div>
+                  <div className="box-amount">₹{youOwe.toFixed(0)}</div>
                 </div>
-                <span className="panel-icon">💰</span>
+                <div className="balance-box owed">
+                  <div className="box-label">You're Owed</div>
+                  <div className="box-amount">₹{youAreOwed.toFixed(0)}</div>
+                </div>
               </div>
-              <p style={{ color: 'var(--text-muted)', margin: '1rem 0' }}>All clear! You don't have any pending settlements.</p>
-              <button className="btn-primary">Record a Payment</button>
+            </div>
+
+            <h3 className="section-heading">Outstanding Debts</h3>
+            {balancesLoading ? (
+              <div className="loading">Loading debts...</div>
+            ) : balancesError ? (
+              <div className="error">Unable to load balances.</div>
+            ) : (
+              <div className="debts-list">
+                {debts.length === 0 && <div className="empty">No outstanding debts</div>}
+                {debts.map((debt) => {
+                  const isOutgoing = debt.from === currentUserId;
+                  const isIncoming = debt.to === currentUserId;
+                  const label = isOutgoing
+                    ? `You → ${debt.toName || debt.to}`
+                    : `${debt.fromName || debt.from} → You`;
+
+                  return (
+                    <div key={`${debt.from}-${debt.to}-${debt.amount}`} className={`debt-item ${isIncoming ? 'incoming' : ''}`}>
+                      <div className="debt-left">
+                        <div className="debt-desc">{label}</div>
+                        <div className="debt-actions">
+                          {isOutgoing && (
+                            <button className="btn-upi" onClick={() => handlePayViaUpi(debt)}>
+                              Pay via UPI
+                            </button>
+                          )}
+                          <button className="btn-secondary" onClick={() => handleRecordSettlement(debt)} disabled={isRecording}>
+                            {isIncoming ? 'Mark Received' : 'Mark Settled'}
+                          </button>
+                        </div>
+                      </div>
+                      <div className="debt-amount">₹{debt.amount.toFixed(0)}</div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            <h3 className="section-heading">Recent Settlements</h3>
+            <div className="settlements-list">
+              {settlements.length === 0 && <div className="empty">No recent settlements</div>}
+              {settlements.map((s) => (
+                <div key={s._id || s.id} className="history-item">
+                  <div className="history-left">
+                    <div className="history-desc">{s.from?.name || s.from} paid {s.to?.name || s.to}</div>
+                    <div className="history-date">{new Date(s.settledAt || s.date).toLocaleDateString()}</div>
+                  </div>
+                  <div className="history-amount">₹{s.amount.toFixed(0)}</div>
+                </div>
+              ))}
             </div>
           </div>
         </div>
       </main>
 
-      {/* ── MOBILE BOTTOM NAV ───────────────────────────────────────── */}
       {isLoggedIn && <BottomNavbareM />}
-        </div>
-    )
-}   
+    </div>
+  );
+}
 
 export default SettleUp;
