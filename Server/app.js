@@ -28,7 +28,7 @@ app.use(session({
     } //session expires in 10mins
 }));
 app.use(cors({
-  origin: 'http://localhost:5173',  // your Vite dev port
+  origin: process.env.CLIENT_URL,  // your Vite dev port
   credentials: true
 }))
 
