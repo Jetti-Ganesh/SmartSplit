@@ -61,22 +61,34 @@ const Navbar = ({ isDark, toggleTheme, forceShow }) => {
             {isLoggedIn ? (
             <>
                  <li>
-                  <a  onClick={() => handleNavClick("/Dashboard")}>
+                  <a 
+                    className={location.pathname === "/Dashboard" ? "active" : ""}
+                    onClick={() => handleNavClick("/Dashboard")}
+                  >
                     Dashboard
                   </a>
                 </li>
                 <li>
-                  <a  onClick={() => handleNavClick("/Groups")}>
+                  <a 
+                    className={location.pathname === "/Groups" ? "active" : ""}
+                    onClick={() => handleNavClick("/Groups")}
+                  >
                    Groups
                   </a>
                 </li>
                 <li>
-                  <a  onClick={() => handleNavClick("/SettleUp")}>
+                  <a 
+                    className={location.pathname === "/SettleUp" ? "active" : ""}
+                    onClick={() => handleNavClick("/SettleUp")}
+                  >
                     Settle Up
                   </a>
                 </li>
                 <li>
-                  <a onClick={() => handleNavClick("/Activity")}>
+                  <a 
+                    className={location.pathname === "/Activity" ? "active" : ""}
+                    onClick={() => handleNavClick("/Activity")}
+                  >
                     Activity
                   </a>
                 </li>
@@ -152,7 +164,7 @@ const Navbar = ({ isDark, toggleTheme, forceShow }) => {
                   </svg>
                 </button>
                 <button 
-                  className="profile-icon-btn" 
+                  className={`profile-icon-btn ${location.pathname === "/Profile" ? "active" : ""}`} 
                   onClick={() => handleNavClick("/Profile")}
                   aria-label="Profile"
                 >

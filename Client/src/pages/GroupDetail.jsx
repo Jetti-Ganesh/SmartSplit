@@ -1,8 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import '../styles/GroupDetail.css';
 import { useAddMemberMutation } from '../services/groupAPI';
 import { useCreateExpenseMutation, useGetExpensesQuery } from '../services/expenseAPI';
+import BottomNavbareM from '../components/BottomNavbareM';
+import SettingsDrawer from '../components/SettingsDrawer';
+import { useOutletContext } from 'react-router-dom';
+
 function GroupDetail() {
   const categories = [
     { name: 'Food', icon: '🍕' }, { name: 'Rent', icon: '🏠' },
@@ -16,10 +21,24 @@ function GroupDetail() {
   const location = useLocation();
   const navigate = useNavigate();
   const { groupId } = useParams();
+  const { isDark, toggleTheme } = useOutletContext();
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const { user: loggedInUser } = useSelector(state => state.auth);
   
   const [addMemberFn, { isLoading: isAddingMember }] = useAddMemberMutation();
   const [addExpenseFn , {isLoading : isCreatingExpense}] = useCreateExpenseMutation();
   const { data: expensesRes, isLoading: isLoadingExpenses } = useGetExpensesQuery(groupId);
+  const [notification, setNotification] = useState(null);
+
+  useEffect(() => {
+    if (notification) {
+      const timer = setTimeout(() => {
+        setNotification(null);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [notification]);
+
   // Try to get group from state, otherwise provide a fallback or fetch it
   const group = location.state?.group || {
     id: groupId,
@@ -60,8 +79,26 @@ function GroupDetail() {
   async function addMember(email) {
     const currentGroupId = group._id || groupId;
     console.log("Adding member to group:", currentGroupId);
-    await addMemberFn({ groupId: currentGroupId, email });
-    setShowAddMemberModal(false);
+    try {
+      await addMemberFn({ groupId: currentGroupId, email }).unwrap();
+      
+      setNotification({ type: 'success', message: 'Member added successfully!' });
+      setShowAddMemberModal(false);
+      setEmail('');
+    } catch (err) {
+      console.error("Failed to add member:", err);
+      const errorMsg = err?.data?.message || err?.message || '';
+      
+      if (err?.status === 404 || errorMsg.toLowerCase().includes('not found')) {
+        setNotification({ type: 'error', message: 'No user found with that email.' });
+      } else if (err?.status === 400 || errorMsg.toLowerCase().includes('already')) {
+        setNotification({ type: 'error', message: 'This person is already in the group.' });
+      } else if (err?.status === 403 || errorMsg.toLowerCase().includes('admin')) {
+        setNotification({ type: 'error', message: 'Only group admins can add members.' });
+      } else {
+        setNotification({ type: 'error', message: errorMsg || 'Something went wrong. Please try again.' });
+      }
+    }
   }
 
   const handleOpenAddExpense = () => {
@@ -114,7 +151,35 @@ function GroupDetail() {
   };
 
   return (
-    <div className="group-detail-container">
+    <>
+      {/* ── MOBILE TOP BAR ── */}
+      <div className="mobile-top-bar">
+        <div className="mobile-top-logo" onClick={() => navigate("/")}>
+          <span className="logo-icon">⚡</span>
+          <span>SplitSmart</span>
+        </div>
+        <button className="mobile-top-settings" onClick={() => setIsSettingsOpen(true)}>
+          ⚙️
+        </button>
+      </div>
+
+      {notification && (
+        <div style={{
+          position: 'fixed',
+          top: '20px',
+          right: '20px',
+          background: notification.type === 'success' ? '#10b981' : '#ef4444',
+          color: 'white',
+          padding: '12px 16px',
+          borderRadius: '8px',
+          zIndex: 1000,
+          boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+        }}>
+          {notification.message}
+        </div>
+      )}
+
+      <div className="group-detail-container">
       {/* Header Section */}
       <div className="group-detail-header">
         {/* <div className="header-top">
@@ -202,7 +267,7 @@ function GroupDetail() {
                       </div>
                       <div className="expense-details">
                         <h3>{expense.description}</h3>
-                        <p>Paid by {expense.paidBy?.name || 'Someone'} • {new Date(expense.date).toLocaleDateString()}</p>
+                        <p>Paid by {expense.paidBy?._id === loggedInUser?._id ? loggedInUser?.name : (expense.paidBy?.name || 'Someone')} • {new Date(expense.date).toLocaleDateString()}</p>
                       </div>
                       <div className="expense-amount">
                         <strong>₹{expense.amount}</strong>
@@ -227,7 +292,7 @@ function GroupDetail() {
                           <div className="paid-by-section">
                             <h4>Paid By</h4>
                             <div className="split-user-row">
-                              <span className="split-user-name">{expense.paidBy?.name || 'Someone'}</span>
+                              <span className="split-user-name">{expense.paidBy?._id === loggedInUser?._id ? loggedInUser?.name : (expense.paidBy?.name || 'Someone')}</span>
                               <span className="split-user-amount text-owed">₹{expense.amount}</span>
                             </div>
                           </div>
@@ -235,7 +300,7 @@ function GroupDetail() {
                             <h4>Owed By (Not Paid)</h4>
                             {expense.splitDetails?.filter(split => split.userId?._id !== expense.paidBy?._id).map(split => (
                               <div className="split-user-row" key={split.userId?._id || Math.random()}>
-                                <span className="split-user-name">{split.userId?.name || 'Unknown'}</span>
+                                <span className="split-user-name">{split.userId?._id === loggedInUser?._id ? loggedInUser?.name : (split.userId?.name || 'Unknown')}</span>
                                 <span className="split-user-amount text-owe">₹{split.amount.toFixed(2)}</span>
                               </div>
                             ))}
@@ -260,11 +325,13 @@ function GroupDetail() {
           <div className="members-list">
             {
               group.members.map(member => {
+                const isCurrentUser = member.userId._id === loggedInUser?._id;
+                const displayName = isCurrentUser ? loggedInUser?.name : member.userId.name;
                 return (
                   <div className="member-item" key={member._id}>
-                    <div className="member-avatar">{member.userId.name[0]}</div>
+                    <div className="member-avatar">{displayName?.[0] || '?'}</div>
                     <div className="member-details">
-                      <h3>{member.userId.name}</h3>
+                      <h3>{displayName}</h3>
                       <p>{member.userId.email}</p>
                     </div>
                     {member.role == "admin" ? <div className="admin-badge">ADMIN</div> : ""}
@@ -330,7 +397,9 @@ function GroupDetail() {
                 <select className="custom-select" value={paidBy} onChange={(e) => setPaidBy(e.target.value)}>
                   {Array.isArray(group.members) && group.members.map((member, i) => {
                     const memberId = member.userId?._id || member._id || 'You';
-                    return <option key={i} value={memberId}>{member.userId?.name || 'You'}</option>;
+                    const isCurrentUser = memberId === loggedInUser?._id;
+                    const displayName = isCurrentUser ? loggedInUser?.name : (member.userId?.name || 'You');
+                    return <option key={i} value={memberId}>{displayName}</option>;
                   })}
                 </select>
               </div>
@@ -430,7 +499,7 @@ function GroupDetail() {
               <button className="close-btn" onClick={() => setShowAddMemberModal(false)}>×</button>
             </div>
 
-            <div className="modal-content">
+            <div className="modal-content scrollable-content">
               <div className="input-group left-align">
                 <label>Email Address</label>
                 <div className="input-with-icon">
@@ -475,7 +544,19 @@ function GroupDetail() {
           </div>
         </div>
       )}
+
+      {/* ── MOBILE BOTTOM NAV ── */}
+      <BottomNavbareM />
+
     </div>
+
+      <SettingsDrawer 
+        isOpen={isSettingsOpen} 
+        onClose={() => setIsSettingsOpen(false)} 
+        isDark={isDark} 
+        toggleTheme={toggleTheme} 
+      />
+    </>
   );
 }
 

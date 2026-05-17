@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux';
 import '../styles/SettleUp.css'
 import { useState, useEffect } from 'react';
 import BottomNavbareM from '../components/BottomNavbareM';
+import SettingsDrawer from '../components/SettingsDrawer';
 
 
 function SettleUp(){
@@ -11,6 +12,7 @@ function SettleUp(){
   const { isLoggedIn } = useSelector((state) => state.auth);
   const navigate  = useNavigate();
   const location  = useLocation();
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   // Derive active tab from URL — stays in sync on direct navigation too
   const getActiveId = () => {
@@ -38,7 +40,7 @@ function SettleUp(){
           <span className="logo-icon">⚡</span>
           <span>SplitSmart</span>
         </div>
-        <button className="mobile-top-settings" onClick={() => navigate("/Settings")}>
+        <button className="mobile-top-settings" onClick={() => setIsSettingsOpen(true)}>
           ⚙️
         </button>
       </div>
@@ -70,6 +72,13 @@ function SettleUp(){
 
       {/* ── MOBILE BOTTOM NAV ───────────────────────────────────────── */}
       {isLoggedIn && <BottomNavbareM />}
+
+      <SettingsDrawer 
+        isOpen={isSettingsOpen} 
+        onClose={() => setIsSettingsOpen(false)} 
+        isDark={isDark} 
+        toggleTheme={toggleTheme} 
+      />
         </div>
     )
 }   

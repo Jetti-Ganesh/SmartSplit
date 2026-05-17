@@ -10,6 +10,21 @@
   position: relative;
 }
 
+@keyframes slideDownFromTop {
+  from {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.group-detail-container > * {
+  animation: slideDownFromTop 0.5s ease-out forwards;
+}
+
 /* Header */
 .group-detail-header {
   background: linear-gradient(135deg, #3b82f6, #8b5cf6);
@@ -398,13 +413,18 @@
 
 /* Responsive Layout Adjustments */
 @media (max-width: 640px) {
+  .group-detail-container {
+    padding-top: 20px;
+    padding-bottom: 90px;
+  }
+
   .group-detail-header {
-    margin: 0 12px;
-    padding: 30px 16px 70px;
+    margin: 0 8px;
+    padding: 20px 16px 50px;
   }
 
   .balance-summary-card {
-    margin: -40px 20px 24px;
+    margin: -30px 16px 20px;
   }
 
   .quick-actions {
@@ -417,6 +437,31 @@
 
   .tab-content {
     padding: 0 16px 30px;
+  }
+
+  .add-member-modal,
+  .add-expense-modal {
+    width: 95%;
+    max-height: 85vh;
+    border-radius: 16px;
+    margin: auto;
+  }
+
+  .modal-content {
+    padding: 16px;
+  }
+
+  .expense-amount-input {
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+
+  .expense-amount-input input {
+    font-size: 36px;
+  }
+
+  .expense-amount-input input {
+    font-size: 36px;
   }
 }
 
@@ -445,11 +490,14 @@
   border-radius: 20px;
   width: 100%;
   max-width: 500px;
+  max-height: 85vh;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
   overflow: hidden;
   border: 1px solid var(--border-color);
   animation: modalSlideUp 0.3s ease-out;
   margin: auto;
+  display: flex;
+  flex-direction: column;
 }
 
 @keyframes modalSlideUp {
@@ -465,6 +513,7 @@
 }
 
 .modal-header {
+  flex-shrink: 0;
   background: linear-gradient(135deg, #3b82f6, #8b5cf6);
   padding: 20px 24px;
   display: flex;
@@ -644,12 +693,13 @@
 
 /* Add Expense & Enhanced Modals */
 .scrollable-content {
-  max-height: 70vh;
+  flex: 1;
   overflow-y: auto;
   -ms-overflow-style: none;
   /* IE and Edge */
   scrollbar-width: none;
   /* Firefox */
+  padding-bottom: 24px !important;
 }
 
 .scrollable-content::-webkit-scrollbar {
