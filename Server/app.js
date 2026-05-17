@@ -52,4 +52,42 @@ app.use("/api/", googleRoutes);
 app.use("/api/profile", profileRoutes);
 app.use("/api/", analyticsRoutes);
 app.use("/api/", expensesRoutes);                // ← add this
+
+// Global Error Handler Middleware (must be last)
+app.use((err, req, res, next) => {
+  console.error('Error:', err);
+  
+  // Validation errors (from Mongoose or custom validation)
+  if (err.message && err.message.includes('Split amounts must equal total amount')) {
+    return res.status(400).json({
+      success: false,
+      message: 'Split amounts must equal total amount'
+    });
+  }
+  
+  // Mongoose validation errors
+  if (err.name === 'ValidationError') {
+    const messages = Object.values(err.errors).map(e => e.message);
+    return res.status(400).json({
+      success: false,
+      message: 'Validation error',
+      details: messages
+    });
+  }
+
+  // Mongoose cast errors
+  if (err.name === 'CastError') {
+    return res.status(400).json({
+      success: false,
+      message: 'Invalid ID format'
+    });
+  }
+
+  // Default error
+  res.status(err.status || 500).json({
+    success: false,
+    message: err.message || 'Internal server error'
+  });
+});
+
 module.exports = app;

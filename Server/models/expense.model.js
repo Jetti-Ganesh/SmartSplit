@@ -24,8 +24,8 @@ const expenseSchema = new mongoose.Schema({
   },
   category: {
     type: String,
-    enum: ['Food', 'Rent', 'Travel', 'Entertainment', 'Shopping', 
-           'Utilities', 'Health', 'Other'],
+    enum: ['Food', 'Rent', 'Travel', 'Entertainment', 'Shopping',
+      'Utilities', 'Health', 'Other'],
     default: 'Other'
   },
   paidBy: {
@@ -73,20 +73,24 @@ const expenseSchema = new mongoose.Schema({
 });
 
 // Update timestamp on save
-expenseSchema.pre('save', function(next) {
+expenseSchema.pre('save', function () {
   this.updatedAt = Date.now();
-  next();
 });
 
 // Validate split details match amount
-expenseSchema.pre('save', function(next) {
+expenseSchema.pre('save', function () {
   const totalSplit = this.splitDetails.reduce((sum, split) => sum + split.amount, 0);
-  
-  if (Math.abs(totalSplit - this.amount) > 0.01) {
-    return next(new Error('Split amounts must equal total amount'));
+
+  // Use a tolerance of 0.1 (10 paise) for floating-point rounding errors
+  // This accounts for IEEE 754 floating-point precision issues
+  const difference = Math.abs(totalSplit - this.amount);
+
+  if (difference > 0.1) {
+    const error = new Error(
+      `Split amounts (₹${totalSplit.toFixed(2)}) must equal total amount (₹${this.amount.toFixed(2)}). Difference: ₹${difference.toFixed(2)}`
+    );
+    return next(error);
   }
-  
-  next();
 });
 
 module.exports = mongoose.model('Expense', expenseSchema);

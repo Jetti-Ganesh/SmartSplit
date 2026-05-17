@@ -4,7 +4,6 @@ import { useCreateGroupMutation, useGetGroupsQuery } from '../services/groupAPI'
 import '../styles/Groups.css';
 
 const PREDEFINED_ICONS = ['🏠', '🏨', '✈️', '🎉', '🛒', '⛱️', '🎓', '⚽', '🎮', '🏪', '🚗', '👥'];
-import '../styles/Groups.css';
 function Groups() {
   const [addGroups, { isLoading: isCreatingGroup }] = useCreateGroupMutation();
   const { data, isLoading: isFetchingGroups } = useGetGroupsQuery();
@@ -14,36 +13,39 @@ function Groups() {
   const [newGroupName, setNewGroupName] = useState('');
   const [newGroupIcon, setNewGroupIcon] = useState('🏠');
   const [newGroupDescription, setNewGroupDescription] = useState('');
+  const [formError, setFormError] = useState('');
 
   // const totalOwe =data ?  data.reduce((acc, g) => acc + g.owe, 0) : "";
   // const totalOwed =data ? data.reduce((acc, g) => acc + g.owed, 0) : "";
 
   const handleAddGroup = async (e) => {
     e.preventDefault();
-    if (!newGroupName.trim()) return;
+    setFormError('');
+
+    if (!newGroupName.trim()) {
+      setFormError('Group name is required.');
+      return;
+    }
 
     const newGroup = {
-      id: Date.now(),
       name: newGroupName,
       description: newGroupDescription || 'Newly created group',
-      owe: 0,
-      owed: 0,
-      members: 1,
       icon: newGroupIcon || '👥'
     };
+
     try {
       await addGroups(newGroup).unwrap();
       setIsModalOpen(false);
       setNewGroupName('');
       setNewGroupDescription('');
       setNewGroupIcon('🏠');
+      setFormError('');
+    } catch (err) {
+      console.error(err);
+      setFormError(err?.data?.message || 'Unable to create group. Please try again.');
     }
-    catch (err) {
-      console.log(err);
-    }
-
   };
-  console.log(data);
+  // console.log(data);
 
   return (
 
@@ -100,7 +102,7 @@ function Groups() {
           </div>
         ) : (
           data.data.map(group => (
-            <div key={group._id} className="group-card" onClick={() => navigate(`/groups/${group.id}`, { state: { group } })}>
+            <div key={group._id} className="group-card" onClick={() => navigate(`/groups/${group._id}`, { state: { group } })}>
               <div className="group-info">
                 <div className="group-avatar" style={group.icon ? { fontSize: '24px' } : {}}>
                   {group.icon ? group.icon : group.name.substring(0, 2).toUpperCase()}
@@ -136,73 +138,60 @@ function Groups() {
 
       {isModalOpen && (
         <div className="modal-overlay" onClick={() => setIsModalOpen(false)}>
-          <div className="modal-content premium-group-modal" onClick={e => e.stopPropagation()}>
-            <div className="modal-header premium-header">
-              <div className="header-text-content">
-                <h2>Create New Group</h2>
-                <p className="modal-subtitle">Set up a space for shared expenses</p>
-              </div>
-              <button className="close-btn premium-close" onClick={() => setIsModalOpen(false)}>
+          <div className="modal-content" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>Create New Group</h2>
+              <button className="close-btn" onClick={() => setIsModalOpen(false)}>
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <line x1="18" y1="6" x2="6" y2="18"></line>
                   <line x1="6" y1="6" x2="18" y2="18"></line>
                 </svg>
               </button>
             </div>
-            <form onSubmit={handleAddGroup} className="premium-add-group-form">
-              <div className="premium-form-group">
-                <label className="premium-label">Group Name</label>
-                <div className="premium-input-with-icon">
-                  <span className="premium-input-icon">🏷️</span>
-                  <input
-                    type="text"
-                    className="premium-input"
-                    value={newGroupName}
-                    onChange={(e) => setNewGroupName(e.target.value)}
-                    placeholder="e.g., Roommates, Goa Trip..."
-                    required
-                  />
-                </div>
+            <form onSubmit={handleAddGroup} className="add-group-form">
+              <div className="form-group">
+                <label>Group Name *</label>
+                <input
+                  type="text"
+                  className="form-input"
+                  value={newGroupName}
+                  onChange={(e) => setNewGroupName(e.target.value)}
+                  placeholder="e.g., Roommates, Goa Trip"
+                  required
+                />
               </div>
-              <div className="premium-form-group">
-                <label className="premium-label">Description (Optional)</label>
-                <div className="premium-input-with-icon">
-                  <span className="premium-input-icon">📝</span>
-                  <input
-                    type="text"
-                    className="premium-input"
-                    value={newGroupDescription}
-                    onChange={(e) => setNewGroupDescription(e.target.value)}
-                    placeholder="e.g., Weekend getaway expenses"
-                  />
-                </div>
+
+              <div className="form-group">
+                <label>Description (Optional)</label>
+                <input
+                  type="text"
+                  className="form-input"
+                  value={newGroupDescription}
+                  onChange={(e) => setNewGroupDescription(e.target.value)}
+                  placeholder="e.g., Weekend getaway"
+                />
               </div>
-              <div className="premium-form-group">
-                <label className="premium-label">Choose an Icon</label>
-                <div className="premium-icons-grid">
+
+              <div className="form-group">
+                <label>Choose Icon</label>
+                <div className="icons-grid">
                   {PREDEFINED_ICONS.map(icon => (
-                    <div
+                    <button
+                      type="button"
                       key={icon}
-                      className={`premium-icon-option ${newGroupIcon === icon ? 'selected' : ''}`}
+                      className={`icon-btn ${newGroupIcon === icon ? 'active' : ''}`}
                       onClick={() => setNewGroupIcon(icon)}
                     >
                       {icon}
-                    </div>
+                    </button>
                   ))}
                 </div>
               </div>
-              <button type="submit" className="premium-submit-btn" disabled={isCreatingGroup}>
-                {isCreatingGroup ? (
-                  <span className="loading-text">Creating...</span>
-                ) : (
-                  <>
-                    <span>Create Group</span>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <line x1="5" y1="12" x2="19" y2="12"></line>
-                      <polyline points="12 5 19 12 12 19"></polyline>
-                    </svg>
-                  </>
-                )}
+
+              {formError && <p className="error-text">{formError}</p>}
+              
+              <button type="submit" className="submit-btn" disabled={isCreatingGroup}>
+                {isCreatingGroup ? 'Creating...' : 'Create Group'}
               </button>
             </form>
           </div>

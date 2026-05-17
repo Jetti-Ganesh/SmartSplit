@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import '../styles/GroupDetail.css';
 import { useAddMemberMutation } from '../services/groupAPI';
-import {useCreateExpenseMutation} from '../services/expenseAPI'
+import { useCreateExpenseMutation, useGetExpensesQuery } from '../services/expenseAPI';
 function GroupDetail() {
   const categories = [
     { name: 'Food', icon: '🍕' }, { name: 'Rent', icon: '🏠' },
@@ -16,8 +16,10 @@ function GroupDetail() {
   const location = useLocation();
   const navigate = useNavigate();
   const { groupId } = useParams();
+  
   const [addMemberFn, { isLoading: isAddingMember }] = useAddMemberMutation();
   const [addExpenseFn , {isLoading : isCreatingExpense}] = useCreateExpenseMutation();
+  const { data: expensesRes, isLoading: isLoadingExpenses } = useGetExpensesQuery(groupId);
   // Try to get group from state, otherwise provide a fallback or fetch it
   const group = location.state?.group || {
     id: groupId,
@@ -27,11 +29,12 @@ function GroupDetail() {
     owe: 0,
     owed: 0
   };
-  console.log(group);
+  // console.log(group);
 
   const [activeTab, setActiveTab] = useState('Expenses');
   const [showAddMemberModal, setShowAddMemberModal] = useState(false);
   const [showAddExpenseModal, setShowAddExpenseModal] = useState(false);
+  const [expandedExpenseId, setExpandedExpenseId] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState('Food');
   const [splitType, setSplitType] = useState('Equally');
   const [email, setEmail] = useState('');
@@ -43,6 +46,9 @@ function GroupDetail() {
   const handleBack = () => {
     navigate('/groups');
   };
+  const toggleExpenseDetails = (id) => {
+    setExpandedExpenseId(prev => prev === id ? null : id);
+  };
   function copyToClipBoard(text) {
     navigator.clipboard.writeText(text).then(() => {
       console.log('Text successfully copied!');
@@ -52,10 +58,10 @@ function GroupDetail() {
     });
   }
   async function addMember(email) {
-    console.log(group._id);
-    const groupId = group._id;
-    await addMemberFn({ groupId, email })
-    setShowAddMemberModal(false)
+    const currentGroupId = group._id || groupId;
+    console.log("Adding member to group:", currentGroupId);
+    await addMemberFn({ groupId: currentGroupId, email });
+    setShowAddMemberModal(false);
   }
 
   const handleOpenAddExpense = () => {
@@ -74,7 +80,8 @@ function GroupDetail() {
     setShowAddExpenseModal(true);
   };
 
-  const handleAddExpense = () => {
+  const handleAddExpense = async () => {
+    const splitTypeLower = splitType === 'Equally' ? 'equal' : 'exact';
     let finalSplitBetween = splitBetween;
     
     if (splitType === 'Exact') {
@@ -88,15 +95,22 @@ function GroupDetail() {
       groupId,
       description: expenseDescription,
       amount: Number(expenseAmount),
-      category: selectedCategory,
+      category: selectedCategory === 'Fun' ? 'Entertainment' : selectedCategory,
       paidBy: paidBy,
-      splitType: splitType,
-      splitBetween: finalSplitBetween
+      splitType: splitTypeLower,
+      ...(splitTypeLower === 'equal' ? { selectedMembers: splitBetween } : { splitDetails: finalSplitBetween })
     };
     console.log('Expense Data Object:', expenseData);
-    // Add logic to save expense later
-    addExpenseFn(expenseData);
-    setShowAddExpenseModal(false);
+    try {
+      await addExpenseFn(expenseData).unwrap();
+      // success: close modal and clear fields
+      setShowAddExpenseModal(false);
+      setExpenseAmount('');
+      setExpenseDescription('');
+    } catch (err) {
+      console.error('Failed to create expense:', err);
+      alert(err?.data?.message || err?.message || 'Failed to create expense');
+    }
   };
 
   return (
@@ -170,26 +184,76 @@ function GroupDetail() {
       <div className="tab-content">
         {activeTab === 'Expenses' && (
           <div className="expenses-list">
-            <div className="expense-item">
-              <div className="expense-icon">🍕</div>
-              <div className="expense-details">
-                <h3>Pizza Party</h3>
-                <p>Paid by Amit • Dec 28</p>
+            {isLoadingExpenses ? (
+              <p style={{textAlign: 'center', padding: '20px'}}>Loading expenses...</p>
+            ) : expensesRes?.data?.length > 0 ? (
+              expensesRes.data.map(expense => {
+                const isExpanded = expandedExpenseId === expense._id;
+                // The payer's own portion of the expense is already 'settled' since they paid it.
+                const payerSplit = expense.splitDetails?.find(split => split.userId?._id === expense.paidBy?._id);
+                const settledAmount = payerSplit ? payerSplit.amount : 0;
+                const progressPercentage = expense.amount > 0 ? (settledAmount / expense.amount) * 100 : 0;
+                
+                return (
+                  <div className={`expense-card ${isExpanded ? 'expanded' : ''}`} key={expense._id}>
+                    <div className="expense-item" onClick={() => toggleExpenseDetails(expense._id)} style={{cursor: 'pointer'}}>
+                      <div className="expense-icon">
+                        {categories.find(c => c.name === (expense.category === 'Entertainment' ? 'Fun' : expense.category))?.icon || '➕'}
+                      </div>
+                      <div className="expense-details">
+                        <h3>{expense.description}</h3>
+                        <p>Paid by {expense.paidBy?.name || 'Someone'} • {new Date(expense.date).toLocaleDateString()}</p>
+                      </div>
+                      <div className="expense-amount">
+                        <strong>₹{expense.amount}</strong>
+                      </div>
+                    </div>
+                    
+                    {isExpanded && (
+                      <div className="expense-expanded-content">
+                        <div className="settlement-progress-section">
+                          <div className="progress-header">
+                            <span>Amount Settled</span>
+                            <span>₹{settledAmount} / ₹{expense.amount}</span>
+                          </div>
+                          <div className="progress-bar-container-custom">
+                            <div className="progress-bar-fill-custom" style={{ width: `${progressPercentage}%` }}>
+                              {progressPercentage > 0 && <span className="progress-emoji">💰</span>}
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="expense-split-details">
+                          <div className="paid-by-section">
+                            <h4>Paid By</h4>
+                            <div className="split-user-row">
+                              <span className="split-user-name">{expense.paidBy?.name || 'Someone'}</span>
+                              <span className="split-user-amount text-owed">₹{expense.amount}</span>
+                            </div>
+                          </div>
+                          <div className="owed-by-section">
+                            <h4>Owed By (Not Paid)</h4>
+                            {expense.splitDetails?.filter(split => split.userId?._id !== expense.paidBy?._id).map(split => (
+                              <div className="split-user-row" key={split.userId?._id || Math.random()}>
+                                <span className="split-user-name">{split.userId?.name || 'Unknown'}</span>
+                                <span className="split-user-amount text-owe">₹{split.amount.toFixed(2)}</span>
+                              </div>
+                            ))}
+                            {(!expense.splitDetails || expense.splitDetails.filter(split => split.userId?._id !== expense.paidBy?._id).length === 0) && (
+                              <p className="no-owes-msg">No one else owes for this expense.</p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })
+            ) : (
+              <div className="activity-empty">
+                <p>No expenses yet. Add one!</p>
               </div>
-              <div className="expense-amount">
-                <strong>₹1,200</strong>
-              </div>
-            </div>
-            <div className="expense-item">
-              <div className="expense-icon">🚕</div>
-              <div className="expense-details">
-                <h3>Uber to Airport</h3>
-                <p>Paid by You • Dec 25</p>
-              </div>
-              <div className="expense-amount">
-                <strong>₹850</strong>
-              </div>
-            </div>
+            )}
           </div>
         )}
         {activeTab === 'Members' && (
@@ -225,9 +289,10 @@ function GroupDetail() {
       {/* Add Expense Modal */}
       {showAddExpenseModal && (
         <div className="modal-overlay" onClick={() => setShowAddExpenseModal(false)}>
-          <div className="add-expense-modal" onClick={e => e.stopPropagation()}>
+          <div className="add-expense-modal enhanced-modal" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
               <h2>Add Expense</h2>
+              <p className="modal-subtitle">Track your shared costs</p>
               <button className="close-btn" onClick={() => setShowAddExpenseModal(false)}>×</button>
             </div>
             <div className="modal-content scrollable-content">
@@ -238,7 +303,10 @@ function GroupDetail() {
 
               <div className="input-group left-align">
                 <label>Description</label>
-                <input type="text" placeholder="What was this for?" value={expenseDescription} onChange={(e) => setExpenseDescription(e.target.value)} />
+                <div className="input-with-icon">
+                  <span className="input-icon">📝</span>
+                  <input type="text" placeholder="What was this for?" value={expenseDescription} onChange={(e) => setExpenseDescription(e.target.value)} />
+                </div>
               </div>
 
               <div className="input-group left-align">
@@ -337,7 +405,16 @@ function GroupDetail() {
                 </div>
               )}
 
-              <button className="primary-btn add-expense-submit-btn" onClick={handleAddExpense}>Add Expense</button>
+              <button className="primary-btn enhanced-btn add-expense-submit-btn" onClick={handleAddExpense}>
+                {isCreatingExpense ? (
+                  <span className="loading-text">Adding Expense...</span>
+                ) : (
+                  <>
+                    <span className="btn-icon">💰</span>
+                    <span>Add Expense</span>
+                  </>
+                )}
+              </button>
             </div>
           </div>
         </div>

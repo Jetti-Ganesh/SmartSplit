@@ -1,11 +1,11 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 const baseQuery = fetchBaseQuery({
-    baseUrl: 'http://localhost:3000/api ',
+    baseUrl: 'http://localhost:3000/api',
 
     prepareHeaders: (headers) => {
         const token = localStorage.getItem('token');
-        console.log(token);
-        
+        // console.log(token);
+
         if (token) {
             headers.set('Authorization', `Bearer ${token}`);
         }
@@ -25,7 +25,7 @@ const baseQueryWithAuth = async (args, api, extraOptions) => {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
 
-        
+
         window.location.href = '/login';
     }
 
@@ -38,7 +38,7 @@ export const expenseAPI = createApi({
     endpoints: (builder) =>
     ({
         getExpenses: builder.query({
-            query: () => 'getexpenses',
+            query: (groupId) => `getexpenses/${groupId}`,
             providesTags: ['Expenses']
         }),
         createExpense: builder.mutation({
@@ -51,4 +51,4 @@ export const expenseAPI = createApi({
         })
     })
 })
-export const {useCreateExpenseMutation,useGetExpensesQuery}= expenseAPI;
+export const { useCreateExpenseMutation, useGetExpensesQuery } = expenseAPI;
