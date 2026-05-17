@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useOutletContext } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { fetchAnalytics, seedDummyExpenses } from '../services/analytics.service';
+import { fetchAnalytics } from '../services/analytics.service';
 import TrendChart from '../components/activity/TrendChart';
 import CategoryDonut from '../components/activity/CategoryDonut';
 import SpendHeatmap from '../components/activity/SpendHeatmap';
@@ -59,7 +59,6 @@ export default function Activity() {
   const [data, setData] = useState(null);
   const [activeCat, setActiveCat] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [seedLoading, setSeedLoading] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   // Collapsible state
@@ -76,19 +75,11 @@ export default function Activity() {
       if (res.success) setData(res.data);
     } catch (err) {
       console.error('Failed to load analytics', err);
+      if (err.code === 'UNAUTHORIZED') {
+        navigate('/Login');
+      }
     }
     setLoading(false);
-  };
-
-  const handleSeed = async () => {
-    setSeedLoading(true);
-    try {
-      await seedDummyExpenses();
-      await loadData();
-    } catch (err) {
-      alert('Error seeding data. Check console.');
-    }
-    setSeedLoading(false);
   };
 
   const handlePeriodChange = (newPeriod) => { setPeriod(newPeriod); setActiveCat(null); };
@@ -103,14 +94,6 @@ export default function Activity() {
     <div style={{ padding: 40, textAlign: 'center' }}>
       <div style={{ fontSize: 48, marginBottom: 16 }}>📊</div>
       <p style={{ color: 'var(--text-muted)', marginBottom: 20, fontSize: 15, fontWeight: 600 }}>No spending data for this period.</p>
-      <button onClick={handleSeed} disabled={seedLoading} style={{
-        padding: '10px 24px', borderRadius: 12, background: '#10B981',
-        color: '#fff', border: 'none', cursor: 'pointer', fontSize: 14, fontWeight: 700, fontFamily: "'DM Sans', sans-serif",
-        boxShadow: '0 4px 16px rgba(16,185,129,0.3)', transition: 'opacity 0.2s',
-        opacity: seedLoading ? 0.7 : 1
-      }}>
-        {seedLoading ? '⏳ Seeding...' : '🌱 Seed Demo Data'}
-      </button>
     </div>
   );
 
@@ -137,13 +120,6 @@ export default function Activity() {
               <h2 style={{ fontSize: 22, fontWeight: 800, color: 'var(--text-color)', margin: 0 }}>Activity</h2>
               <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: '4px 0 0', fontWeight: 500 }}>Your spending overview</p>
             </div>
-            <button onClick={handleSeed} title="Seed Demo Data" disabled={seedLoading} style={{
-              background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.2)',
-              borderRadius: 10, padding: '8px 12px', cursor: 'pointer', fontSize: 13,
-              color: '#10B981', fontWeight: 700, fontFamily: "'DM Sans', sans-serif", display: 'flex', alignItems: 'center', gap: 6
-            }}>
-              {seedLoading ? '⏳' : '🌱'} {seedLoading ? 'Seeding...' : 'Demo Data'}
-            </button>
           </div>
         </div>
 
@@ -197,6 +173,58 @@ export default function Activity() {
                 <div className="s-sub">to settle</div>
               </div>
             </FadeInSection>
+
+            {/* Quick Stats */}
+            <FadeInSection className="analytics-section">
+              <div className="section-title">Quick Stats</div>
+              <div className="summary-grid" style={{ padding: 0 }}>
+                {/* CARD 1 — Daily Average */}
+                <div className="summary-card card-blue">
+                  <div className="s-label" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span>📅</span> Daily Avg
+                  </div>
+                  <div className="s-value">₹{data.dailyAvg?.toLocaleString('en-IN') || 0}</div>
+                  <div className="s-sub">this period</div>
+                </div>
+
+                {/* CARD 2 — Biggest Expense */}
+                <div className="summary-card card-purple">
+                  <div className="s-label" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span>🔝</span> Biggest
+                  </div>
+                  {data.topExpense ? (
+                    <>
+                      <div className="s-value" style={{ fontSize: '15px' }}>
+                        {data.topExpense.emoji} {data.topExpense.desc.length > 12 ? `${data.topExpense.desc.slice(0, 12)}...` : data.topExpense.desc}
+                      </div>
+                      <div className="s-sub" style={{ display: 'flex', justifyContent: 'space-between', gap: '4px', width: '100%' }}>
+                        <span>₹{data.topExpense.amount?.toLocaleString('en-IN')}</span>
+                        <span>{data.topExpense.groupName}</span>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="s-value" style={{ fontSize: '15px' }}>No expenses</div>
+                      <div className="s-sub">this period</div>
+                    </>
+                  )}
+                </div>
+
+                {/* CARD 3 — Pending Settlements */}
+                <div 
+                  className={`summary-card ${data.pendingSettlements > 0 ? 'card-amber' : 'card-green'}`}
+                  onClick={() => navigate('/SettleUp')}
+                  style={{ cursor: 'pointer' }}
+                >
+                  <div className="s-label" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span>⏳</span> Pending
+                  </div>
+                  <div className="s-value">{data.pendingSettlements || 0}</div>
+                  <div className="s-sub">settlements</div>
+                </div>
+              </div>
+            </FadeInSection>
+
 
             {/* Trend chart */}
             <FadeInSection className="analytics-section">
@@ -296,7 +324,7 @@ export default function Activity() {
                                       <div className="cem-meta">
                                         <span className="cem-date">{e.date}</span>
                                         <span className="cem-sep">·</span>
-                                        <span className="cem-group">{e.groupName}</span>
+                                        <span className="cem-group">{e.groupIcon} {e.groupName}</span>
                                       </div>
                                     </div>
                                     <div className="cem-amt" style={{ color: c.color }}>
