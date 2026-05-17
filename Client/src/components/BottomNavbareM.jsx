@@ -72,12 +72,12 @@ export default function BottomNavbareM() {
 
   // Derive active tab from current URL path
   const getActiveId = () => {
-    const p = location.pathname;
-    if (p === "/Dashboard") return "dashboard";
-    if (p === "/Groups")    return "groups";
-    if (p === "/Activity")  return "activity";
-    if (p === "/SettleUp")  return "settle";
-    if (p === "/Profile")   return "profile";
+    const p = location.pathname.toLowerCase();
+    if (p === "/dashboard") return "dashboard";
+    if (p.startsWith("/groups")) return "groups";
+    if (p === "/activity")  return "activity";
+    if (p === "/settleup")  return "settle";
+    if (p === "/profile")   return "profile";
     return "dashboard";
   };
 

@@ -387,3 +387,19 @@ body {
 .profile-icon-btn:hover {
   transform: scale(1.1); /* Overriding rotation for profile icon to just scale up */
 }
+
+/* active link and active profile highlights */
+.nav-links a.active {
+  color: var(--accent-cyan) !important;
+}
+
+.nav-links a.active::after {
+  width: 100% !important;
+  background: var(--accent-gradient) !important;
+}
+
+.profile-icon-btn.active {
+  color: var(--accent-cyan) !important;
+  background: var(--bg-card) !important;
+  box-shadow: 0 0 10px rgba(0, 229, 255, 0.2);
+}

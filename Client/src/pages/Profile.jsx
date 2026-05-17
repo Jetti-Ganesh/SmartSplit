@@ -8,10 +8,12 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation, useOutletContext } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
+import axios from "axios";
 import { logout } from "../services/authSlice";
 import { fetchUserProfile, updateUserProfile, clearSuccess } from "../services/profileSlice";
 import ThemeToggle from "../components/ThemeToggle";
 import BottomNavbareM from "../components/BottomNavbareM";
+import SettingsDrawer from "../components/SettingsDrawer";
 import "../styles/Profile.css";
 // ─────────────────────────────────────────────────────
 // ── CONSTANTS 
@@ -294,6 +296,267 @@ function UpiModal({ upiList, defaultUpi, onSave, onClose }) {
   );
 }
 
+function VerifyOtherModal({ profileUser, setShowVerifyPopup }) {
+  const dispatch = useDispatch();
+  const [verifyStep, setVerifyStep] = useState(1);
+  const [verifyInput, setVerifyInput] = useState('');
+  const [verifyOtp, setVerifyOtp] = useState('');
+  const [verifyError, setVerifyError] = useState('');
+  const [verifySuccess, setVerifySuccess] = useState('');
+  const [verifyLoading, setVerifyLoading] = useState(false);
+  const [verifyTimer, setVerifyTimer] = useState(0);
+  const [verifyDevOtp, setVerifyDevOtp] = useState('');
+
+  // countdown timer useEffect
+  useEffect(() => {
+    let interval;
+    if (verifyTimer > 0) {
+      interval = setInterval(() => setVerifyTimer(t => t - 1), 1000);
+    }
+    return () => clearInterval(interval);
+  }, [verifyTimer]);
+
+  const needsPhone = profileUser?.signupMethod === 'email' && !profileUser?.isPhoneVerified;
+  const verifyType = needsPhone ? 'phone' : 'email';
+  const icon = needsPhone ? '📱' : '📧';
+  const label = needsPhone ? 'mobile number' : 'email address';
+
+  const handleSendVerifyOtp = async () => {
+    setVerifyError('');
+    setVerifySuccess('');
+    setVerifyLoading(true);
+    try {
+      let formattedInput = verifyInput.trim();
+      if (verifyType === 'phone') {
+        const digits = formattedInput.replace(/\D/g, '').slice(-10);
+        if (digits.length !== 10) {
+          setVerifyError('Please enter a valid 10-digit mobile number.');
+          setVerifyLoading(false);
+          return;
+        }
+        formattedInput = digits;
+      } else {
+        if (!formattedInput.includes('@')) {
+          setVerifyError('Please enter a valid email address.');
+          setVerifyLoading(false);
+          return;
+        }
+      }
+
+      const payload = verifyType === 'phone' ? { phone: formattedInput } : { email: formattedInput };
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/send-otp`, payload, {
+        withCredentials: true
+      });
+
+      setVerifyTimer(30);
+      setVerifySuccess(res.data.message || 'OTP sent successfully!');
+      if (res.data.devOtp) {
+        setVerifyDevOtp(res.data.devOtp);
+      }
+      setVerifyStep(3);
+    } catch (err) {
+      setVerifyError(err.response?.data?.message || 'Failed to send OTP.');
+    } finally {
+      setVerifyLoading(false);
+    }
+  };
+
+  const handleVerifyOtp = async () => {
+    setVerifyError('');
+    setVerifySuccess('');
+    setVerifyLoading(true);
+    try {
+      // 1. Verify OTP with session
+      await axios.post(`${import.meta.env.VITE_API_URL}/api/verify-otp`, {
+        enteredOtp: verifyOtp
+      }, {
+        withCredentials: true
+      });
+
+      let verifiedValue = verifyInput.trim();
+      if (verifyType === 'phone') {
+        verifiedValue = verifiedValue.replace(/\D/g, '').slice(-10);
+      } else {
+        verifiedValue = verifiedValue.toLowerCase();
+      }
+
+      // 2. Persist to DB using new PATCH /api/profile/verify-contact
+      const token = localStorage.getItem('token');
+      const res = await axios.patch(
+        `${import.meta.env.VITE_API_URL}/api/profile/verify-contact`,
+        { type: verifyType, value: verifiedValue },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          withCredentials: true
+        }
+      );
+
+      setVerifySuccess('✅ Verified successfully!');
+      
+      // Update Redux profile & localstorage
+      dispatch({ type: 'profile/setUser', payload: res.data.user });
+      localStorage.setItem('user', JSON.stringify(res.data.user));
+      dispatch(fetchUserProfile());
+
+      setTimeout(() => {
+        sessionStorage.setItem('dismissedVerifyPopup', 'true');
+        setShowVerifyPopup(false);
+      }, 1500);
+    } catch (err) {
+      setVerifyError(err.response?.data?.message || 'Invalid OTP.');
+    } finally {
+      setVerifyLoading(false);
+    }
+  };
+
+  const handleCancel = () => {
+    sessionStorage.setItem('dismissedVerifyPopup', 'true');
+    setShowVerifyPopup(false);
+  };
+
+  const digits = verifyType === 'phone' ? verifyInput.replace(/\D/g, '').slice(-10) : '';
+
+  return (
+    <div className="modal-overlay">
+      <div className="modal-sheet" style={{ maxWidth: '400px', animation: 'slideUpFade 0.4s ease' }} onClick={(e) => e.stopPropagation()}>
+        <div className="modal-handle" />
+
+        {/* Progress dots at top of modal */}
+        <div className="verify-step-dots">
+          <div className={`verify-step-dot ${verifyStep === 1 ? 'active' : ''}`} />
+          <div className={`verify-step-dot ${verifyStep === 2 ? 'active' : ''}`} />
+          <div className={`verify-step-dot ${verifyStep === 3 ? 'active' : ''}`} />
+        </div>
+
+        {/* Step 1 — Intro */}
+        {verifyStep === 1 && (
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: '64px', margin: '10px 0 20px' }}>🔐</div>
+            <div className="modal-title" style={{ marginBottom: '12px' }}>Secure Your Account</div>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '14px', lineHeight: '1.5', marginBottom: '24px' }}>
+              {needsPhone
+                ? "You signed up with email. Add your mobile number to secure your account and recover it if you lose access."
+                : "You signed up with mobile. Add your email address to secure your account and recover it if you lose access."}
+            </p>
+            <div className="modal-actions" style={{ display: 'flex', gap: '12px' }}>
+              <button className="modal-btn modal-cancel" style={{ flex: 1 }} onClick={handleCancel}>
+                Maybe Later
+              </button>
+              <button 
+                className="modal-btn modal-save" 
+                style={{ flex: 1, background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)', border: 'none', color: '#fff' }} 
+                onClick={() => setVerifyStep(2)}
+              >
+                Verify Now →
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Step 2 — Enter Contact + Send OTP */}
+        {verifyStep === 2 && (
+          <div>
+            <div className="modal-title" style={{ marginBottom: '8px' }}>Verify Your {label}</div>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '14px', marginBottom: '20px' }}>
+              Enter your {label} below. We'll send you a 6-digit OTP.
+            </p>
+
+            <div className="modal-field" style={{ marginBottom: '16px' }}>
+              <input
+                type={verifyType === 'phone' ? 'tel' : 'email'}
+                placeholder={verifyType === 'phone' ? '+91 XXXXXXXXXX' : 'you@example.com'}
+                value={verifyInput}
+                onChange={(e) => setVerifyInput(e.target.value)}
+                style={{ width: '100%', height: 'auto', background: 'var(--bg-input)', border: '1px solid var(--border-input)', color: 'var(--text-primary)' }}
+              />
+            </div>
+
+            {verifyError && <p style={{ color: '#f43f5e', fontSize: '14px', marginBottom: '16px' }}>{verifyError}</p>}
+            {verifySuccess && <p style={{ color: '#10d9a0', fontSize: '14px', marginBottom: '16px' }}>{verifySuccess}</p>}
+
+            <div className="modal-actions" style={{ flexDirection: 'column', gap: '12px' }}>
+              <button 
+                className="modal-btn modal-save" 
+                style={{ width: '100%', background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)', border: 'none', color: '#fff' }} 
+                onClick={handleSendVerifyOtp}
+                disabled={verifyLoading || verifyTimer > 0}
+              >
+                {verifyLoading ? 'Sending...' : verifyTimer > 0 ? `Resend in ${verifyTimer}s` : 'Send OTP'}
+              </button>
+              <button className="resend-link" style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', alignSelf: 'center' }} onClick={() => setVerifyStep(1)}>
+                Back
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Step 3 — Enter OTP */}
+        {verifyStep === 3 && (
+          <div>
+            <div className="modal-title" style={{ marginBottom: '8px' }}>Enter OTP</div>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '14px', marginBottom: '20px' }}>
+              {verifyType === 'phone'
+                ? `OTP sent to +91 ******${digits.slice(-4)}`
+                : `OTP sent to ${verifyInput[0]}***@${verifyInput.split('@')[1]}`}
+            </p>
+
+            {verifyDevOtp && (
+              <p className="dev-otp-hint" style={{ background: 'rgba(234, 179, 8, 0.1)', color: '#eab308', padding: '8px 12px', borderRadius: '6px', fontSize: '13px', margin: '0 0 16px 0', textAlign: 'center' }}>
+                🔑 Dev Mode OTP: <strong>{verifyDevOtp}</strong>
+              </p>
+            )}
+
+            <div className="modal-field" style={{ marginBottom: '16px' }}>
+              <input
+                type="text"
+                maxLength={6}
+                placeholder="Enter 6-digit OTP"
+                value={verifyOtp}
+                onChange={(e) => setVerifyOtp(e.target.value.replace(/\D/g, ''))}
+                style={{
+                  textAlign: 'center',
+                  letterSpacing: '8px',
+                  fontSize: '24px',
+                  fontWeight: '600',
+                  width: '100%',
+                  height: 'auto',
+                  background: 'var(--bg-input)',
+                  border: '1px solid var(--border-input)',
+                  color: 'var(--text-primary)'
+                }}
+              />
+            </div>
+
+            {verifyError && <p style={{ color: '#f43f5e', fontSize: '14px', marginBottom: '16px' }}>{verifyError}</p>}
+            {verifySuccess && <p style={{ color: '#10d9a0', fontSize: '14px', marginBottom: '16px' }}>{verifySuccess}</p>}
+
+            <div className="modal-actions" style={{ flexDirection: 'column', gap: '12px' }}>
+              <button 
+                className="modal-btn modal-save" 
+                style={{ width: '100%', background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)', border: 'none', color: '#fff' }} 
+                onClick={handleVerifyOtp}
+                disabled={verifyLoading}
+              >
+                {verifyLoading ? 'Verifying...' : 'Verify OTP'}
+              </button>
+              <div style={{ textAlign: 'center', marginTop: '8px' }}>
+                {verifyTimer > 0 ? (
+                  <span style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>Resend OTP in {verifyTimer}s</span>
+                ) : (
+                  <button className="resend-link" style={{ background: 'none', border: 'none', color: '#3b82f6', cursor: 'pointer', fontSize: '13px', fontWeight: '600' }} onClick={handleSendVerifyOtp}>
+                    Resend OTP
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+      </div>
+    </div>
+  );
+}
+
 // ─────────────────────────────────────────────────────
 // ── MAIN EXPORT
 // ─────────────────────────────────────────────────────
@@ -303,11 +566,106 @@ export default function ProfilePage() {
   const location  = useLocation();
   const { isDark, toggleTheme } = useOutletContext();
   const dispatch = useDispatch();
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+
+  // ── Verify modal state ──────────────────────────────────────
+  const [verifyModal, setVerifyModal] = useState(null); // 'phone' | 'email' | null
+  const [verifyInput, setVerifyInput] = useState('');
+  const [verifyOtp, setVerifyOtp] = useState('');
+  const [verifyStep, setVerifyStep] = useState(1); // 1 = enter contact, 2 = enter OTP
+  const [verifyError, setVerifyError] = useState('');
+  const [verifySuccess, setVerifySuccess] = useState('');
+  const [verifyLoading, setVerifyLoading] = useState(false);
+  const [verifyDevOtp, setVerifyDevOtp] = useState('');
+  const [verifyTimer, setVerifyTimer] = useState(0);
+
+  useEffect(() => {
+    let t; if (verifyTimer > 0) t = setInterval(() => setVerifyTimer(p => p - 1), 1000);
+    return () => clearInterval(t);
+  }, [verifyTimer]);
+
+  const openVerifyModal = (type) => {
+    setVerifyModal(type);
+    setVerifyInput(type === 'phone' ? (displayUser?.phone || '') : (displayUser?.email || ''));
+    setVerifyOtp('');
+    setVerifyStep(1);
+    setVerifyError('');
+    setVerifySuccess('');
+    setVerifyDevOtp('');
+  };
+
+  const handleSendVerifyOtp = async () => {
+    setVerifyError(''); setVerifyLoading(true);
+    try {
+      const payload = verifyModal === 'phone' ? { phone: verifyInput } : { email: verifyInput };
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/send-otp`, payload,
+        { withCredentials: true });
+      setVerifyTimer(30);
+      setVerifyStep(2);
+      if (res.data.devOtp) setVerifyDevOtp(res.data.devOtp);
+    } catch (err) {
+      setVerifyError(err.response?.data?.message || 'Failed to send OTP.');
+    } finally { setVerifyLoading(false); }
+  };
+
+  const handleConfirmVerifyOtp = async () => {
+    setVerifyError(''); setVerifyLoading(true);
+    try {
+      // First verify the OTP with session
+      await axios.post(`${import.meta.env.VITE_API_URL}/api/verify-otp`, { enteredOtp: verifyOtp },
+        { withCredentials: true });
+
+      // Then persist to DB via profile endpoint
+      const token = localStorage.getItem('token');
+      const endpoint = verifyModal === 'phone'
+        ? `${import.meta.env.VITE_API_URL}/api/profile/verify-phone`
+        : `${import.meta.env.VITE_API_URL}/api/profile/verify-email`;
+      const payload = verifyModal === 'phone'
+        ? { phone: verifyInput }
+        : { email: verifyInput };
+      const res = await axios.patch(endpoint, payload, {
+        headers: { Authorization: `Bearer ${token}` },
+        withCredentials: true
+      });
+
+      // Update Redux profile with fresh user
+      dispatch({ type: 'profile/setUser', payload: res.data.user });
+      localStorage.setItem('user', JSON.stringify(res.data.user));
+
+      setVerifySuccess(verifyModal === 'phone' ? '✅ Phone verified!' : '✅ Email verified!');
+      setTimeout(() => setVerifyModal(null), 1500);
+      dispatch(fetchUserProfile());
+    } catch (err) {
+      setVerifyError(err.response?.data?.message || 'Verification failed.');
+    } finally { setVerifyLoading(false); }
+  };
 
   const active = getActiveId(location.pathname);
 
   // Redux selectors
   const { user: profileUser, loading, error, success } = useSelector(state => state.profile);
+
+  const [showVerifyPopup, setShowVerifyPopup] = useState(false);
+
+  useEffect(() => {
+    if (!profileUser) return;
+
+    // 1. Primary priority: Verify missing email/phone
+    const dismissed = sessionStorage.getItem('dismissedVerifyPopup');
+    const needsPhone = profileUser.signupMethod === 'email' && !profileUser.isPhoneVerified;
+    const needsEmail = profileUser.signupMethod === 'phone' && !profileUser.isEmailVerified;
+    if ((needsPhone || needsEmail) && dismissed !== 'true') {
+      setShowVerifyPopup(true);
+      return;
+    }
+
+    // 2. Secondary priority: If verified but upiList is empty, prompt for UPI
+    const promptedUpi = sessionStorage.getItem('promptedUpi');
+    if (profileUser.upiList && profileUser.upiList.length === 0 && promptedUpi !== 'true') {
+      setModal("upi");
+      sessionStorage.setItem('promptedUpi', 'true');
+    }
+  }, [profileUser]);
 
   const [prefs, setPrefs] = useState(() =>
     Object.fromEntries(PREFERENCES.map((p) => [p.id, p.defaultOn]))
@@ -386,7 +744,7 @@ export default function ProfilePage() {
           <span className="logo-icon">⚡</span>
           <span>SplitSmart</span>
         </div>
-        <button className="mobile-top-settings" onClick={() => navigate("/Settings")}>
+        <button className="mobile-top-settings" onClick={() => setIsSettingsOpen(true)}>
           ⚙️
         </button>
       </div>
@@ -454,22 +812,49 @@ export default function ProfilePage() {
                   : getInitials(displayUser.name)
                 }
               </div>
-              <button
-                className="edit-avatar-btn"
-                onClick={() => setModal("edit")}
-              >
-                📸
-              </button>
+              <button className="edit-avatar-btn" onClick={() => setModal("edit")}>📸</button>
             </div>
             <div className="hero-info">
-              <h1>{displayUser.name}</h1>
-              <p>{displayUser.email}</p>
+              <h1>
+                {displayUser.name}
+                {displayUser.isEmailVerified && displayUser.isPhoneVerified && (
+                  <span className="fully-verified-badge" style={{ marginLeft: 10, fontSize: 11 }}>✅ Fully Verified</span>
+                )}
+              </h1>
+              <p>{displayUser.email || displayUser.phone}</p>
               <div className="user-badge-stack">
                 <span className="premium-badge">Verified User</span>
                 <span className="premium-badge" style={{ borderColor: 'rgba(124, 58, 237, 0.2)', color: '#7c3aed' }}>Beta Tester</span>
               </div>
             </div>
           </section>
+
+          {/* ── 1b. Verification Banners ── */}
+          {profileUser && (() => {
+            const needsPhone = profileUser.signupMethod === 'email' && !profileUser.isPhoneVerified;
+            const needsEmail = profileUser.signupMethod === 'phone' && !profileUser.isEmailVerified;
+            if (needsPhone) return (
+              <div className="verify-banner">
+                <div className="verify-banner-icon">📱</div>
+                <div className="verify-banner-text">
+                  <strong>Add your mobile number</strong>
+                  <span>Secure your account with phone verification</span>
+                </div>
+                <button className="verify-banner-btn" onClick={() => openVerifyModal('phone')}>Verify Now →</button>
+              </div>
+            );
+            if (needsEmail) return (
+              <div className="verify-banner">
+                <div className="verify-banner-icon">📧</div>
+                <div className="verify-banner-text">
+                  <strong>Add your email address</strong>
+                  <span>Get notifications and recover your account</span>
+                </div>
+                <button className="verify-banner-btn" onClick={() => openVerifyModal('email')}>Verify Now →</button>
+              </div>
+            );
+            return null;
+          })()}
 
           {/* ── 2. Statistics Bento Grid ── */}
           <section className="stats-bento">
@@ -508,12 +893,62 @@ export default function ProfilePage() {
                 <p>{displayUser.name}</p>
               </div>
               <div className="info-item-premium">
-                <label>Mobile Number</label>
-                <p>{displayUser.phone}</p>
+                <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <span>Mobile Number</span>
+                  {displayUser.isPhoneVerified ? (
+                    <span style={{ color: '#10d9a0', fontSize: '12px', fontWeight: 'bold' }}>✓ Verified</span>
+                  ) : (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span style={{ color: '#ef4444', fontSize: '12px' }}>Unverified</span>
+                      <button 
+                        onClick={() => openVerifyModal('phone')}
+                        style={{
+                          background: 'rgba(59, 130, 246, 0.1)',
+                          border: '1px solid rgba(59, 130, 246, 0.2)',
+                          color: '#3b82f6',
+                          padding: '2px 8px',
+                          borderRadius: '4px',
+                          fontSize: '11px',
+                          fontWeight: '600',
+                          cursor: 'pointer',
+                          transition: 'all 0.2s ease'
+                        }}
+                      >
+                        Verify
+                      </button>
+                    </div>
+                  )}
+                </label>
+                <p>{displayUser.phone || 'Not added'}</p>
               </div>
               <div className="info-item-premium">
-                <label>Email Address</label>
-                <p>{displayUser.email}</p>
+                <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <span>Email Address</span>
+                  {displayUser.isEmailVerified ? (
+                    <span style={{ color: '#10d9a0', fontSize: '12px', fontWeight: 'bold' }}>✓ Verified</span>
+                  ) : (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span style={{ color: '#ef4444', fontSize: '12px' }}>Unverified</span>
+                      <button 
+                        onClick={() => openVerifyModal('email')}
+                        style={{
+                          background: 'rgba(59, 130, 246, 0.1)',
+                          border: '1px solid rgba(59, 130, 246, 0.2)',
+                          color: '#3b82f6',
+                          padding: '2px 8px',
+                          borderRadius: '4px',
+                          fontSize: '11px',
+                          fontWeight: '600',
+                          cursor: 'pointer',
+                          transition: 'all 0.2s ease'
+                        }}
+                      >
+                        Verify
+                      </button>
+                    </div>
+                  )}
+                </label>
+                <p>{displayUser.email || 'Not added'}</p>
               </div>
             </section>
 
@@ -570,6 +1005,88 @@ export default function ProfilePage() {
           onSave={handleSaveUpi}
           onClose={() => setModal(null)}
         />
+      )}
+      {showVerifyPopup === true && modal !== 'edit' && modal !== 'upi' && (
+        <VerifyOtherModal
+          profileUser={profileUser}
+          setShowVerifyPopup={setShowVerifyPopup}
+        />
+      )}
+
+      <SettingsDrawer 
+        isOpen={isSettingsOpen} 
+        onClose={() => setIsSettingsOpen(false)} 
+        isDark={isDark} 
+        toggleTheme={toggleTheme} 
+      />
+
+      {/* ── Verify Phone/Email Modal ── */}
+      {verifyModal && (
+        <div className="verify-modal-overlay" onClick={() => setVerifyModal(null)}>
+          <div className="verify-modal" onClick={e => e.stopPropagation()}>
+            <h3>{verifyModal === 'phone' ? '📱 Verify Phone Number' : '📧 Verify Email Address'}</h3>
+            <p>
+              {verifyModal === 'phone'
+                ? 'Enter your 10-digit mobile number. We will send an OTP to verify it.'
+                : 'Enter your email address. We will send an OTP to verify it.'}
+            </p>
+
+            {verifyError && <p className="error-msg">{verifyError}</p>}
+            {verifySuccess && <p className="success-msg">{verifySuccess}</p>}
+
+            {verifyStep === 1 && (
+              <>
+                <div className="input-wrapper" style={{ marginBottom: 16 }}>
+                  <input
+                    type={verifyModal === 'phone' ? 'tel' : 'email'}
+                    className="pill-input"
+                    style={{ paddingLeft: 20 }}
+                    placeholder={verifyModal === 'phone' ? '+91 XXXXXXXXXX' : 'you@example.com'}
+                    value={verifyInput}
+                    onChange={e => setVerifyInput(e.target.value)}
+                  />
+                </div>
+                <div className="verify-modal-actions">
+                  <button className="verify-modal-cancel" onClick={() => setVerifyModal(null)}>Cancel</button>
+                  <button className="solid-btn" style={{ flex: 1, margin: 0, width: 'auto' }}
+                    onClick={handleSendVerifyOtp} disabled={verifyLoading}>
+                    {verifyLoading ? 'Sending...' : 'Send OTP'}
+                  </button>
+                </div>
+              </>
+            )}
+
+            {verifyStep === 2 && (
+              <>
+                {verifyDevOtp && (
+                  <p className="dev-otp-hint">📱 Dev mode — OTP: <strong>{verifyDevOtp}</strong></p>
+                )}
+                <div className="input-wrapper" style={{ marginBottom: 12 }}>
+                  <input
+                    type="text" maxLength={6}
+                    className="pill-input"
+                    style={{ paddingLeft: 20, textAlign: 'center', letterSpacing: 10, fontSize: 20 }}
+                    placeholder="• • • • • •"
+                    value={verifyOtp}
+                    onChange={e => setVerifyOtp(e.target.value.replace(/\D/g, ''))}
+                  />
+                </div>
+                <div className="resend-row" style={{ marginBottom: 12 }}>
+                  <button className="resend-link" onClick={handleSendVerifyOtp} disabled={verifyTimer > 0}>
+                    {verifyTimer > 0 ? `Resend in ${verifyTimer}s` : 'Resend OTP'}
+                  </button>
+                </div>
+                <div className="verify-modal-actions">
+                  <button className="verify-modal-cancel" onClick={() => setVerifyStep(1)}>← Back</button>
+                  <button className="solid-btn" style={{ flex: 1, margin: 0, width: 'auto' }}
+                    onClick={handleConfirmVerifyOtp} disabled={verifyLoading}>
+                    {verifyLoading ? 'Verifying...' : 'Confirm'}
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
       )}
 
     </div>

@@ -101,6 +101,8 @@ const profileSlice = createSlice({
         state.user = action.payload;
         state.error = null;
         state.success = true;
+        // Keep auth slice sync'd by updating local storage
+        localStorage.setItem('user', JSON.stringify(action.payload));
       })
       .addCase(updateUserProfile.rejected, (state, action) => {
         state.loading = false;

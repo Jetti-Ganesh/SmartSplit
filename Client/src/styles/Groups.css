@@ -8,6 +8,21 @@
   margin: 0 auto;
 }
 
+@keyframes slideDownFromTop {
+  from {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.groups-container > * {
+  animation: slideDownFromTop 0.5s ease-out forwards;
+}
+
 /* Header */
 .groups-header {
   display: flex;
@@ -281,6 +296,11 @@
 
 /* Responsive */
 @media (max-width: 768px) {
+  .groups-container {
+    padding-top: 20px;
+    padding-bottom: 90px;
+  }
+
   .groups-header {
     flex-direction: column;
     align-items: flex-start;
@@ -320,10 +340,13 @@
   border-radius: 20px;
   width: 90%;
   max-width: 480px;
+  max-height: 85vh;
   box-shadow: 0 20px 60px rgba(15, 23, 42, 0.3);
   border: 1px solid var(--border-color);
   animation: modalFadeIn 0.3s ease;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 @keyframes modalFadeIn {
@@ -332,6 +355,7 @@
 }
 
 .modal-header {
+  flex-shrink: 0;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -369,6 +393,8 @@
   display: flex;
   flex-direction: column;
   gap: 24px;
+  overflow-y: auto;
+  flex: 1;
 }
 
 .form-group {

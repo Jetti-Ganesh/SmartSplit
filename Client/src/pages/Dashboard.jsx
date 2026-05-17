@@ -1,6 +1,8 @@
 import { useOutletContext, useNavigate, useLocation, data } from "react-router-dom";
 import "../styles/Dashboard.css";
 import BottomNavbareM from "../components/BottomNavbareM";
+import SettingsDrawer from "../components/SettingsDrawer";
+import { useState } from "react";
 import {  useGetGroupsQuery } from "../services/groupAPI";
 // ── Static data ───────────────────────────────────────────────────────────────
 // const USER = { name: "Rahul", email: "rahul@email.com", initial: "R" };
@@ -29,6 +31,7 @@ export default function Dashboard() {
   const { isDark, toggleTheme } = useOutletContext();
   const navigate = useNavigate();
   const location = useLocation();
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const { data: Groupdata, isLoading: isFetchingGroups } = useGetGroupsQuery();
   // console.log(Groupdata);
 
@@ -66,7 +69,7 @@ export default function Dashboard() {
           <span className="logo-icon">💸</span>
           <span>SplitSmart</span>
         </div>
-        <button className="mobile-top-settings" onClick={() => navigate("/Settings")}>
+        <button className="mobile-top-settings" onClick={() => setIsSettingsOpen(true)}>
           ⚙️
         </button>
       </div>
@@ -190,6 +193,12 @@ export default function Dashboard() {
       {/* ── MOBILE BOTTOM NAV ── */}
       <BottomNavbareM />
 
+      <SettingsDrawer 
+        isOpen={isSettingsOpen} 
+        onClose={() => setIsSettingsOpen(false)} 
+        isDark={isDark} 
+        toggleTheme={toggleTheme} 
+      />
     </div>
   );
 }

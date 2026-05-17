@@ -578,3 +578,25 @@ body.light {
   transform: translateY(-2px);
   box-shadow: 0 6px 16px rgba(0, 229, 255, 0.3);
 }
+
+.verify-step-dots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.verify-step-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #e5e7eb;
+  border: 2px solid #d1d5db;
+  transition: all 0.3s ease;
+}
+
+.verify-step-dot.active {
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  border-color: transparent;
+  transform: scale(1.2);
+}

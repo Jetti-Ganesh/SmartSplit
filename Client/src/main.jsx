@@ -15,6 +15,7 @@ import Profile from './pages/Profile.jsx'
 import SettleUp from './pages/SettleUp.jsx'
 import Activity from './pages/Activity.jsx'
 import Settings from './pages/settings.jsx'
+import ForgotPassword from './pages/ForgotPassword.jsx'
 const router = createBrowserRouter([
   {
     path: "/",
@@ -52,9 +53,13 @@ const router = createBrowserRouter([
         path: "/Activity",
         element: <Activity></Activity>
       },
-     {
-      path: "/Settings",
-      element: <Settings></Settings>
+      {
+       path: "/Settings",
+       element: <Settings></Settings>
+      },
+      {
+        path: "/forgot-password",
+        element: <ForgotPassword />
       },
       {
         path: "/groups/:groupId",

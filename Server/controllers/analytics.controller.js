@@ -138,7 +138,7 @@ exports.getAnalytics = async (req, res) => {
             emoji: categoryEmojis[e.category] || '📦',
             color: categoryColors[e.category] || '#6B7280',
             paid: 'You',
-            share: e.participants.find(p => p.userId.toString() === userId.toString())?.share || e.amount,
+            share: e.participants?.find(p => p.userId && p.userId.toString() === userId.toString())?.share || e.amount,
             total: e.amount,
             date: `${e.date.getDate()} ${e.date.toLocaleString('default', { month: 'short' })}`,
             groupName: e.groupId ? e.groupId.name : 'Unknown'

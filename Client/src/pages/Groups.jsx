@@ -1,6 +1,10 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import { useCreateGroupMutation, useGetGroupsQuery } from '../services/groupAPI';
+import BottomNavbareM from '../components/BottomNavbareM';
+import SettingsDrawer from '../components/SettingsDrawer';
+import { useOutletContext } from 'react-router-dom';
 import '../styles/Groups.css';
 
 const PREDEFINED_ICONS = ['🏠', '🏨', '✈️', '🎉', '🛒', '⛱️', '🎓', '⚽', '🎮', '🏪', '🚗', '👥'];
@@ -9,6 +13,9 @@ function Groups() {
   const { data, isLoading: isFetchingGroups } = useGetGroupsQuery();
   // const [groups, setGroups] = useState('');
   const navigate = useNavigate();
+  const { isDark, toggleTheme } = useOutletContext();
+  const { user: loggedInUser } = useSelector(state => state.auth);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newGroupName, setNewGroupName] = useState('');
   const [newGroupIcon, setNewGroupIcon] = useState('🏠');
@@ -49,8 +56,19 @@ function Groups() {
   // console.log(data);
 
   return (
+    <>
+      {/* ── MOBILE TOP BAR ── */}
+      <div className="mobile-top-bar">
+        <div className="mobile-top-logo" onClick={() => navigate("/")}>
+          <span className="logo-icon">⚡</span>
+          <span>SplitSmart</span>
+        </div>
+        <button className="mobile-top-settings" onClick={() => setIsSettingsOpen(true)}>
+          ⚙️
+        </button>
+      </div>
 
-    <div className="groups-container">
+      <div className="groups-container">
       <div className="groups-header">
         <div className="header-text">
           <h1>My Groups</h1>
@@ -102,8 +120,19 @@ function Groups() {
             <button className="join-now-btn" onClick={() => setIsModalOpen(true)}>Create Group</button>
           </div>
         ) : (
-          data.data.map(group => (
-            <div key={group._id} className="group-card" onClick={() => navigate(`/groups/${group._id}`, { state: { group } })}>
+          data.data.map(group => {
+            // Pass updated loggedInUser name into stale router state so GroupDetail stays fresh
+            const enrichedGroup = {
+              ...group,
+              members: group.members.map(m => ({
+                ...m,
+                userId: m.userId?._id === loggedInUser?._id
+                  ? { ...m.userId, name: loggedInUser.name }
+                  : m.userId
+              }))
+            };
+            return (
+            <div key={group._id} className="group-card" onClick={() => navigate(`/groups/${group._id}`, { state: { group: enrichedGroup } })}>
               <div className="group-info">
                 <div className="group-avatar" style={group.icon ? { fontSize: '24px' } : {}}>
                   {group.icon ? group.icon : group.name.substring(0, 2).toUpperCase()}
@@ -133,7 +162,8 @@ function Groups() {
                 )}
               </div>
             </div>
-          ))
+            );
+          })
         )}
       </div>
 
@@ -198,7 +228,19 @@ function Groups() {
           </div>
         </div>
       )}
+
+      {/* ── MOBILE BOTTOM NAV ── */}
+      <BottomNavbareM />
+
     </div>
+
+      <SettingsDrawer 
+        isOpen={isSettingsOpen} 
+        onClose={() => setIsSettingsOpen(false)} 
+        isDark={isDark} 
+        toggleTheme={toggleTheme} 
+      />
+    </>
   );
 }
 

@@ -190,6 +190,13 @@ function SettleUp() {
       </main>
 
       {isLoggedIn && <BottomNavbareM />}
+
+      <SettingsDrawer 
+        isOpen={isSettingsOpen} 
+        onClose={() => setIsSettingsOpen(false)} 
+        isDark={isDark} 
+        toggleTheme={toggleTheme} 
+      />
     </div>
   );
 }
