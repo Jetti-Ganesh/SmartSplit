@@ -1,7 +1,8 @@
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation, useOutletContext } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import '../styles/SettleUp.css'
 import { useState, useEffect } from 'react';
+import SettingsDrawer from '../components/SettingsDrawer';
 import BottomNavbareM from '../components/BottomNavbareM';
 import { useGetGroupsQuery } from '../services/groupAPI';
 import { useGetBalancesQuery, useRecordSettlementMutation } from '../services/settleUpAPI';
@@ -10,6 +11,9 @@ function SettleUp() {
   const { isLoggedIn, user: currentUser } = useSelector((state) => state.auth);
   const currentUserId = currentUser?._id || currentUser?.id || currentUser?.userId;
   const navigate = useNavigate();
+  const location = useLocation();
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const { isDark, toggleTheme } = useOutletContext();
 
   const { data: groupsResponse, isLoading: groupsLoading } = useGetGroupsQuery();
   const groups = groupsResponse?.data || [];
@@ -45,9 +49,12 @@ function SettleUp() {
     .filter((debt) => debt.to === currentUserId)
     .reduce((sum, debt) => sum + debt.amount, 0);
 
+  const fmt = (v) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(v);
+  const groupNet = youAreOwed - youOwe;
+
   const handlePayViaUpi = (debt) => {
     const recipientName = debt.toName || debt.to;
-    const upiUrl = `upi://pay?pa=demo@upi&pn=${encodeURIComponent(recipientName)}&am=${debt.amount}&cu=INR`;
+    const upiUrl = `upi://pay?pa=9848247279-2@axl&pn=${encodeURIComponent(recipientName)}&am=${debt.amount}&cu=INR`;
     window.open(upiUrl, '_blank');
   };
 
@@ -110,15 +117,23 @@ function SettleUp() {
 
           <div className="settle-container">
             <div className="balance-card">
-              <div className="balance-title">{currentGroup?.name || 'Group'} balance</div>
-              <div className="balance-grid">
-                <div className="balance-box owe">
-                  <div className="box-label">You Owe</div>
-                  <div className="box-amount">₹{youOwe.toFixed(0)}</div>
-                </div>
-                <div className="balance-box owed">
-                  <div className="box-label">You're Owed</div>
-                  <div className="box-amount">₹{youAreOwed.toFixed(0)}</div>
+              <div className="panel-header">
+                <div className="balance-expanded">
+                  <div className="balance-title">{currentGroup?.name || 'Group'} balance</div>
+                  <div className="balance-grid-expanded">
+                    <div className="balance-box owe large">
+                      <div className="box-label">You Owe</div>
+                      <div className="box-amount">{fmt(youOwe)}</div>
+                    </div>
+                    <div className="balance-box net large">
+                      <div className="box-label">Net</div>
+                      <div className="box-amount" style={{ color: groupNet < 0 ? 'var(--accent-red)' : 'var(--accent-green)' }}>{fmt(groupNet)}</div>
+                    </div>
+                    <div className="balance-box owed large">
+                      <div className="box-label">You're Owed</div>
+                      <div className="box-amount">{fmt(youAreOwed)}</div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -139,7 +154,7 @@ function SettleUp() {
                     : `${debt.fromName || debt.from} → You`;
 
                   return (
-                    <div key={`${debt.from}-${debt.to}-${debt.amount}`} className={`debt-item ${isIncoming ? 'incoming' : ''}`}>
+                    <div key={`${debt.from}-${debt.to}-${debt.amount}`} className={`debt-item ${isIncoming ? 'incoming' : 'outgoing'}`}>
                       <div className="debt-left">
                         <div className="debt-desc">{label}</div>
                         <div className="debt-actions">
@@ -153,7 +168,7 @@ function SettleUp() {
                           </button>
                         </div>
                       </div>
-                      <div className="debt-amount">₹{debt.amount.toFixed(0)}</div>
+                      <div className="debt-amount">{fmt(debt.amount)}</div>
                     </div>
                   );
                 })}
@@ -169,7 +184,7 @@ function SettleUp() {
                     <div className="history-desc">{s.from?.name || s.from} paid {s.to?.name || s.to}</div>
                     <div className="history-date">{new Date(s.settledAt || s.date).toLocaleDateString()}</div>
                   </div>
-                  <div className="history-amount">₹{s.amount.toFixed(0)}</div>
+                  <div className="history-amount">{fmt(s.amount)}</div>
                 </div>
               ))}
             </div>
@@ -179,11 +194,11 @@ function SettleUp() {
 
       {isLoggedIn && <BottomNavbareM />}
 
-      <SettingsDrawer 
-        isOpen={isSettingsOpen} 
-        onClose={() => setIsSettingsOpen(false)} 
-        isDark={isDark} 
-        toggleTheme={toggleTheme} 
+      <SettingsDrawer
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+        isDark={isDark}
+        toggleTheme={toggleTheme}
       />
     </div>
   );
