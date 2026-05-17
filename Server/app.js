@@ -27,10 +27,25 @@ app.use(session({
         maxAge : 600000   // Prevents client-side JS from reading the cookie
     } //session expires in 10mins
 }));
+const allowedOrigin = process.env.CLIENT_URL || 'http://localhost:5173';
+
 app.use(cors({
-  origin: process.env.CLIENT_URL,  // your Vite dev port
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps, curl, postman)
+    if (!origin) return callback(null, true);
+    
+    // Normalize both by stripping any trailing slash
+    const normalizedOrigin = origin.replace(/\/$/, "");
+    const normalizedAllowed = allowedOrigin.replace(/\/$/, "");
+    
+    if (normalizedOrigin === normalizedAllowed || normalizedOrigin === 'http://localhost:5173') {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true
-}))
+}));
 
 // Increase JSON payload limit to handle base64 images (up to 5MB)
 app.use(express.json({ limit: '5mb' }));
