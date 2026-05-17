@@ -4,6 +4,7 @@ const express = require('express');
 const app = express();
 const cors = require('cors');
 const session = require('express-session');
+const MongoStore = require('connect-mongo'); 
 
 const loginRoutes = require("./routes/login.route");
 const signUpRoutes = require("./routes/signUp.route");
@@ -14,12 +15,16 @@ const profileRoutes = require("./routes/profile.route");
 const analyticsRoutes = require("./routes/analytics.routes");
 const expensesRoutes = require("./routes/expenses.route");
 const forgotPasswordRoutes = require("./routes/forgotPassword.route");
-const settleUpRoutes = require("./routes/settlup.route"); // ← add this
+const settleUpRoutes = require("./routes/settlup.route"); // ← add this 
 
 app.use(session({
     secret : "My_Secret",
     resave : false,
     saveUninitialized:true,
+     store: new MongoStore({
+        mongoUrl: process.env.MONGO_URI,  // ← USE YOUR MONGO DB
+        touchAfter: 24 * 3600  // Lazy session update
+    }),
     cookie: {
         secure: false,      // Must be false for non-HTTPS (localhost)
         sameSite: 'lax',    // Works well for local development
