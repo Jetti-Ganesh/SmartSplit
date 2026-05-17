@@ -147,21 +147,56 @@ async function calculateAllBalances(groupId) {
   }
 
   const debts = [];
+  // Convert pairwise balances into a simple map for netting
+  const pairMap = {}; // key: "from_to" -> amount (positive means from owes to)
   Object.keys(balances).forEach(from => {
     Object.keys(balances[from]).forEach(to => {
       const amount = balances[from][to];
       if (amount > 0) {
-        debts.push({
-          from,
-          to,
-          fromName: userNames[from] || 'Unknown',
-          toName: userNames[to] || 'Unknown',
-          amount: Math.round(amount * 100) / 100
-        });
+        const key = `${from}_${to}`;
+        pairMap[key] = (pairMap[key] || 0) + amount;
       }
     });
   });
-  
+
+  // Apply recorded settlements (payments) to reduce net debts
+  const settlements = await Settlement.find({ groupId });
+  settlements.forEach(s => {
+    const f = s.from.toString();
+    const t = s.to.toString();
+    const amt = s.amount || 0;
+    if (amt <= 0) return;
+
+    const key = `${f}_${t}`;
+    // subtract payment from that direction
+    pairMap[key] = (pairMap[key] || 0) - amt;
+  });
+
+  // Normalize map into final debts array (positive amounts only)
+  Object.keys(pairMap).forEach(k => {
+    const val = Math.round(pairMap[k] * 100) / 100;
+    if (val === 0) return;
+    const [from, to] = k.split('_');
+    if (val > 0) {
+      debts.push({
+        from,
+        to,
+        fromName: userNames[from] || 'Unknown',
+        toName: userNames[to] || 'Unknown',
+        amount: val
+      });
+    } else if (val < 0) {
+      // negative means reverse direction owes
+      debts.push({
+        from: to,
+        to: from,
+        fromName: userNames[to] || 'Unknown',
+        toName: userNames[from] || 'Unknown',
+        amount: Math.abs(val)
+      });
+    }
+  });
+
   return debts;
 }
 
