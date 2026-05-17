@@ -52,8 +52,8 @@ const Navbar = ({ isDark, toggleTheme, forceShow }) => {
             onClick={() => handleNavClick("/")}
             style={{ cursor: "pointer" }}
           >
-            <span className="logo-icon">⚡</span>
-            <span className="logo-text">SplitSmart</span>
+            <span className="logo-icon">💸</span>
+            <span className="logo-text">SmartSplit</span>
           </div>
 
           {/* ── Nav Links ── */}

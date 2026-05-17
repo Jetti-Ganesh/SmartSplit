@@ -21,21 +21,9 @@ export const fetchAnalytics = async (period = 'month', customRange = null) => {
         return response.data;
     } catch (error) {
         console.error('Error fetching analytics:', error);
-        throw error;
-    }
-};
-
-export const seedDummyExpenses = async () => {
-    try {
-        const token = localStorage.getItem('token');
-        const response = await axios.post(`${API_URL}/seed`, {}, {
-            headers: {
-                Authorization: `Bearer ${token}`
-            }
-        });
-        return response.data;
-    } catch (error) {
-        console.error('Error seeding expenses:', error);
+        if (error.response?.status === 401) {
+            throw { code: 'UNAUTHORIZED' };
+        }
         throw error;
     }
 };

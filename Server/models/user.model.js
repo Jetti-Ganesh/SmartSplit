@@ -3,8 +3,8 @@ const mongoose = require('mongoose');
 const userSchema = new mongoose.Schema(
   {
     name:            { type: String, required: true, trim: true },
-    email:           { type: String, default: null, lowercase: true, trim: true },
-    phone:           { type: String, default: null, trim: true },
+    email:           { type: String, lowercase: true, trim: true },
+    phone:           { type: String, trim: true },
     password:        { type: String, required: true },
     avatar:          { type: String, default: '' },
     defaultUpi:      { type: String, default: '' },
@@ -19,6 +19,16 @@ const userSchema = new mongoose.Schema(
 // Sparse unique indexes — null values are ignored, but non-null must be unique
 userSchema.index({ email: 1 }, { unique: true, sparse: true });
 userSchema.index({ phone: 1 }, { unique: true, sparse: true });
+
+// Pre-validate hook to clean up empty/null values so sparse unique index works
+userSchema.pre('validate', function () {
+  if (this.email === null || this.email === '') {
+    this.email = undefined;
+  }
+  if (this.phone === null || this.phone === '') {
+    this.phone = undefined;
+  }
+});
 
 // At least one of email or phone must exist
 userSchema.pre('save', function () {

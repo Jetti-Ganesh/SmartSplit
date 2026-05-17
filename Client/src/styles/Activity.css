@@ -671,3 +671,21 @@
 .cat-list-collapsible.open {
   max-height: 1500px;
 }
+
+.card-blue {
+  background: linear-gradient(135deg, rgba(59,130,246,0.12), rgba(37,99,235,0.06));
+  border-color: rgba(59,130,246,0.2);
+}
+.card-blue .s-value { color: #3b82f6; }
+
+.card-purple {
+  background: linear-gradient(135deg, rgba(139,92,246,0.12), rgba(109,40,217,0.06));
+  border-color: rgba(139,92,246,0.2);
+}
+.card-purple .s-value { color: #8b5cf6; }
+
+.card-amber {
+  background: linear-gradient(135deg, rgba(245,158,11,0.12), rgba(217,119,6,0.06));
+  border-color: rgba(245,158,11,0.2);
+}
+.card-amber .s-value { color: #f59e0b; }

@@ -829,31 +829,46 @@ export default function ProfilePage() {
             </div>
           </section>
 
-          {/* ── 1b. Verification Banners ── */}
+          {/* ── 1b. Verification & UPI Banners ── */}
           {profileUser && (() => {
             const needsPhone = profileUser.signupMethod === 'email' && !profileUser.isPhoneVerified;
             const needsEmail = profileUser.signupMethod === 'phone' && !profileUser.isEmailVerified;
-            if (needsPhone) return (
-              <div className="verify-banner">
-                <div className="verify-banner-icon">📱</div>
-                <div className="verify-banner-text">
-                  <strong>Add your mobile number</strong>
-                  <span>Secure your account with phone verification</span>
-                </div>
-                <button className="verify-banner-btn" onClick={() => openVerifyModal('phone')}>Verify Now →</button>
-              </div>
+            const hasUpi = profileUser.upiList && profileUser.upiList.length > 0;
+            
+            return (
+              <>
+                {needsPhone && (
+                  <div className="verify-banner" style={{ marginBottom: (needsEmail || !hasUpi) ? '12px' : '0' }}>
+                    <div className="verify-banner-icon">📱</div>
+                    <div className="verify-banner-text">
+                      <strong>Add your mobile number</strong>
+                      <span>Secure your account with phone verification</span>
+                    </div>
+                    <button className="verify-banner-btn" onClick={() => openVerifyModal('phone')}>Verify Now →</button>
+                  </div>
+                )}
+                {needsEmail && (
+                  <div className="verify-banner" style={{ marginBottom: !hasUpi ? '12px' : '0' }}>
+                    <div className="verify-banner-icon">📧</div>
+                    <div className="verify-banner-text">
+                      <strong>Add your email address</strong>
+                      <span>Get notifications and recover your account</span>
+                    </div>
+                    <button className="verify-banner-btn" onClick={() => openVerifyModal('email')}>Verify Now →</button>
+                  </div>
+                )}
+                {!hasUpi && (
+                  <div className="verify-banner upi-banner" style={{ background: 'linear-gradient(135deg, rgba(6, 182, 212, 0.1) 0%, rgba(59, 130, 246, 0.1) 100%)', borderColor: 'rgba(6, 182, 212, 0.2)' }}>
+                    <div className="verify-banner-icon">⚡</div>
+                    <div className="verify-banner-text">
+                      <strong>Add your UPI ID</strong>
+                      <span>Enable instant, secure group settlements</span>
+                    </div>
+                    <button className="verify-banner-btn" onClick={() => setModal("upi")} style={{ background: '#06b6d4' }}>Add UPI ID →</button>
+                  </div>
+                )}
+              </>
             );
-            if (needsEmail) return (
-              <div className="verify-banner">
-                <div className="verify-banner-icon">📧</div>
-                <div className="verify-banner-text">
-                  <strong>Add your email address</strong>
-                  <span>Get notifications and recover your account</span>
-                </div>
-                <button className="verify-banner-btn" onClick={() => openVerifyModal('email')}>Verify Now →</button>
-              </div>
-            );
-            return null;
           })()}
 
           {/* ── 2. Statistics Bento Grid ── */}
@@ -959,18 +974,50 @@ export default function ProfilePage() {
                 <span className="edit-link" onClick={() => setModal("upi")}>Manage</span>
               </div>
               <div className="upi-scroll">
-                {displayUser.upiList.map(upi => (
-                  <div key={upi} className="upi-card-mini">
-                    <div className="upi-icon-box">⚡</div>
-                    <div className="upi-details">
-                      <div className="upi-id-text">
-                        {upi}
-                        {displayUser.defaultUpi === upi && <span className="default-tag">PRIMARY</span>}
-                      </div>
-                      <div className="upi-status">UPI ID • Active</div>
-                    </div>
+                {displayUser.upiList.length === 0 ? (
+                  <div style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: '24px 16px',
+                    textAlign: 'center',
+                    color: 'var(--text-muted)'
+                  }}>
+                    <span style={{ fontSize: '24px', marginBottom: '8px' }}>💳</span>
+                    <p style={{ fontSize: '13px', margin: '0 0 12px 0', fontWeight: '500' }}>No UPI payment methods added yet.</p>
+                    <button
+                      onClick={() => setModal("upi")}
+                      style={{
+                        background: '#06b6d4',
+                        color: 'white',
+                        border: 'none',
+                        padding: '6px 16px',
+                        borderRadius: '6px',
+                        fontSize: '12px',
+                        fontWeight: '600',
+                        cursor: 'pointer',
+                        boxShadow: '0 4px 12px rgba(6, 182, 212, 0.2)',
+                        transition: 'all 0.2s ease'
+                      }}
+                    >
+                      Add UPI ID
+                    </button>
                   </div>
-                ))}
+                ) : (
+                  displayUser.upiList.map(upi => (
+                    <div key={upi} className="upi-card-mini">
+                      <div className="upi-icon-box">⚡</div>
+                      <div className="upi-details">
+                        <div className="upi-id-text">
+                          {upi}
+                          {displayUser.defaultUpi === upi && <span className="default-tag">PRIMARY</span>}
+                        </div>
+                        <div className="upi-status">UPI ID • Active</div>
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
             </section>
           </div>
