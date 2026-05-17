@@ -1,4 +1,4 @@
-const transporter = require('../utils/mailer');
+const mailer = require('../utils/mailer');
 const crypto = require('crypto');
 
 const generateOTP = () => crypto.randomInt(100000, 999999).toString();
@@ -18,18 +18,8 @@ exports.sendOtp = async (req, res) => {
   req.session.otpIdentifier = isEmailValid ? email : phone;
 
   if (isEmailValid) {
-    // Send email OTP
-    const mailOptions = {
-      from: process.env.EMAIL_USER,
-      to: email,
-      subject: 'Verify your email for SplitSmart',
-      html: `<h2>SplitSmart ⚡</h2>
-             <p>Your verification OTP is:</p>
-             <h1 style="letter-spacing:8px">${OTP}</h1>
-             <p>Valid for 10 minutes. Do not share.</p>`,
-    };
     try {
-      await transporter.sendMail(mailOptions);
+      await mailer.sendOTP(email, OTP);
       return res.status(200).json({ message: 'OTP sent to your email.' });
     } catch (err) {
       console.error('Email OTP error:', err);
