@@ -73,12 +73,13 @@ const expenseSchema = new mongoose.Schema({
 });
 
 // Update timestamp on save
-expenseSchema.pre('save', function () {
+expenseSchema.pre('save', function (next) {
   this.updatedAt = Date.now();
+  next();
 });
 
 // Validate split details match amount
-expenseSchema.pre('save', function () {
+expenseSchema.pre('save', function (next) {
   const totalSplit = this.splitDetails.reduce((sum, split) => sum + split.amount, 0);
 
   // Use a tolerance of 0.1 (10 paise) for floating-point rounding errors
@@ -91,6 +92,8 @@ expenseSchema.pre('save', function () {
     );
     return next(error);
   }
+
+  next();
 });
 
 module.exports = mongoose.model('Expense', expenseSchema);

@@ -14,6 +14,7 @@ const profileRoutes = require("./routes/profile.route");
 const analyticsRoutes = require("./routes/analytics.routes");
 const expensesRoutes = require("./routes/expenses.route");
 const forgotPasswordRoutes = require("./routes/forgotPassword.route");
+const settleUpRoutes = require("./routes/settlup.route"); // ← add this
 
 app.use(session({
     secret : "My_Secret",
@@ -54,7 +55,7 @@ app.use("/api/profile", profileRoutes);
 app.use("/api/", analyticsRoutes);
 app.use("/api/", expensesRoutes);
 app.use("/api/", forgotPasswordRoutes);
-
+app.use("/api/settlements", settleUpRoutes);      // ← add this
 // Global Error Handler Middleware (must be last)
 app.use((err, req, res, next) => {
   console.error('Error:', err);
