@@ -1,7 +1,8 @@
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, useOutletContext } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import '../styles/SettleUp.css'
 import { useState, useEffect } from 'react';
+import SettingsDrawer from '../components/SettingsDrawer';
 import BottomNavbareM from '../components/BottomNavbareM';
 import { useGetGroupsQuery } from '../services/groupAPI';
 import { useGetBalancesQuery, useRecordSettlementMutation } from '../services/settleUpAPI';
@@ -11,6 +12,8 @@ function SettleUp() {
   const currentUserId = currentUser?._id || currentUser?.id || currentUser?.userId;
   const navigate = useNavigate();
   const location = useLocation();
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const { isDark, toggleTheme } = useOutletContext();
 
   const { data: groupsResponse, isLoading: groupsLoading } = useGetGroupsQuery();
   const groups = groupsResponse?.data || [];
@@ -191,11 +194,11 @@ function SettleUp() {
 
       {isLoggedIn && <BottomNavbareM />}
 
-      <SettingsDrawer 
-        isOpen={isSettingsOpen} 
-        onClose={() => setIsSettingsOpen(false)} 
-        isDark={isDark} 
-        toggleTheme={toggleTheme} 
+      <SettingsDrawer
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+        isDark={isDark}
+        toggleTheme={toggleTheme}
       />
     </div>
   );
