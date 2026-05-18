@@ -1,9 +1,10 @@
-import { useOutletContext, useNavigate, useLocation, data } from "react-router-dom";
+import { useOutletContext, useNavigate, useLocation } from "react-router-dom";
 import "../styles/Dashboard.css";
 import BottomNavbareM from "../components/BottomNavbareM";
 import SettingsDrawer from "../components/SettingsDrawer";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {  useGetGroupsQuery } from "../services/groupAPI";
+import api from "../../utils/api";
 // ── Static data ───────────────────────────────────────────────────────────────
 // const USER = { name: "Rahul", email: "rahul@email.com", initial: "R" };
 
@@ -19,14 +20,6 @@ import {  useGetGroupsQuery } from "../services/groupAPI";
 //   { id: 2, icon: "🎉", name: "Goa Trip 2024", meta: "Last activity: 2h ago", amount: "+₹850", amountCls: "amount-green" },
 // ];
 
-const ACTIVITY = [
-  { id: 1, content: <><strong>Amit</strong> paid ₹500 to you</>, time: "2h ago" },
-  { id: 2, content: <>You added <strong>"Dinner"</strong> (₹240)</>, time: "5h ago" },
-  { id: 3, content: <><strong>Priya</strong> settled up (₹1,000)</>, time: "Yesterday" },
-  { id: 4, content: <>You added <strong>"Groceries"</strong> (₹540)</>, time: "2d ago" },
-];
-
-// ─────────────────────────────────────────────────────────────────────────────
 export default function Dashboard() {
   const { isDark, toggleTheme } = useOutletContext();
   const navigate = useNavigate();
@@ -48,17 +41,56 @@ export default function Dashboard() {
     return "dashboard";
   };
   const active = getActiveId();
+  const [notifications, setNotifications] = useState([]);
+  const [loadingMessages, setLoadingMessages] = useState(true);
+  const [flashMessage, setFlashMessage] = useState(null);
 
   const today = new Date().toLocaleDateString("en-IN", {
     weekday: "long", day: "numeric", month: "long", year: "numeric",
   });
-  const user =JSON.parse(localStorage.getItem('user'));
-  // console.log(user);
+  const user = JSON.parse(localStorage.getItem('user'));
+
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      try {
+        const res = await api.get('/notifications');
+        if (res.data?.success) {
+          setNotifications(res.data.data || []);
+        }
+      } catch (err) {
+        console.error('Could not load notifications', err);
+      } finally {
+        setLoadingMessages(false);
+      }
+    };
+
+    const flash = localStorage.getItem('flashMessage');
+    if (flash) {
+      try {
+        setFlashMessage(JSON.parse(flash));
+      } catch (e) {
+        console.warn('Invalid flash message', e);
+      }
+      localStorage.removeItem('flashMessage');
+    }
+
+    fetchNotifications();
+  }, []);
+
   const fmt = (v) => new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR" }).format(v);
   const settleAmount = typeof totalNet === "number" ? fmt(Math.abs(totalNet)) : "—";
   const settleText = typeof totalNet === "number"
     ? (totalNet < 0 ? `Pay ${settleAmount}` : totalNet > 0 ? `Get ${settleAmount}` : "All settled")
     : "—";
+
+  const formatMessageTime = (timestamp) => {
+    if (!timestamp) return '';
+    const diffMs = Date.now() - new Date(timestamp).getTime();
+    if (diffMs < 60_000) return 'Just now';
+    if (diffMs < 3_600_000) return `${Math.floor(diffMs / 60_000)}m ago`;
+    if (diffMs < 86_400_000) return `${Math.floor(diffMs / 3_600_000)}h ago`;
+    return new Date(timestamp).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+  };
   
   return (
     <div className="dashboard-shell">
@@ -80,25 +112,33 @@ export default function Dashboard() {
 
           {/* Section Header */}
           <div className="section-header">
-            <h2 className="section-title">Hi {user.name}! 👋</h2>
+            <h1 className="section-title">Hi {user.name}! 👋</h1>
             <p className="section-subtitle">
-              {today} — Here's your balance overview and group activity.
+              {today} — Here's your balance overview and recent messages.
             </p>
           </div>
 
+          {flashMessage && (
+            <div className={`flash-banner flash-${flashMessage.type || 'info'}`}>
+              {flashMessage.text}
+            </div>
+          )}
+
           {/* Action Buttons */}
           <div className="top-bar-actions">
-            <button className="btn-primary">+ Add Expense</button>
+            <button className="btn-primary" onClick={() => navigate('/Groups')}>
+              + Add Expense
+            </button>
             <button
-              className="btn-secondary btn-settle"
+              className="btn-settle"
               onClick={() => navigate("/SettleUp", { state: { totalNet } })}
               title={typeof totalNet === "number" ? (totalNet < 0 ? `You owe ${settleAmount}` : totalNet > 0 ? `You're owed ${settleAmount}` : "You're all settled") : "No balances"}
               aria-label="Settle up"
             >
               <span style={{ marginRight: 8 }}>💰</span>
               <span style={{ marginRight: 8 }}>Settle Up</span>
-              <span style={{ fontWeight: 600 }}>{settleText}</span>
             </button>
+              {/* <span style={{ fontWeight: 600 }}>{settleText}</span> */}
           </div>
 
           {/* Balance Cards */}
@@ -167,23 +207,42 @@ export default function Dashboard() {
               </button>
             </div>
 
-            {/* Activity Panel */}
+            {/* Messages Panel */}
             <div className="feature-card" style={{ animationDelay: "0.4s" }}>
               <div className="card-glow glow-purple" />
               <div className="panel-header">
                 <div className="panel-label">
                   <span className="panel-tag">Live</span>
-                  <div className="panel-title">Recent Activity</div>
+                  <div className="panel-title">Recent Messages</div>
                 </div>
-                <span className="panel-icon">⚡</span>
+                <span className="panel-icon">✉️</span>
               </div>
-              {ACTIVITY.map((a) => (
-                <div className="activity-item" key={a.id}>
-                  <div className="activity-dot" />
-                  <div className="activity-text">{a.content}</div>
-                  <div className="activity-time">{a.time}</div>
+              {loadingMessages ? (
+                <div className="activity-item">
+                  <div className="activity-dot" style={{ background: 'var(--accent-purple)', boxShadow: '0 0 6px var(--accent-purple)' }} />
+                  <div className="activity-text">Loading messages…</div>
                 </div>
-              ))}
+              ) : notifications.length > 0 ? (
+                notifications.map((item, index) => (
+                  <div className="activity-item" key={item._id || index}>
+                    <div
+                      className="activity-dot"
+                      style={{
+                        background: item.type === 'error' ? '#ef4444' : item.type === 'success' ? '#10b981' : item.type === 'group' ? '#38bdf8' : 'var(--accent-purple)',
+                        boxShadow: `0 0 6px ${item.type === 'error' ? '#ef4444' : item.type === 'success' ? '#10b981' : item.type === 'group' ? '#38bdf8' : 'rgba(124,58,237,0.5)'}`
+                      }}
+                    />
+                    <div className="activity-text">{item.message}</div>
+                    <div className="activity-time">{formatMessageTime(item.createdAt)}</div>
+                  </div>
+                ))
+              ) : (
+                <div className="activity-item">
+                  <div className="activity-dot" style={{ background: 'var(--accent-purple)', boxShadow: '0 0 6px rgba(124,58,237,0.5)' }} />
+                  <div className="activity-text">No recent messages yet. New login and group updates will appear here.</div>
+                  <div className="activity-time">—</div>
+                </div>
+              )}
             </div>
 
           </div>

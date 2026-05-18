@@ -1,13 +1,16 @@
 import { useState, useEffect } from 'react'
 import { useGoogleLogin } from '@react-oauth/google'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useOutletContext } from 'react-router-dom'
 import { useDispatch } from 'react-redux';
 import { loginSuccess } from '../services/authSlice';
+import MobileTopBar from '../components/MobileTopBar';
 import axios from 'axios';
 import '../styles/Login-SignUp.css'
 axios.defaults.withCredentials = true;
 
 function SignUp() {
+  const context = useOutletContext() || {};
+  const { isDark, toggleTheme } = context;
   const navigate = useNavigate()
   const dispatch = useDispatch()
 
@@ -195,13 +198,7 @@ function SignUp() {
 
   return (
     <>
-      {/* ── MOBILE TOP BAR ── */}
-      <div className="mobile-top-bar">
-        <div className="mobile-top-logo" onClick={() => navigate("/")}>
-          <span className="logo-icon">⚡</span>
-          <span>SplitSmart</span>
-        </div>
-      </div>
+      <MobileTopBar isDark={isDark ?? false} toggleTheme={toggleTheme ?? (() => {})} showHamburger={false} />
 
       <div className="split-container">
         <div className="login-card">

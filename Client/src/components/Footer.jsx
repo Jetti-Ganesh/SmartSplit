@@ -19,8 +19,8 @@ const Footer = () => {
       <div className="footer-bottom">
         <div className="footer-container">
           <div className="footer-brand">
-            <span className="logo-icon">⚡</span>
-            <span className="footer-logo">SplitSmart</span>
+            <span className="logo-icon">💸</span>
+            <span className="footer-logo">SmartSplit</span>
           </div>
 
           <div className="footer-links">
@@ -50,7 +50,7 @@ const Footer = () => {
         </div>
 
         <div className="footer-copyright">
-          <p>© 2025 SplitSmart. All rights reserved. Built with ❤️ in India.</p>
+          <p>© 2026 SmartSplit. All rights reserved. Built with ❤️ in India.</p>
         </div>
       </div>
     </footer>

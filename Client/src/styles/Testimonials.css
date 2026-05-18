@@ -112,10 +112,102 @@
   user-select: none;
 }
 
+/* ── Tablet ── */
 @media (max-width: 900px) {
+  .testimonials {
+    padding: 70px 0;
+  }
+
+  .testimonials-container {
+    padding: 0 1.5rem;
+  }
+
   .testimonials-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    max-width: 100%;
+  }
+
+  /* Make 3rd card span full width on tablet so it's not orphaned */
+  .testimonial-card:last-child {
+    grid-column: 1 / -1;
     max-width: 480px;
     margin: 0 auto;
+    width: 100%;
   }
 }
+
+/* ── Mobile ── */
+@media (max-width: 600px) {
+  .testimonials {
+    padding: 56px 0;
+  }
+
+  .testimonials-container {
+    padding: 0 1rem;
+  }
+
+  .testimonials-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    max-width: 100%;
+  }
+
+  /* Remove the span override on mobile — each card is 1 col */
+  .testimonial-card:last-child {
+    grid-column: unset;
+    max-width: 100%;
+    margin: 0;
+  }
+
+  .testimonial-card {
+    padding: 1.4rem 1.2rem;
+    border-radius: 16px;
+  }
+
+  .testimonial-text {
+    font-size: 0.92rem;
+    line-height: 1.7;
+    margin-bottom: 1.2rem;
+  }
+
+  .stars {
+    font-size: 0.9rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .author-avatar {
+    width: 38px;
+    height: 38px;
+    font-size: 0.9rem;
+  }
+
+  .author-name {
+    font-size: 0.85rem;
+  }
+
+  .author-role {
+    font-size: 0.74rem;
+  }
+
+  .quote-icon {
+    font-size: 4rem;
+    top: 12px;
+    right: 14px;
+  }
+}
+
+/* ── Small phones (≤ 380px) ── */
+@media (max-width: 380px) {
+  .testimonials-container {
+    padding: 0 0.85rem;
+  }
+
+  .testimonial-card {
+    padding: 1.2rem 1rem;
+  }
+
+  .testimonial-text {
+    font-size: 0.88rem;
+  }
+}

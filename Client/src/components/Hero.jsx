@@ -58,15 +58,15 @@ const Hero = () => {
             <div className="phone-screen">
               <div className="app-preview">
                 <div className="preview-header">
-                  <span>Trip to Goa 🏖️</span>
+                  <span>Room  Expenses🏡  </span>
                   <span className="preview-amount">₹8,400</span>
                 </div>
                 <div className="preview-list">
                   {[
-                    { name: 'Ravi', amount: '₹2,100', color: '#00e5ff' },
-                    { name: 'Sneha', amount: '₹1,800', color: '#7c3aed' },
-                    { name: 'Arjun', amount: '₹2,400', color: '#10b981' },
-                    { name: 'Priya', amount: '₹2,100', color: '#f59e0b' },
+                    { name: 'Jagan', amount: '₹2,100', color: '#00e5ff' },
+                    { name: 'Ganesh', amount: '₹1,800', color: '#7c3aed' },
+                    { name: 'Sathya', amount: '₹2,400', color: '#10b981' },
+                    { name: 'Nani', amount: '₹1,200', color: '#b13bc3' },
                   ].map((person) => (
                     <div className="preview-item" key={person.name}>
                       <div className="preview-avatar" style={{ background: person.color + '22', border: `1px solid ${person.color}44` }}>

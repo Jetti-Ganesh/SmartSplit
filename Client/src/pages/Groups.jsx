@@ -171,7 +171,10 @@ function Groups() {
         <div className="modal-overlay" onClick={() => setIsModalOpen(false)}>
           <div className="modal-content" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
-              <h2>Create New Group</h2>
+              <div>
+                <h2>Create New Group</h2>
+                <p className="modal-subtitle">Add a group name, description and icon to get everyone connected fast.</p>
+              </div>
               <button className="close-btn" onClick={() => setIsModalOpen(false)}>
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <line x1="18" y1="6" x2="6" y2="18"></line>

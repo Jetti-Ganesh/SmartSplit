@@ -27,8 +27,168 @@ main.landing-page-main {
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
+main.landing-page-main > section {
+  opacity: 0;
+  transform: translateY(45px);
+  animation: sectionSlideIn 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+main.landing-page-main > section:nth-of-type(1) {
+  animation-delay: 0.08s;
+}
+
+main.landing-page-main > section:nth-of-type(2) {
+  animation-delay: 0.18s;
+}
+
+main.landing-page-main > section:nth-of-type(3) {
+  animation-delay: 0.28s;
+}
+
+main.landing-page-main > section:nth-of-type(4) {
+  animation-delay: 0.38s;
+}
+
+@keyframes sectionSlideIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* Divider between sections */
 .features,
 .testimonials {
   border-top: 1px solid var(--lp-border, var(--border));
 }
+
+/* ── Mobile Hamburger & Navigation Menu ── */
+.mobile-top-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.mobile-hamburger {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  width: 20px;
+  height: 16px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  z-index: 1002;
+}
+
+.mobile-hamburger span {
+  width: 20px;
+  height: 2px;
+  background-color: var(--text-primary);
+  border-radius: 2px;
+  transition: all 0.3s linear;
+  position: relative;
+  transform-origin: 1px;
+}
+
+/* Burger Animation */
+.mobile-hamburger.open span:first-child {
+  transform: rotate(45deg);
+}
+
+.mobile-hamburger.open span:nth-child(2) {
+  opacity: 0;
+  transform: translateX(20px);
+}
+
+.mobile-hamburger.open span:last-child {
+  transform: rotate(-45deg);
+}
+
+.mobile-nav-dropdown {
+  position: fixed;
+  top: 60px;
+  left: 0;
+  right: 0;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  z-index: 999;
+  animation: slideDown 0.3s ease;
+}
+
+body.dark .mobile-nav-dropdown {
+  background: rgba(15, 23, 42, 0.95);
+  border-bottom-color: rgba(255, 255, 255, 0.05);
+}
+
+.mobile-nav-dropdown a {
+  color: var(--text-primary);
+  text-decoration: none;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.mobile-nav-dropdown a:hover {
+  color: #3b82f6;
+}
+
+.mobile-nav-divider {
+  height: 1px;
+  background-color: var(--border);
+  margin: 8px 0;
+}
+
+.mobile-nav-cta {
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  color: #ffffff !important;
+  padding: 12px;
+  border-radius: 8px;
+  text-align: center;
+  font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  .mobile-top-bar { display: flex; }
+}
+
+@media (max-width: 480px) {
+  .mobile-top-bar { padding: 0 16px; }
+}
+
+@media (max-width: 768px) {
+  .section-header {
+    padding: 0 1rem;
+    margin-bottom: 2.5rem;
+    text-align: center;
+  }
+
+  .section-tag {
+    font-size: 0.72rem;
+  }
+
+  .section-title {
+    font-size: clamp(1.6rem, 6.5vw, 2.2rem);
+  }
+
+  .section-subtitle {
+    font-size: 0.93rem;
+    max-width: 100%;
+    padding: 0 0.25rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .section-title {
+    font-size: clamp(1.45rem, 7.5vw, 1.9rem);
+  }
+}
+
