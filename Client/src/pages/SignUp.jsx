@@ -163,22 +163,17 @@ function SignUp() {
         ? { name: form.name, email: form.email, password: form.password, signupMethod: 'email' }
         : { name: form.name, phone: digits, password: form.password, signupMethod: 'phone' }
 
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/signUp`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/signUp`, body, {
+        withCredentials: true,
+        headers: { 'Content-Type': 'application/json' }
       })
-      const data = await res.json()
-
-      if (!res.ok) {
-        return setError(data.message || 'Signup failed.')
-      }
+      const data = res.data
 
       dispatch(loginSuccess({ token: data.token, user: data.user }))
       showNotification('🎉 Account created successfully! Welcome to SmartSplit.', 'success', 5000)
       navigate('/Dashboard')
     } catch (err) {
-      setError('Could not connect to server.')
+      setError(err.response?.data?.message || 'Could not connect to server.')
     } finally {
       setLoading(false)
     }
