@@ -3,12 +3,14 @@ const nodemailer = require('nodemailer');
 // ✅ CORRECT - Use SMTP instead of service: "Gmail"
 const transporter = nodemailer.createTransport({
   host: 'smtp.gmail.com',
-  port: 587,
-  secure: false,  // ⚠️ IMPORTANT: false for port 587
+  port: 465,                    // ← CHANGE FROM 587 TO 465
+  secure: true,                 // ← CHANGE FROM false TO true
   auth: {
-    user: process.env.EMAIL_USER,      // your-email@gmail.com
-    pass: process.env.EMAIL_PASS       // Gmail App Password
-  }
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS
+  },
+  connectionTimeout: 10000,     // ← ADD: 10 seconds timeout
+  socketTimeout: 10000          // ← ADD: 10 seconds socket timeout
 });
 
 // Test connection
@@ -58,10 +60,16 @@ exports.sendWelcomeEmail = async (email, name) => {
       to: email,
       subject: 'Welcome to SplitSmart! 🎉',
       html: `
-        <div style="font-family: Arial; max-width: 600px; margin: 0 auto;">
-          <h2>Welcome ${name}!</h2>
-          <p>Your SplitSmart account is ready.</p>
-          <p>Start splitting expenses with friends and never fight over money again!</p>
+        <div style="font-family: Arial, Helvetica, sans-serif; max-width:600px; margin:0 auto; background:#f8fafc; border-radius:10px; overflow:hidden; box-shadow:0 6px 18px rgba(15,23,42,0.06);">
+          <div style="padding:18px; text-align:center; background:linear-gradient(90deg,#06b6d4 0%,#7c3aed 100%); color:#fff;">
+            <h1 style="margin:0; font-size:20px; font-weight:700;">Welcome to SplitSmart</h1>
+          </div>
+          <div style="padding:20px; color:#111;">
+            <h2 style="margin:0 0 8px 0; font-size:18px;">Hi ${name} 👋</h2>
+            <p style="margin:0 0 12px 0; color:#374151; line-height:1.5;">Your SplitSmart account is ready. Track expenses, split bills, and keep friendships drama-free.</p>
+            <a href="#" style="display:inline-block; background:#10B981; color:#fff; padding:10px 16px; border-radius:8px; text-decoration:none; font-weight:600;">Get started</a>
+            <p style="margin:16px 0 0 0; font-size:12px; color:#6b7280;">If you didn't request this, you can safely ignore this email.</p>
+          </div>
         </div>
       `
     };
