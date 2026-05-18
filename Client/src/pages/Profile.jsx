@@ -367,9 +367,12 @@ function VerifyOtherModal({ profileUser, setShowVerifyPopup }) {
     setVerifyLoading(true);
     try {
       // 1. Verify OTP with session
-      await axios.post(`${import.meta.env.VITE_API_URL}/api/verify-otp`, {
-        enteredOtp: verifyOtp
-      }, {
+      const verifyPayload = {
+        enteredOtp: verifyOtp,
+        email: verifyType === 'email' ? verifyInput.trim().toLowerCase() : undefined,
+        phone: verifyType === 'phone' ? digits : undefined,
+      };
+      await axios.post(`${import.meta.env.VITE_API_URL}/api/verify-otp`, verifyPayload, {
         withCredentials: true
       });
 
@@ -611,8 +614,13 @@ export default function ProfilePage() {
   const handleConfirmVerifyOtp = async () => {
     setVerifyError(''); setVerifyLoading(true);
     try {
-      // First verify the OTP with session
-      await axios.post(`${import.meta.env.VITE_API_URL}/api/verify-otp`, { enteredOtp: verifyOtp },
+      // First verify the OTP with session or identifier-based fallback
+      const verifyPayload = {
+        enteredOtp: verifyOtp,
+        email: verifyModal === 'email' ? verifyInput.trim().toLowerCase() : undefined,
+        phone: verifyModal === 'phone' ? verifyInput.replace(/\D/g, '').slice(-10) : undefined,
+      };
+      await axios.post(`${import.meta.env.VITE_API_URL}/api/verify-otp`, verifyPayload,
         { withCredentials: true });
 
       // Then persist to DB via profile endpoint

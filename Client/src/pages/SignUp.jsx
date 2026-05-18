@@ -118,9 +118,14 @@ function SignUp() {
       return setError('Please enter the OTP.')
     }
     try {
+      const payload = {
+        enteredOtp: otp,
+        email: signupMode === 'email' ? form.email : undefined,
+        phone: signupMode === 'phone' ? form.phone.replace(/\D/g, '').slice(-10) : undefined,
+      }
       const res = await axios.post(
         `${import.meta.env.VITE_API_URL}/api/verify-otp`,
-        { enteredOtp: otp },
+        payload,
         { withCredentials: true }
       )
       setShowOTPInput(false)
