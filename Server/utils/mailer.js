@@ -3,12 +3,14 @@ const nodemailer = require('nodemailer');
 // ✅ CORRECT - Use SMTP instead of service: "Gmail"
 const transporter = nodemailer.createTransport({
   host: 'smtp.gmail.com',
-  port: 587,
-  secure: false,  // ⚠️ IMPORTANT: false for port 587
+  port: 465,                    // ← CHANGE FROM 587 TO 465
+  secure: true,                 // ← CHANGE FROM false TO true
   auth: {
-    user: process.env.EMAIL_USER,      // your-email@gmail.com
-    pass: process.env.EMAIL_PASS       // Gmail App Password
-  }
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS
+  },
+  connectionTimeout: 10000,     // ← ADD: 10 seconds timeout
+  socketTimeout: 10000          // ← ADD: 10 seconds socket timeout
 });
 
 // Test connection
