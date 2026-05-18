@@ -167,7 +167,8 @@ exports.createExpense = async (req, res, next) => {
   } catch (error) {
     console.error('Error creating expense:', error.message);
     console.error('Error stack:', error.stack);
-    next(error);
+    if (typeof next === 'function') return next(error);
+    return res.status(500).json({ success: false, message: error.message || 'Server error' });
   }
 };
 
@@ -207,7 +208,9 @@ exports.getGroupExpenses = async (req, res, next) => {
       data: expenses
     });
   } catch (error) {
-    next(error);
+    console.error('Error fetching group expenses:', error.message);
+    if (typeof next === 'function') return next(error);
+    return res.status(500).json({ success: false, message: error.message || 'Server error' });
   }
 };
 
@@ -247,6 +250,8 @@ exports.deleteExpense = async (req, res, next) => {
       message: 'Expense deleted successfully'
     });
   } catch (error) {
-    next(error);
+    console.error('Error deleting expense:', error.message);
+    if (typeof next === 'function') return next(error);
+    return res.status(500).json({ success: false, message: error.message || 'Server error' });
   }
 };

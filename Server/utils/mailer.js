@@ -1,4 +1,9 @@
-const { Resend } = require('resend');
+let ResendClass = null;
+try {
+  ResendClass = require('resend').Resend;
+} catch (err) {
+  console.warn('⚠️ optional package "resend" is not installed. Falling back to SMTP. To enable Resend, run: npm i resend');
+}
 const nodemailer = require('nodemailer');
 
 const cleanEnvValue = (value) => {
@@ -11,7 +16,7 @@ const EMAIL_PASS = cleanEnvValue(process.env.EMAIL_PASS);
 const RESEND_API_KEY = cleanEnvValue(process.env.RESEND_API_KEY || '');
 const EMAIL_FROM = cleanEnvValue(process.env.RESEND_FROM || `SplitSmart <${EMAIL_USER}>`);
 
-const resend = RESEND_API_KEY ? new Resend(RESEND_API_KEY) : null;
+const resend = RESEND_API_KEY && ResendClass ? new ResendClass(RESEND_API_KEY) : null;
 
 if (resend) {
   console.log('✅ Resend client initialized.');
@@ -25,15 +30,17 @@ if (!EMAIL_USER || !EMAIL_PASS) {
 
 const transporter = nodemailer.createTransport({
   host: 'smtp.gmail.com',
-  port: 465,
-  secure: true,
+  port: 587,
+  secure: false,
+  requireTLS: true,
+  tls: {
+    rejectUnauthorized: false
+  },
   auth: {
     user: EMAIL_USER,
     pass: EMAIL_PASS
   },
-  tls: {
-    rejectUnauthorized: false
-  },
+  family: 4,
   connectionTimeout: 10000,
   socketTimeout: 10000
 });
