@@ -56,16 +56,6 @@ app.use(cors({
 app.use(express.json({ limit: '5mb' }));
 app.use(express.urlencoded({ limit: '5mb', extended: true }));
 
-const path = require('path');
-app.use(express.static(path.join(__dirname, '..', 'Client', 'dist')));
-
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, '..', 'Client', 'dist', 'index.html'));
-});
-
-
-
-
 app.use("/api/", loginRoutes);
 app.use("/api/", signUpRoutes);
 app.use("/api/", verifyUserRoutes);
@@ -75,7 +65,15 @@ app.use("/api/profile", profileRoutes);
 app.use("/api/", analyticsRoutes);
 app.use("/api/", expensesRoutes);
 app.use("/api/", forgotPasswordRoutes);
-app.use("/api/settlements", settleUpRoutes);      // ← add this
+app.use("/api/settlements", settleUpRoutes);     
+
+const path = require('path');
+app.use(express.static(path.join(__dirname, '..', 'Client', 'dist')));
+
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, '..', 'Client', 'dist', 'index.html'));
+});
+
 // Global Error Handler Middleware (must be last)
 app.use((err, req, res, next) => {
   console.error('Error:', err);
