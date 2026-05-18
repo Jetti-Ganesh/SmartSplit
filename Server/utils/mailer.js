@@ -1,13 +1,4 @@
 const { Resend } = require('resend');
-const User = require('../models/user.model');
-
-const resend = new Resend(process.env.RESEND_API_KEY);
-
-if (!process.env.RESEND_API_KEY) {
-  console.warn('❌ RESEND_API_KEY is not set. Email sending will fail.');
-} else {
-  console.log('✅ Resend client initialized.');
-}
 const nodemailer = require('nodemailer');
 
 const cleanEnvValue = (value) => {
@@ -17,9 +8,19 @@ const cleanEnvValue = (value) => {
 
 const EMAIL_USER = cleanEnvValue(process.env.EMAIL_USER);
 const EMAIL_PASS = cleanEnvValue(process.env.EMAIL_PASS);
+const RESEND_API_KEY = cleanEnvValue(process.env.RESEND_API_KEY || '');
+const EMAIL_FROM = cleanEnvValue(process.env.RESEND_FROM || `SplitSmart <${EMAIL_USER}>`);
+
+const resend = RESEND_API_KEY ? new Resend(RESEND_API_KEY) : null;
+
+if (resend) {
+  console.log('✅ Resend client initialized.');
+} else {
+  console.warn('⚠️ RESEND_API_KEY is not set. Falling back to SMTP if EMAIL_USER/EMAIL_PASS are available.');
+}
 
 if (!EMAIL_USER || !EMAIL_PASS) {
-  console.error('❌ Missing email credentials: set EMAIL_USER and EMAIL_PASS in environment variables.');
+  console.warn('⚠️ EMAIL_USER or EMAIL_PASS is not configured. SMTP mode will not work without both.');
 }
 
 const transporter = nodemailer.createTransport({
@@ -40,21 +41,46 @@ const transporter = nodemailer.createTransport({
 // Test connection
 transporter.verify((error, success) => {
   if (error) {
-    console.error('❌ Email Config Error:', error);
+    console.error('❌ SMTP Email Config Error:', error);
   } else {
-    console.log('✅ Email Service Ready!');
+    console.log('✅ SMTP Email Service Ready!');
   }
 });
 
+const sendWithSmtp = async (mailOptions) => {
+  if (!EMAIL_USER || !EMAIL_PASS) {
+    throw new Error('Missing SMTP credentials: EMAIL_USER and EMAIL_PASS must be configured.');
+  }
+  return transporter.sendMail(mailOptions);
+};
+
+const sendWithResend = async (mailOptions) => {
+  if (!resend) {
+    throw new Error('Resend service is not configured.');
+  }
+  return resend.emails.send(mailOptions);
+};
+
+const sendEmail = async (mailOptions) => {
+  const normalized = { ...mailOptions, from: EMAIL_FROM };
+
+  if (resend) {
+    try {
+      console.log('ℹ️ Sending email via Resend.');
+      return await sendWithResend(normalized);
+    } catch (sendError) {
+      console.warn('⚠️ Resend send failed, falling back to SMTP:', sendError.message);
+    }
+  }
+
+  console.log('ℹ️ Sending email via SMTP fallback.');
+  return await sendWithSmtp(normalized);
+};
+
 // Send OTP Email
 exports.sendOTP = async (email, otp) => {
-  const exists = await User.findOne({ email });
-  if (exists)
-    return { success: false, message: 'Email Already Registered' };
   try {
-    const from = process.env.RESEND_FROM || 'onboarding@resend.dev';
-    const response = await resend.emails.send({
-      from,
+    const response = await sendEmail({
       to: email,
       subject: 'Your SplitSmart OTP Code',
       text: `Your SplitSmart OTP Code is: ${otp}. It expires in 5 minutes.`,
@@ -70,9 +96,8 @@ exports.sendOTP = async (email, otp) => {
         </div>
       `
     });
-    console.log('✅ OTP Email Sent:', response.id || response);
+    console.log('✅ OTP Email Sent:', response.id || response.response || response);
     return { success: true, message: 'OTP sent to email' };
-
   } catch (error) {
     console.error('❌ Email Send Error:', error.message, error);
     throw new Error(`Failed to send email: ${error.message}`);
@@ -82,9 +107,7 @@ exports.sendOTP = async (email, otp) => {
 // Send Welcome Email
 exports.sendWelcomeEmail = async (email, name) => {
   try {
-    const from = process.env.RESEND_FROM || 'onboarding@resend.dev';
-    await resend.emails.send({
-      from,
+    const response = await sendEmail({
       to: email,
       subject: 'Welcome to SplitSmart! 🎉',
       text: `Welcome to SplitSmart, ${name}! Your account is ready.`,
@@ -102,10 +125,8 @@ exports.sendWelcomeEmail = async (email, name) => {
         </div>
       `
     });
-    console.log('✅ Welcome Email Sent to:', email);
-
+    console.log('✅ Welcome Email Sent to:', email, response.id || response.response || response);
   } catch (error) {
-    console.error('❌ Welcome Email Error:', error.message);
-    // Don't throw - this is not critical
+    console.error('❌ Welcome Email Error:', error.message, error);
   }
 };

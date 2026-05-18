@@ -19,11 +19,14 @@ exports.sendOtp = async (req, res) => {
 
   if (isEmailValid) {
     try {
-      await mailer.sendOTP(email, OTP);
+      const result = await mailer.sendOTP(email, OTP);
+      if (result && result.success === false) {
+        return res.status(400).json({ message: result.message || 'Failed to send email OTP.' });
+      }
       return res.status(200).json({ message: 'OTP sent to your email.' });
     } catch (err) {
       console.error('Email OTP error:', err);
-      return res.status(500).json({ message: 'Failed to send email OTP.' });
+      return res.status(500).json({ message: err.message || 'Failed to send email OTP.' });
     }
   }
 
