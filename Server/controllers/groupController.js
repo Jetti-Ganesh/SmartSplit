@@ -69,7 +69,7 @@ exports.createGroup = async (req, res, next) => {
 exports.addMember = async (req, res, next) => {
   try {
     const { groupId } = req.params;
-    const { email } = req.body;
+    let { email } = req.body;
     const userId = req.user.id;
     console.log(email);
     
@@ -93,8 +93,11 @@ exports.addMember = async (req, res, next) => {
       });
     }
     
-    // Find user by email
-    // const User = require('../models/User');
+    // Normalize and find user by email
+    if (!email || typeof email !== 'string') {
+      return res.status(400).json({ success: false, message: 'Email is required' });
+    }
+    email = email.toLowerCase().trim();
     const newUser = await User.findOne({ email });
     if (!newUser) {
       return res.status(404).json({
