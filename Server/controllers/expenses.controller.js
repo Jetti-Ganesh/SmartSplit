@@ -5,7 +5,7 @@ const mongoose = require('mongoose');
 // Create new expense
 exports.createExpense = async (req, res, next) => {
   try {
-    const {
+    let {
       groupId,
       description,
       amount,
@@ -20,8 +20,13 @@ exports.createExpense = async (req, res, next) => {
     const userId = req.user.id;
     console.log('Current user ID:', userId);
     
-    // Validate required fields
-    if (!groupId || !description || !amount) {
+    // Normalize and validate required fields
+    amount = Number(amount);
+    if (Number.isNaN(amount) || amount <= 0) {
+      return res.status(400).json({ success: false, message: 'Amount must be a positive number' });
+    }
+
+    if (!groupId || !description) {
       return res.status(400).json({
         success: false,
         message: 'groupId, description, and amount are required'
@@ -67,17 +72,25 @@ exports.createExpense = async (req, res, next) => {
         });
       }
 
+      // Ensure selectedMembers are valid and are part of the group
+      selectedMembers = selectedMembers.map(id => id.toString());
+      const groupMemberIds = group.members.map(m => m.userId.toString());
+      for (const memberId of selectedMembers) {
+        if (!mongoose.isValidObjectId(memberId) || !groupMemberIds.includes(memberId)) {
+          return res.status(400).json({ success: false, message: `Invalid or non-member ID: ${memberId}` });
+        }
+      }
+
+      // If paidBy provided, ensure payer is among selectedMembers (include if missing)
+      const payerIdStr = (paidBy ? paidBy : userId).toString();
+      if (!selectedMembers.includes(payerIdStr)) selectedMembers.push(payerIdStr);
+
       // Use fixed decimal arithmetic to avoid floating-point errors
       const totalPaisa = Math.round(amount * 100);
       const perPersonPaisa = Math.floor(totalPaisa / selectedMembers.length);
       const remainderPaisa = totalPaisa % selectedMembers.length;
 
-      // Validate member IDs
-      for (const memberId of selectedMembers) {
-        if (!mongoose.isValidObjectId(memberId)) {
-          return res.status(400).json({ success: false, message: `Invalid member ID: ${memberId}` });
-        }
-      }
+      // memberId validation already performed above
 
       calculatedSplits = selectedMembers.map((memberId, index) => ({
         userId: new mongoose.Types.ObjectId(memberId),
@@ -93,11 +106,23 @@ exports.createExpense = async (req, res, next) => {
         });
       }
       // validate splitDetails userIds
+      let total = 0;
       for (const split of splitDetails) {
-        if (!mongoose.isValidObjectId(split.userId) || typeof split.amount !== 'number') {
-          return res.status(400).json({ success: false, message: 'Invalid split detail entries' });
+        if (!mongoose.isValidObjectId(split.userId)) {
+          return res.status(400).json({ success: false, message: 'Invalid split detail userId' });
         }
+        split.amount = Number(split.amount);
+        if (Number.isNaN(split.amount) || split.amount < 0) {
+          return res.status(400).json({ success: false, message: 'Invalid split amount in splitDetails' });
+        }
+        total += split.amount;
       }
+
+      const diff = Math.abs(total - amount);
+      if (diff > 0.1) {
+        return res.status(400).json({ success: false, message: 'Split details amounts must sum to total amount' });
+      }
+
       calculatedSplits = splitDetails.map(split => ({
         userId: new mongoose.Types.ObjectId(split.userId),
         amount: split.amount
@@ -112,7 +137,7 @@ exports.createExpense = async (req, res, next) => {
     console.log('Calculated splits:', JSON.stringify(calculatedSplits, null, 2));
     
     // Validate total amount
-    const totalSplit = calculatedSplits.reduce((sum, split) => sum + split.amount, 0);
+    const totalSplit = calculatedSplits.reduce((sum, split) => sum + Number(split.amount), 0);
     console.log(`Total split: ₹${totalSplit.toFixed(2)}, Expected: ₹${amount.toFixed(2)}`);
     
     // Create expense

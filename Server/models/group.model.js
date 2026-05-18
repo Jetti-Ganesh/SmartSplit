@@ -1,7 +1,5 @@
 const mongoose = require('mongoose');
-const { create } = require('./user.model');
-const { join, isAbsolute } = require('path');
-const { type } = require('os');
+
 const groupSchema = new mongoose.Schema({
     name: {
         type: String,
@@ -25,11 +23,10 @@ const groupSchema = new mongoose.Schema({
             ref: 'User',
             required: true
         },
-        role:
-        {
+        role: {
             type: String,
             enum: ['admin', 'member'],
-            defaut: 'member',
+            default: 'member'
         },
         joinedAt: {
             type: Date,
