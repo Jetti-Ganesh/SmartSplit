@@ -25,7 +25,9 @@ function SignUp() {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [loading, setLoading] = useState(false)
-
+  // console.log("API URL" , import.meta.env.VITE_API_URL);
+ 
+  
   // Countdown timer for OTP resend
   useEffect(() => {
     let interval;
