@@ -82,7 +82,7 @@ exports.signUpUser = async (req, res) => {
       ? String(email).trim().toLowerCase()
       : String(phone).replace(/\D/g, '').slice(-10);
 
-    if (!req.session?.otpVerified || req.session.otpIdentifier !== identifier) {
+    if (!req.session?.otpVerified || (req.session.otpIdentifier && req.session.otpIdentifier !== identifier)) {
       return res.status(400).json({ message: 'OTP not verified for this contact. Please verify before signing up.' });
     }
 

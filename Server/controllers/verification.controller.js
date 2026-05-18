@@ -165,6 +165,7 @@ exports.verifyOtp = async (req, res) => {
   }
   if (req.session.otp === enteredOtp) {
     req.session.otpVerified = true;
+    req.session.otpIdentifier = identifier || req.session.otpIdentifier;
     return res.status(200).json({ message: 'OTP verified successfully.' });
   }
   return res.status(400).json({ message: 'Invalid OTP. Please try again.' });
