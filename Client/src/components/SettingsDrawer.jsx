@@ -296,14 +296,6 @@ const SettingsDrawer = ({ isOpen, onClose, isDark, toggleTheme }) => {
                 <span className="slider round"></span>
               </label>
             </div>
-            <div className="settings-item">
-              <span className="settings-label">Currency</span>
-              <select className="settings-select">
-                <option value="INR">₹ INR</option>
-                <option value="USD">$ USD</option>
-                <option value="EUR">€ EUR</option>
-              </select>
-            </div>
           </div>
 
           {user && (
