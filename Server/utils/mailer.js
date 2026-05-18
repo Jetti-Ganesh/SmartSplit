@@ -1,16 +1,30 @@
 const nodemailer = require('nodemailer');
 
-// ✅ CORRECT - Use SMTP instead of service: "Gmail"
+const cleanEnvValue = (value) => {
+  if (!value || typeof value !== 'string') return '';
+  return value.trim().replace(/^['"]+|['"]+$/g, '');
+};
+
+const EMAIL_USER = cleanEnvValue(process.env.EMAIL_USER);
+const EMAIL_PASS = cleanEnvValue(process.env.EMAIL_PASS);
+
+if (!EMAIL_USER || !EMAIL_PASS) {
+  console.error('❌ Missing email credentials: set EMAIL_USER and EMAIL_PASS in environment variables.');
+}
+
 const transporter = nodemailer.createTransport({
   host: 'smtp.gmail.com',
-  port: 465,                    // ← CHANGE FROM 587 TO 465
-  secure: true,                 // ← CHANGE FROM false TO true
+  port: 465,
+  secure: true,
   auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
+    user: EMAIL_USER,
+    pass: EMAIL_PASS
   },
-  connectionTimeout: 10000,     // ← ADD: 10 seconds timeout
-  socketTimeout: 10000          // ← ADD: 10 seconds socket timeout
+  tls: {
+    rejectUnauthorized: false
+  },
+  connectionTimeout: 10000,
+  socketTimeout: 10000
 });
 
 // Test connection
@@ -26,9 +40,10 @@ transporter.verify((error, success) => {
 exports.sendOTP = async (email, otp) => {
   try {
     const mailOptions = {
-      from: process.env.EMAIL_USER,
+      from: `SplitSmart <${EMAIL_USER}>`,
       to: email,
       subject: 'Your SplitSmart OTP Code',
+      text: `Your SplitSmart OTP Code is: ${otp}. It expires in 5 minutes.`,
       html: `
         <div style="font-family: Arial; max-width: 600px; margin: 0 auto;">
           <h2>Your OTP Code</h2>
@@ -47,7 +62,7 @@ exports.sendOTP = async (email, otp) => {
     return { success: true, message: 'OTP sent to email' };
     
   } catch (error) {
-    console.error('❌ Email Send Error:', error.message);
+    console.error('❌ Email Send Error:', error.message, error);
     throw new Error(`Failed to send email: ${error.message}`);
   }
 };
@@ -56,9 +71,10 @@ exports.sendOTP = async (email, otp) => {
 exports.sendWelcomeEmail = async (email, name) => {
   try {
     const mailOptions = {
-      from: process.env.EMAIL_USER,
+      from: `SplitSmart <${EMAIL_USER}>`,
       to: email,
       subject: 'Welcome to SplitSmart! 🎉',
+      text: `Welcome to SplitSmart, ${name}! Your account is ready.`,
       html: `
         <div style="font-family: Arial, Helvetica, sans-serif; max-width:600px; margin:0 auto; background:#f8fafc; border-radius:10px; overflow:hidden; box-shadow:0 6px 18px rgba(15,23,42,0.06);">
           <div style="padding:18px; text-align:center; background:linear-gradient(90deg,#06b6d4 0%,#7c3aed 100%); color:#fff;">
