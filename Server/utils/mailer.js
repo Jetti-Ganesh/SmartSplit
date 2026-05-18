@@ -1,3 +1,13 @@
+const { Resend } = require('resend');
+const User = require('../models/user.model');
+
+const resend = new Resend(process.env.RESEND_API_KEY);
+
+if (!process.env.RESEND_API_KEY) {
+  console.warn('❌ RESEND_API_KEY is not set. Email sending will fail.');
+} else {
+  console.log('✅ Resend client initialized.');
+}
 const nodemailer = require('nodemailer');
 
 const cleanEnvValue = (value) => {
@@ -38,9 +48,13 @@ transporter.verify((error, success) => {
 
 // Send OTP Email
 exports.sendOTP = async (email, otp) => {
+  const exists = await User.findOne({ email });
+  if (exists)
+    return { success: false, message: 'Email Already Registered' };
   try {
-    const mailOptions = {
-      from: `SplitSmart <${EMAIL_USER}>`,
+    const from = process.env.RESEND_FROM || 'onboarding@resend.dev';
+    const response = await resend.emails.send({
+      from,
       to: email,
       subject: 'Your SplitSmart OTP Code',
       text: `Your SplitSmart OTP Code is: ${otp}. It expires in 5 minutes.`,
@@ -55,12 +69,10 @@ exports.sendOTP = async (email, otp) => {
           <p>If you didn't request this, please ignore this email.</p>
         </div>
       `
-    };
-
-    const info = await transporter.sendMail(mailOptions);
-    console.log('✅ OTP Email Sent:', info.response);
+    });
+    console.log('✅ OTP Email Sent:', response.id || response);
     return { success: true, message: 'OTP sent to email' };
-    
+
   } catch (error) {
     console.error('❌ Email Send Error:', error.message, error);
     throw new Error(`Failed to send email: ${error.message}`);
@@ -70,8 +82,9 @@ exports.sendOTP = async (email, otp) => {
 // Send Welcome Email
 exports.sendWelcomeEmail = async (email, name) => {
   try {
-    const mailOptions = {
-      from: `SplitSmart <${EMAIL_USER}>`,
+    const from = process.env.RESEND_FROM || 'onboarding@resend.dev';
+    await resend.emails.send({
+      from,
       to: email,
       subject: 'Welcome to SplitSmart! 🎉',
       text: `Welcome to SplitSmart, ${name}! Your account is ready.`,
@@ -88,11 +101,9 @@ exports.sendWelcomeEmail = async (email, name) => {
           </div>
         </div>
       `
-    };
-
-    await transporter.sendMail(mailOptions);
+    });
     console.log('✅ Welcome Email Sent to:', email);
-    
+
   } catch (error) {
     console.error('❌ Welcome Email Error:', error.message);
     // Don't throw - this is not critical

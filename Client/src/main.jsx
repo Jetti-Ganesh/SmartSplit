@@ -4,6 +4,7 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import { GoogleOAuthProvider } from '@react-oauth/google'
 import { Provider } from 'react-redux'
 import { store } from './store'
+import { NotificationProvider } from './context/NotificationContext'
 import App from './App.jsx'
 import LandingPage from './pages/LandingPage.jsx'
 import SignUp from './pages/SignUp.jsx'
@@ -73,8 +74,9 @@ const router = createBrowserRouter([
 createRoot(document.getElementById('root')).render(
    <Provider store={store}>
      <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
-      <RouterProvider router={router} >
-      </RouterProvider>
+       <NotificationProvider>
+         <RouterProvider router={router} />
+       </NotificationProvider>
      </GoogleOAuthProvider>
    </Provider>
 )

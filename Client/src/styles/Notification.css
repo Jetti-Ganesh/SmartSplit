@@ -1,0 +1,187 @@
+/* ================================================================
+   Notification.css — SmartSplit Toast System (react-hot-toast)
+   Custom toast skin — mobile-first, glassmorphism, slide from top
+   ================================================================ */
+
+/* ── Keyframes ──────────────────────────────────────────────── */
+@keyframes ht-slide-in {
+  0%   { opacity: 0; transform: translateY(-110%) scale(0.9); }
+  60%  { opacity: 1; transform: translateY(5px)   scale(1.01); }
+  100% { opacity: 1; transform: translateY(0)     scale(1); }
+}
+
+@keyframes ht-slide-out {
+  0%   { opacity: 1; transform: translateY(0)      scale(1);    }
+  100% { opacity: 0; transform: translateY(-110%)  scale(0.92); }
+}
+
+@keyframes ht-progress {
+  from { transform: scaleX(1); }
+  to   { transform: scaleX(0); }
+}
+
+/* ── Base toast shell ───────────────────────────────────────── */
+.ht-toast {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 300px;
+  max-width: 420px;
+  padding: 14px 14px 18px 18px;
+  border-radius: 16px;
+  overflow: hidden;
+  /* Glassmorphism */
+  background: rgba(18, 18, 28, 0.88);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.45),
+    0 2px 8px  rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  cursor: default;
+  user-select: none;
+  pointer-events: all;
+}
+
+/* ── Animations via t.visible ───────────────────────────────── */
+.ht-enter { animation: ht-slide-in  0.5s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.ht-exit  { animation: ht-slide-out 0.35s cubic-bezier(0.55, 0, 1, 0.45) both; }
+
+/* ── Left accent bar ────────────────────────────────────────── */
+.ht-accent {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  border-radius: 16px 0 0 16px;
+}
+
+/* ── Icon wrapper ───────────────────────────────────────────── */
+.ht-icon {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.06);
+  padding: 8px;
+}
+.ht-icon svg { width: 100%; height: 100%; }
+
+/* ── Message ────────────────────────────────────────────────── */
+.ht-message {
+  flex: 1;
+  font-family: 'Inter', 'Outfit', sans-serif;
+  font-size: 13.5px;
+  font-weight: 500;
+  line-height: 1.48;
+  color: rgba(255, 255, 255, 0.92);
+  margin: 0;
+}
+
+/* ── Close button ───────────────────────────────────────────── */
+.ht-close {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  transition: background 0.18s, color 0.18s, transform 0.15s;
+}
+.ht-close svg { width: 14px; height: 14px; }
+.ht-close:hover {
+  background: rgba(255, 255, 255, 0.14);
+  color: rgba(255, 255, 255, 0.9);
+  transform: scale(1.1);
+}
+.ht-close:active { transform: scale(0.9); }
+
+/* ── Progress bar ───────────────────────────────────────────── */
+.ht-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  transform-origin: left;
+  animation: ht-progress linear forwards;
+  border-radius: 0 0 16px 16px;
+}
+
+/* ================================================================
+   TYPE TOKENS
+   ================================================================ */
+
+/* SUCCESS ─── green */
+.ht-toast--success .ht-accent   { background: #10b981; }
+.ht-toast--success .ht-icon     { color: #10b981; }
+.ht-toast--success .ht-progress { background: linear-gradient(90deg, #10b981, #34d399); }
+
+/* ERROR ─── red */
+.ht-toast--error .ht-accent   { background: #ef4444; }
+.ht-toast--error .ht-icon     { color: #ef4444; }
+.ht-toast--error .ht-progress { background: linear-gradient(90deg, #ef4444, #f87171); }
+
+/* WARNING ─── amber */
+.ht-toast--warning .ht-accent   { background: #f59e0b; }
+.ht-toast--warning .ht-icon     { color: #fbbf24; }
+.ht-toast--warning .ht-progress { background: linear-gradient(90deg, #f59e0b, #fcd34d); }
+
+/* INFO ─── blue */
+.ht-toast--info .ht-accent   { background: #3b82f6; }
+.ht-toast--info .ht-icon     { color: #60a5fa; }
+.ht-toast--info .ht-progress { background: linear-gradient(90deg, #3b82f6, #93c5fd); }
+
+/* GROUP ─── cyan */
+.ht-toast--group .ht-accent   { background: #22d3ee; }
+.ht-toast--group .ht-icon     { color: #22d3ee; }
+.ht-toast--group .ht-progress { background: linear-gradient(90deg, #22d3ee, #67e8f9); }
+
+/* EXPENSE ─── purple */
+.ht-toast--expense .ht-accent   { background: #7c3aed; }
+.ht-toast--expense .ht-icon     { color: #a78bfa; }
+.ht-toast--expense .ht-progress { background: linear-gradient(90deg, #7c3aed, #c4b5fd); }
+
+/* ================================================================
+   LIGHT MODE
+   ================================================================ */
+body.light .ht-toast {
+  background: rgba(255, 255, 255, 0.92);
+  border-color: rgba(0, 0, 0, 0.07);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.12),
+    0 2px 8px  rgba(0, 0, 0, 0.07),
+    inset 0 1px 0 rgba(255, 255, 255, 0.95);
+}
+body.light .ht-message { color: rgba(15, 23, 42, 0.87); }
+body.light .ht-close   { color: rgba(15, 23, 42, 0.45); background: rgba(0, 0, 0, 0.05); }
+body.light .ht-close:hover { background: rgba(0, 0, 0, 0.1); color: rgba(15, 23, 42, 0.85); }
+body.light .ht-icon    { background: rgba(0, 0, 0, 0.04); }
+
+/* ================================================================
+   MOBILE
+   ================================================================ */
+@media (max-width: 768px) {
+  .ht-toast {
+    min-width: unset;
+    max-width: calc(100vw - 28px);
+    width: calc(100vw - 28px);
+    border-radius: 14px;
+    padding: 12px 12px 16px 16px;
+    gap: 10px;
+  }
+  .ht-message { font-size: 13px; }
+  .ht-icon { width: 32px; height: 32px; padding: 7px; }
+}

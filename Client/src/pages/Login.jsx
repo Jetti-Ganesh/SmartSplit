@@ -3,6 +3,7 @@ import { useNavigate, useOutletContext } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { loginSuccess } from '../services/authSlice';
 import MobileTopBar from '../components/MobileTopBar';
+import { useNotification } from '../context/NotificationContext';
 import '../styles/Login-SignUp.css';
 
 const PhoneIcon = () => (
@@ -24,6 +25,7 @@ function Login() {
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
   const dispatch = useDispatch()
+  const { showNotification } = useNotification()
 
   const switchMode = (mode) => { setLoginMode(mode); setError('') }
 
@@ -53,8 +55,7 @@ function Login() {
       if (!res.ok) return setError(data.message || 'Login failed. Please try again.')
 
       dispatch(loginSuccess({ token: data.token, user: data.user }))
-      const flashMessage = { type: 'success', text: data.message || 'Logged in successfully.' };
-      localStorage.setItem('flashMessage', JSON.stringify(flashMessage));
+      showNotification(data.message || '🎉 Logged in successfully. Welcome back!', 'success', 5000)
       navigate('/Dashboard')
     } catch {
       setError('Could not connect to server. Please try again.')

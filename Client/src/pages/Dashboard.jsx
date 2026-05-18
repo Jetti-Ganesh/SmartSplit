@@ -3,8 +3,10 @@ import "../styles/Dashboard.css";
 import BottomNavbareM from "../components/BottomNavbareM";
 import SettingsDrawer from "../components/SettingsDrawer";
 import { useState, useEffect } from "react";
-import {  useGetGroupsQuery } from "../services/groupAPI";
+import { useSelector } from "react-redux";
+import { useGetGroupsQuery } from "../services/groupAPI";
 import api from "../../utils/api";
+import { useNotification } from "../context/NotificationContext";
 // ── Static data ───────────────────────────────────────────────────────────────
 // const USER = { name: "Rahul", email: "rahul@email.com", initial: "R" };
 
@@ -25,8 +27,16 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const location = useLocation();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+
+  // ── Auth guard — get user from Redux (clears properly on logout) ──
+  const { user, isLoggedIn } = useSelector((state) => state.auth);
+  useEffect(() => {
+    if (!isLoggedIn) {
+      navigate('/Login', { replace: true });
+    }
+  }, [isLoggedIn, navigate]);
+
   const { data: Groupdata, isLoading: isFetchingGroups } = useGetGroupsQuery();
-  // console.log(Groupdata);
 
   const totalOwe = Groupdata ? Groupdata.data.reduce((acc, g) => acc + g.userBalance.owing, 0) : "";
   const totalOwed = Groupdata ? Groupdata.data.reduce((acc, g) => acc + g.userBalance.owed, 0) : "";
@@ -43,12 +53,11 @@ export default function Dashboard() {
   const active = getActiveId();
   const [notifications, setNotifications] = useState([]);
   const [loadingMessages, setLoadingMessages] = useState(true);
-  const [flashMessage, setFlashMessage] = useState(null);
+  const { showNotification } = useNotification();
 
   const today = new Date().toLocaleDateString("en-IN", {
     weekday: "long", day: "numeric", month: "long", year: "numeric",
   });
-  const user = JSON.parse(localStorage.getItem('user'));
 
   useEffect(() => {
     const fetchNotifications = async () => {
@@ -64,10 +73,12 @@ export default function Dashboard() {
       }
     };
 
+    // Read any pending flash from localStorage and show as toast
     const flash = localStorage.getItem('flashMessage');
     if (flash) {
       try {
-        setFlashMessage(JSON.parse(flash));
+        const parsed = JSON.parse(flash);
+        showNotification(parsed.text || 'Welcome!', parsed.type || 'info', 5000);
       } catch (e) {
         console.warn('Invalid flash message', e);
       }
@@ -92,6 +103,9 @@ export default function Dashboard() {
     return new Date(timestamp).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
   };
   
+  // If not logged in yet, render nothing while redirect fires
+  if (!isLoggedIn || !user) return null;
+
   return (
     <div className="dashboard-shell">
 
@@ -112,17 +126,11 @@ export default function Dashboard() {
 
           {/* Section Header */}
           <div className="section-header">
-            <h1 className="section-title">Hi {user.name}! 👋</h1>
+            <h1 className="section-title">Hi {user?.name ?? 'there'}! 👋</h1>
             <p className="section-subtitle">
               {today} — Here's your balance overview and recent messages.
             </p>
           </div>
-
-          {flashMessage && (
-            <div className={`flash-banner flash-${flashMessage.type || 'info'}`}>
-              {flashMessage.text}
-            </div>
-          )}
 
           {/* Action Buttons */}
           <div className="top-bar-actions">
@@ -217,32 +225,34 @@ export default function Dashboard() {
                 </div>
                 <span className="panel-icon">✉️</span>
               </div>
-              {loadingMessages ? (
-                <div className="activity-item">
-                  <div className="activity-dot" style={{ background: 'var(--accent-purple)', boxShadow: '0 0 6px var(--accent-purple)' }} />
-                  <div className="activity-text">Loading messages…</div>
-                </div>
-              ) : notifications.length > 0 ? (
-                notifications.map((item, index) => (
-                  <div className="activity-item" key={item._id || index}>
-                    <div
-                      className="activity-dot"
-                      style={{
-                        background: item.type === 'error' ? '#ef4444' : item.type === 'success' ? '#10b981' : item.type === 'group' ? '#38bdf8' : 'var(--accent-purple)',
-                        boxShadow: `0 0 6px ${item.type === 'error' ? '#ef4444' : item.type === 'success' ? '#10b981' : item.type === 'group' ? '#38bdf8' : 'rgba(124,58,237,0.5)'}`
-                      }}
-                    />
-                    <div className="activity-text">{item.message}</div>
-                    <div className="activity-time">{formatMessageTime(item.createdAt)}</div>
+              <div className="recent-messages-scroll-container">
+                {loadingMessages ? (
+                  <div className="activity-item">
+                    <div className="activity-dot" style={{ background: 'var(--accent-purple)', boxShadow: '0 0 6px var(--accent-purple)' }} />
+                    <div className="activity-text">Loading messages…</div>
                   </div>
-                ))
-              ) : (
-                <div className="activity-item">
-                  <div className="activity-dot" style={{ background: 'var(--accent-purple)', boxShadow: '0 0 6px rgba(124,58,237,0.5)' }} />
-                  <div className="activity-text">No recent messages yet. New login and group updates will appear here.</div>
-                  <div className="activity-time">—</div>
-                </div>
-              )}
+                ) : notifications.length > 0 ? (
+                  notifications.map((item, index) => (
+                    <div className="activity-item" key={item._id || index}>
+                      <div
+                        className="activity-dot"
+                        style={{
+                          background: item.type === 'error' ? '#ef4444' : item.type === 'success' ? '#10b981' : item.type === 'group' ? '#38bdf8' : 'var(--accent-purple)',
+                          boxShadow: `0 0 6px ${item.type === 'error' ? '#ef4444' : item.type === 'success' ? '#10b981' : item.type === 'group' ? '#38bdf8' : 'rgba(124,58,237,0.5)'}`
+                        }}
+                      />
+                      <div className="activity-text">{item.message}</div>
+                      <div className="activity-time">{formatMessageTime(item.createdAt)}</div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="activity-item">
+                    <div className="activity-dot" style={{ background: 'var(--accent-purple)', boxShadow: '0 0 6px rgba(124,58,237,0.5)' }} />
+                    <div className="activity-text">No recent messages yet. New login and group updates will appear here.</div>
+                    <div className="activity-time">—</div>
+                  </div>
+                )}
+              </div>
             </div>
 
           </div>

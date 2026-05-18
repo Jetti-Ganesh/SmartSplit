@@ -5,6 +5,7 @@ import { logout } from "../services/authSlice";
 import ThemeToggle from "./ThemeToggle";
 import api from "../../utils/api";
 import { fetchUserProfile } from "../services/profileSlice";
+import { useNotification } from "../context/NotificationContext";
 import "../styles/SettingsDrawer.css";
 
 const SettingsDrawer = ({ isOpen, onClose, isDark, toggleTheme }) => {
@@ -12,6 +13,7 @@ const SettingsDrawer = ({ isOpen, onClose, isDark, toggleTheme }) => {
   const navigate = useNavigate();
   const { user } = useSelector((state) => state.auth);
   const { user: profileUser } = useSelector((state) => state.profile);
+  const { showNotification } = useNotification();
 
   // ── States for Change Password ──
   const [showChangePassword, setShowChangePassword] = useState(false);
@@ -90,6 +92,7 @@ const SettingsDrawer = ({ isOpen, onClose, isDark, toggleTheme }) => {
   const handleLogout = () => {
     dispatch(logout());
     onClose();
+    showNotification('👋 Logged out successfully. See you soon!', 'info', 4000);
     navigate("/");
   };
 
@@ -143,10 +146,11 @@ const SettingsDrawer = ({ isOpen, onClose, isDark, toggleTheme }) => {
     setCpLoading(true);
     try {
       await api.post('/change-password', { newPassword: cpNewPassword, confirmPassword: cpConfirm }, { withCredentials: true });
+      showNotification('🔑 Password updated successfully!', 'success');
       setCpSuccess('✅ Password updated!');
       setTimeout(() => {
         resetCpState();
-      }, 1500);
+      }, 1200);
     } catch (err) {
       setCpError(err.response?.data?.message || 'Server error.');
     } finally {
@@ -199,11 +203,12 @@ const SettingsDrawer = ({ isOpen, onClose, isDark, toggleTheme }) => {
     try {
       await api.post('/verify-otp', { enteredOtp: twoFAOtp }, { withCredentials: true });
       await api.post('/enable-2fa', { method: twoFAMethod }, { withCredentials: true });
+      showNotification('🔐 Two-Factor Authentication enabled!', 'success');
       setTwoFASuccess('🔐 Two-Factor Auth enabled!');
       dispatch(fetchUserProfile());
       setTimeout(() => {
         resetTwoFAState();
-      }, 1500);
+      }, 1200);
     } catch (err) {
       setTwoFAError(err.response?.data?.message || 'Invalid OTP. Please try again.');
     } finally {
@@ -217,11 +222,12 @@ const SettingsDrawer = ({ isOpen, onClose, isDark, toggleTheme }) => {
     setTwoFASuccess('');
     try {
       await api.post('/disable-2fa', {}, { withCredentials: true });
+      showNotification('🔓 Two-Factor Authentication disabled.', 'warning');
       setTwoFASuccess('🔐 Two-Factor Auth disabled!');
       dispatch(fetchUserProfile());
       setTimeout(() => {
         resetTwoFAState();
-      }, 1500);
+      }, 1200);
     } catch (err) {
       setTwoFAError(err.response?.data?.message || 'Failed to disable 2FA.');
     } finally {

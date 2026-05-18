@@ -7,6 +7,7 @@ import { useCreateExpenseMutation, useGetExpensesQuery } from '../services/expen
 import BottomNavbareM from '../components/BottomNavbareM';
 import SettingsDrawer from '../components/SettingsDrawer';
 import { useOutletContext } from 'react-router-dom';
+import { useNotification } from '../context/NotificationContext';
 
 function GroupDetail() {
   const categories = [
@@ -28,16 +29,7 @@ function GroupDetail() {
   const [addMemberFn, { isLoading: isAddingMember }] = useAddMemberMutation();
   const [addExpenseFn, { isLoading: isCreatingExpense }] = useCreateExpenseMutation();
   const { data: expensesRes, isLoading: isLoadingExpenses } = useGetExpensesQuery(groupId);
-  const [notification, setNotification] = useState(null);
-
-  useEffect(() => {
-    if (notification) {
-      const timer = setTimeout(() => {
-        setNotification(null);
-      }, 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [notification]);
+  const { showNotification } = useNotification();
 
   // Try to get group from state, otherwise provide a fallback or fetch it
   const group = location.state?.group || {
@@ -55,6 +47,7 @@ function GroupDetail() {
   const [showAddExpenseModal, setShowAddExpenseModal] = useState(false);
   const [expandedExpenseId, setExpandedExpenseId] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState('Food');
+  const [memberTab, setMemberTab] = useState('email'); // 'email' | 'invite'
   const [splitType, setSplitType] = useState('Equally');
   const [email, setEmail] = useState('');
   const [expenseAmount, setExpenseAmount] = useState('');
@@ -81,35 +74,33 @@ function GroupDetail() {
   const toggleExpenseDetails = (id) => {
     setExpandedExpenseId(prev => prev === id ? null : id);
   };
-  function copyToClipBoard(text) {
+  function copyToClipBoard(text, label = "Code") {
     navigator.clipboard.writeText(text).then(() => {
-      console.log('Text successfully copied!');
-      alert("Copied: " + text);
+      showNotification(`📋 ${label} copied to clipboard successfully!`, 'success');
     }).catch(err => {
       console.error('Unable to copy text', err);
+      showNotification('Failed to copy to clipboard.', 'error');
     });
   }
   async function addMember(email) {
     const currentGroupId = group._id || groupId;
-    console.log("Adding member to group:", currentGroupId);
     try {
-      await addMemberFn({ groupId: currentGroupId, email }).unwrap();
-      
-      setNotification({ type: 'success', message: 'Member added successfully!' });
+      const res = await addMemberFn({ groupId: currentGroupId, email }).unwrap();
+      showNotification('👥 Member added successfully!', 'success');
       setShowAddMemberModal(false);
       setEmail('');
     } catch (err) {
       console.error("Failed to add member:", err);
       const errorMsg = err?.data?.message || err?.message || '';
-      
+
       if (err?.status === 404 || errorMsg.toLowerCase().includes('not found')) {
-        setNotification({ type: 'error', message: 'No user found with that email.' });
+        showNotification('No user found with that email.', 'error');
       } else if (err?.status === 400 || errorMsg.toLowerCase().includes('already')) {
-        setNotification({ type: 'error', message: 'This person is already in the group.' });
+        showNotification('This person is already in the group.', 'warning');
       } else if (err?.status === 403 || errorMsg.toLowerCase().includes('admin')) {
-        setNotification({ type: 'error', message: 'Only group admins can add members.' });
+        showNotification('Only group admins can add members.', 'error');
       } else {
-        setNotification({ type: 'error', message: errorMsg || 'Something went wrong. Please try again.' });
+        showNotification(errorMsg || 'Something went wrong. Please try again.', 'error');
       }
     }
   }
@@ -153,13 +144,13 @@ function GroupDetail() {
     console.log('Expense Data Object:', expenseData);
     try {
       await addExpenseFn(expenseData).unwrap();
-      // success: close modal and clear fields
       setShowAddExpenseModal(false);
       setExpenseAmount('');
       setExpenseDescription('');
+      showNotification('💰 Expense added successfully!', 'expense');
     } catch (err) {
       console.error('Failed to create expense:', err);
-      alert(err?.data?.message || err?.message || 'Failed to create expense');
+      showNotification(err?.data?.message || err?.message || 'Failed to create expense', 'error');
     }
   };
 
@@ -176,22 +167,7 @@ function GroupDetail() {
         </button>
       </div>
 
-      {notification && (
-        <div style={{
-          position: 'fixed',
-          top: '20px',
-          right: '20px',
-          background: notification.type === 'success' ? '#10b981' : '#ef4444',
-          color: 'white',
-          padding: '12px 16px',
-          borderRadius: '8px',
-          zIndex: 1000,
-          boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
-        }}>
-          {notification.message}
-        </div>
-      )}
-
+      {/* Group detail container */}
       <div className="group-detail-container">
       {/* Header Section */}
       <div className="group-detail-header">
@@ -517,52 +493,88 @@ function GroupDetail() {
         <div className="modal-overlay" onClick={() => setShowAddMemberModal(false)}>
           <div className="add-member-modal enhanced-modal" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
-              <h2>Add New Member</h2>
-              <p className="modal-subtitle">Expand your circle and share expenses</p>
+              <h2>Add Group Members</h2>
+              <p className="modal-subtitle">Grow your circle and keep all expenses in sync</p>
               <button className="close-btn" onClick={() => setShowAddMemberModal(false)}>×</button>
             </div>
 
-            <div className="modal-content scrollable-content">
-              <div className="input-group left-align">
-                <label>Email Address</label>
-                <div className="input-with-icon">
-                  <span className="input-icon">✉️</span>
-                  <input type="email" placeholder="Enter member's email" onChange={(e) => { setEmail(e.target.value) }} />
-                </div>
-              </div>
-
-              <div className="info-banner enhanced-banner">
-                <div className="banner-icon">💡</div>
-                <div className="banner-text">The person must have a SmartSplit account. They'll be added immediately.</div>
-              </div>
-
-              <button className="primary-btn enhanced-btn" onClick={() => addMember(email)}>
-                {isAddingMember ? (
-                  <span className="loading-text">Adding Member...</span>
-                ) : (
-                  <>
-                    <span className="btn-icon">+</span>
-                    <span>Add Member</span>
-                  </>
-                )}
+            {/* Premium Sliding Tabs inside Add Member Modal */}
+            <div className="modal-tabs" style={{ margin: '12px 24px 0', display: 'flex', borderBottom: '1px solid rgba(139, 92, 246, 0.12)' }}>
+              <button 
+                className={`modal-tab-btn ${memberTab === 'email' ? 'active' : ''}`}
+                onClick={() => setMemberTab('email')}
+                style={{ flex: 1, background: 'transparent', border: 'none', padding: '12px', fontWeight: '700', cursor: 'pointer', borderBottom: memberTab === 'email' ? '3px solid #8b5cf6' : '3px solid transparent', color: memberTab === 'email' ? '#8b5cf6' : 'var(--text-muted)' }}
+              >
+                <span>✉️ Add by Email</span>
               </button>
+              <button 
+                className={`modal-tab-btn ${memberTab === 'invite' ? 'active' : ''}`}
+                onClick={() => setMemberTab('invite')}
+                style={{ flex: 1, background: 'transparent', border: 'none', padding: '12px', fontWeight: '700', cursor: 'pointer', borderBottom: memberTab === 'invite' ? '3px solid #8b5cf6' : '3px solid transparent', color: memberTab === 'invite' ? '#8b5cf6' : 'var(--text-muted)' }}
+              >
+                <span>🔗 Share Code/Link</span>
+              </button>
+            </div>
 
-              <div className="divider enhanced-divider">
-                <span>Or Share Invite Code</span>
-              </div>
+            <div className="modal-content scrollable-content" style={{ padding: '20px 24px 24px' }}>
+              {memberTab === 'email' ? (
+                <>
+                  <div className="premium-email-field">
+                    <label>Email Address</label>
+                    <div className="premium-input-container">
+                      <span className="premium-input-icon">✉️</span>
+                      <input 
+                        type="email" 
+                        placeholder="Enter member's email address..." 
+                        onChange={(e) => setEmail(e.target.value)} 
+                        className="premium-email-input"
+                      />
+                    </div>
+                  </div>
 
-              <div className="invite-code-container enhanced-invite">
-                <p>Share this code with your friends</p>
-                <div className="invite-code-box">
-                  <h3 className="invite-code">{group.inviteCode || 'AB7X9K'}</h3>
-                  <button className="icon-copy-btn" onClick={() => copyToClipBoard(group.inviteCode || "AB7X9K")}>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                    </svg>
+                  <div className="info-banner enhanced-banner">
+                    <strong>💡 Quick Tip:</strong> The person must have an active SmartSplit account to be added immediately.
+                  </div>
+
+                  <button className="premium-add-btn" onClick={() => addMember(email)}>
+                    {isAddingMember ? 'Adding Member...' : '➕ Add Member'}
                   </button>
+                </>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', width: '100%' }}>
+                  
+                  {/* Invite Code Box */}
+                  <div className="invite-code-container enhanced-invite" style={{ background: 'var(--bg-color)', border: '1px solid var(--border-color)', borderRadius: '16px', padding: '20px', textAlign: 'center' }}>
+                    <p style={{ margin: '0 0 10px', fontSize: '13px', color: 'var(--text-muted)', fontWeight: '600' }}>INVITATION CODE</p>
+                    <div className="invite-code-box" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '14px' }}>
+                      <h3 className="invite-code" style={{ margin: 0, fontSize: '32px', letterSpacing: '4px', color: '#8b5cf6', fontFamily: 'monospace', fontWeight: '800' }}>{group.inviteCode || 'AB7X9K'}</h3>
+                      <button 
+                        className="copy-code-btn" 
+                        onClick={() => copyToClipBoard(group.inviteCode || "AB7X9K", "Invite Code")}
+                        style={{ background: 'var(--card-bg)', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '6px 12px', color: 'var(--text-color)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px' }}
+                      >
+                        Copy Code
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Invite Link Box */}
+                  <div className="invite-link-container" style={{ background: 'var(--bg-color)', border: '1px solid var(--border-color)', borderRadius: '16px', padding: '20px', textAlign: 'left' }}>
+                    <p style={{ margin: '0 0 10px', fontSize: '13px', color: 'var(--text-muted)', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.5px' }}>INVITATION LINK</p>
+                    <div className="invite-link-preview" style={{ background: 'var(--card-bg)', border: '1px solid var(--border-color)', borderRadius: '10px', padding: '10px 12px', fontSize: '12px', color: 'var(--text-muted)', wordBreak: 'break-all', fontFamily: 'monospace', marginBottom: '14px' }}>
+                      {window.location.origin}/groups?invite={group.inviteCode || 'AB7X9K'}
+                    </div>
+                    <button 
+                      className="primary-btn invite-link-btn" 
+                      onClick={() => copyToClipBoard(`${window.location.origin}/groups?invite=${group.inviteCode || 'AB7X9K'}`, "Invite Link")}
+                      style={{ background: 'linear-gradient(90deg, #8b5cf6, #7c3aed)', color: '#fff', border: 'none', padding: '12px', borderRadius: '10px', fontWeight: '600', width: '100%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', boxShadow: '0 8px 16px rgba(124, 58, 237, 0.2)' }}
+                    >
+                      <span>🔗</span> Copy Invitation Link
+                    </button>
+                  </div>
+
                 </div>
-              </div>
+              )}
             </div>
           </div>
         </div>
