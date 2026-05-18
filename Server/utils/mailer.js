@@ -1,26 +1,13 @@
-const nodemailer = require('nodemailer');
+const { Resend } = require('resend');
 const User = require('../models/user.model');
-// ✅ CORRECT - Use SMTP instead of service: "Gmail"
-const transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com',
-  port: 465,                    // ← CHANGE FROM 587 TO 465
-  secure: true,                 // ← CHANGE FROM false TO true
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
-  },
-  connectionTimeout: 10000,     // ← ADD: 10 seconds timeout
-  socketTimeout: 10000          // ← ADD: 10 seconds socket timeout
-});
 
-// Test connection
-transporter.verify((error, success) => {
-  if (error) {
-    console.error('❌ Email Config Error:', error);
-  } else {
-    console.log('✅ Email Service Ready!');
-  }
-});
+const resend = new Resend(process.env.RESEND_API_KEY);
+
+if (!process.env.RESEND_API_KEY) {
+  console.warn('❌ RESEND_API_KEY is not set. Email sending will fail.');
+} else {
+  console.log('✅ Resend client initialized.');
+}
 
 // Send OTP Email
 exports.sendOTP = async (email, otp) => {
@@ -28,8 +15,9 @@ exports.sendOTP = async (email, otp) => {
   if (exists)
     return { success: false, message: 'Email Already Registered' };
   try {
-    const mailOptions = {
-      from: process.env.EMAIL_USER,
+    const from = process.env.RESEND_FROM || 'onboarding@resend.dev';
+    const response = await resend.emails.send({
+      from,
       to: email,
       subject: 'Your SplitSmart OTP Code',
       html: `
@@ -43,9 +31,8 @@ exports.sendOTP = async (email, otp) => {
           <p>If you didn't request this, please ignore this email.</p>
         </div>
       `
-    };
-    const info = await transporter.sendMail(mailOptions);
-    console.log('✅ OTP Email Sent:', info.response);
+    });
+    console.log('✅ OTP Email Sent:', response.id || response);
     return { success: true, message: 'OTP sent to email' };
 
   } catch (error) {
@@ -57,8 +44,9 @@ exports.sendOTP = async (email, otp) => {
 // Send Welcome Email
 exports.sendWelcomeEmail = async (email, name) => {
   try {
-    const mailOptions = {
-      from: process.env.EMAIL_USER,
+    const from = process.env.RESEND_FROM || 'onboarding@resend.dev';
+    await resend.emails.send({
+      from,
       to: email,
       subject: 'Welcome to SplitSmart! 🎉',
       html: `
@@ -74,9 +62,7 @@ exports.sendWelcomeEmail = async (email, name) => {
           </div>
         </div>
       `
-    };
-
-    await transporter.sendMail(mailOptions);
+    });
     console.log('✅ Welcome Email Sent to:', email);
 
   } catch (error) {

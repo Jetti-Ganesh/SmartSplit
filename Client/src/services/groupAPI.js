@@ -56,7 +56,15 @@ export const groupAPI = createApi({
                 body: { email }
             }),
             invalidatesTags: ['Groups']
+        }),
+        joinGroup: builder.mutation({
+            query: ({ code }) => ({
+                url: 'join-group',
+                method: 'POST',
+                body: { code }
+            }),
+            invalidatesTags: ['Groups']
         })
     })
 })
-export const { useCreateGroupMutation, useGetGroupsQuery, useAddMemberMutation } = groupAPI;
+export const { useCreateGroupMutation, useGetGroupsQuery, useAddMemberMutation, useJoinGroupMutation } = groupAPI;

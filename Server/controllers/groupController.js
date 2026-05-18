@@ -149,6 +149,64 @@ exports.addMember = async (req, res, next) => {
     next(error);
   }
 };
+
+// Join group by invite code
+exports.joinByCode = async (req, res, next) => {
+  try {
+    const { code } = req.body;
+    const userId = req.user.id;
+
+    if (!code) {
+      return res.status(400).json({ success: false, message: 'Invite code is required' });
+    }
+
+    const group = await Group.findOne({
+      inviteCode: code.toUpperCase().trim(),
+      isActive: true
+    });
+
+    if (!group) {
+      return res.status(404).json({ success: false, message: 'Invalid or expired invite code. Please check and try again.' });
+    }
+
+    // Check if already a member
+    const alreadyMember = group.members.some(m => m.userId.toString() === userId);
+    if (alreadyMember) {
+      return res.status(400).json({ success: false, message: 'You are already a member of this group!' });
+    }
+
+    group.members.push({ userId, role: 'member' });
+    await group.save();
+
+    // Notify the user
+    try {
+      await User.findByIdAndUpdate(userId, {
+        $push: {
+          notifications: {
+            type: 'group',
+            message: `You joined "${group.name}" via invite code. Welcome! 🎉`,
+            isRead: false,
+            createdAt: new Date()
+          }
+        }
+      });
+    } catch (notifyErr) {
+      console.error('Notification save failed:', notifyErr);
+    }
+
+    const updatedGroup = await Group.findById(group._id)
+      .populate('members.userId', 'name email');
+
+    res.json({
+      success: true,
+      message: `🎉 Joined "${group.name}" successfully!`,
+      data: updatedGroup
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 // Helper: Calculate user balance in a group
 async function calculateUserBalanceInGroup(groupId, userId) {
   const expenses = await Expense.find({ groupId });

@@ -4,6 +4,7 @@ import { useNavigate, useOutletContext } from 'react-router-dom'
 import { useDispatch } from 'react-redux';
 import { loginSuccess } from '../services/authSlice';
 import MobileTopBar from '../components/MobileTopBar';
+import { useNotification } from '../context/NotificationContext';
 import axios from 'axios';
 import '../styles/Login-SignUp.css'
 axios.defaults.withCredentials = true;
@@ -13,6 +14,7 @@ function SignUp() {
   const { isDark, toggleTheme } = context;
   const navigate = useNavigate()
   const dispatch = useDispatch()
+  const { showNotification } = useNotification()
 
   const [signupMode, setSignupMode] = useState('email') // 'email' | 'phone'
   const [isEmailVerified, setIsEmailVerified] = useState(false)
@@ -168,6 +170,7 @@ function SignUp() {
       }
 
       dispatch(loginSuccess({ token: data.token, user: data.user }))
+      showNotification('🎉 Account created successfully! Welcome to SmartSplit.', 'success', 5000)
       navigate('/Dashboard')
     } catch (err) {
       setError('Could not connect to server.')
@@ -192,6 +195,7 @@ function SignUp() {
         const data = await backendRes.json()
         if (!backendRes.ok) return setError(data.message || 'Google sign-up failed.')
         dispatch(loginSuccess({ token: data.token, user: data.user }))
+        showNotification('🎉 Signed in with Google! Welcome to SmartSplit.', 'success', 5000)
         navigate('/Dashboard')
       } catch { setError('Google sign-up failed. Try again.') }
     },
