@@ -1,5 +1,5 @@
 const nodemailer = require('nodemailer');
-
+const User = require('../models/user.model');
 // ✅ CORRECT - Use SMTP instead of service: "Gmail"
 const transporter = nodemailer.createTransport({
   host: 'smtp.gmail.com',
@@ -24,6 +24,9 @@ transporter.verify((error, success) => {
 
 // Send OTP Email
 exports.sendOTP = async (email, otp) => {
+  const exists = await User.findOne({ email });
+  if (exists)
+    return { success: false, message: 'Email Already Registered' };
   try {
     const mailOptions = {
       from: process.env.EMAIL_USER,
@@ -41,11 +44,10 @@ exports.sendOTP = async (email, otp) => {
         </div>
       `
     };
-
     const info = await transporter.sendMail(mailOptions);
     console.log('✅ OTP Email Sent:', info.response);
     return { success: true, message: 'OTP sent to email' };
-    
+
   } catch (error) {
     console.error('❌ Email Send Error:', error.message);
     throw new Error(`Failed to send email: ${error.message}`);
@@ -76,7 +78,7 @@ exports.sendWelcomeEmail = async (email, name) => {
 
     await transporter.sendMail(mailOptions);
     console.log('✅ Welcome Email Sent to:', email);
-    
+
   } catch (error) {
     console.error('❌ Welcome Email Error:', error.message);
     // Don't throw - this is not critical
