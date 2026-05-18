@@ -1,0 +1,352 @@
+/* ── MobileTopBar — only renders on mobile (hidden on desktop) ── */
+
+.mtb-bar {
+  display: none; /* hidden on desktop */
+}
+
+@media (max-width: 768px) {
+  .mtb-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: fixed !important;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 56px;
+    padding: 0 18px;
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    z-index: 99999 !important;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.08);
+  }
+
+  /* ── Logo ── */
+  .mtb-logo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .mtb-logo-icon {
+    width: 32px;
+    height: 32px;
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.35);
+  }
+
+  .mtb-logo-text {
+    font-size: 17px;
+    font-weight: 700;
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -0.3px;
+  }
+
+  /* ── Right side wrapper ── */
+  .mtb-right {
+    display: flex;
+    align-items: center;
+    position: relative;
+  }
+
+  /* ── Hamburger button ── */
+  .mtb-hamburger {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    width: 42px;
+    height: 42px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    cursor: pointer;
+    padding: 0;
+    transition: background 0.2s, border-color 0.2s, transform 0.15s;
+    position: relative;
+    z-index: 1100;
+  }
+
+  .mtb-hamburger:hover {
+    background: rgba(59, 130, 246, 0.12);
+    border-color: rgba(59, 130, 246, 0.35);
+  }
+
+  .mtb-hamburger.open {
+    background: rgba(59, 130, 246, 0.15);
+    border-color: rgba(59, 130, 246, 0.5);
+  }
+
+  .mtb-hamburger:active { transform: scale(0.94); }
+
+  .mtb-bar-line {
+    display: block;
+    width: 18px;
+    height: 2px;
+    background: var(--text-primary);
+    border-radius: 2px;
+    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+    transform-origin: center;
+  }
+
+  /* Animated X when open */
+  .mtb-hamburger.open .mtb-bar-line:nth-child(1) {
+    transform: translateY(7px) rotate(45deg);
+  }
+  .mtb-hamburger.open .mtb-bar-line:nth-child(2) {
+    opacity: 0;
+    transform: scaleX(0);
+  }
+  .mtb-hamburger.open .mtb-bar-line:nth-child(3) {
+    transform: translateY(-7px) rotate(-45deg);
+  }
+
+  /* ── Fullscreen overlay ── */
+  .mtb-overlay {
+    position: fixed !important;
+    inset: 0;
+    background: rgba(0, 0, 0, 0);
+    z-index: 99998 !important;
+    pointer-events: none;
+    transition: background 0.3s ease;
+  }
+  .mtb-overlay.visible {
+    background: rgba(0, 0, 0, 0.45);
+    pointer-events: all;
+    backdrop-filter: blur(2px);
+  }
+
+  /* ── Slide-in drawer from right ── */
+  .mtb-drawer {
+    position: fixed !important;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: auto;
+    height: 100vh;
+    min-height: 100vh;
+    width: min(320px, 85vw);
+    background: var(--bg-secondary);
+    z-index: 100000 !important;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    transform: translateX(100%);
+    transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+    box-shadow: -8px 0 40px rgba(0, 0, 0, 0.2);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .mtb-drawer.open {
+    transform: translateX(0);
+  }
+
+  /* ── Drawer header ── */
+  .mtb-drawer-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    min-height: 56px;
+  }
+
+  .mtb-drawer-logo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 16px;
+    font-weight: 700;
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .mtb-drawer-logo-icon {
+    width: 28px;
+    height: 28px;
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    border-radius: 7px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+  }
+
+  .mtb-drawer-close {
+    width: 38px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    cursor: pointer;
+    color: var(--text-primary);
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+  }
+  .mtb-drawer-close:hover {
+    background: rgba(59, 130, 246, 0.12);
+    border-color: rgba(59, 130, 246, 0.22);
+    color: var(--text-primary);
+  }
+
+  /* ── Drawer sections ── */
+  .mtb-drawer-section {
+    padding: 20px 20px 8px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .mtb-drawer-section-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: var(--text-secondary);
+    margin: 0 0 10px 4px;
+    opacity: 0.6;
+  }
+
+  /* ── Nav links inside drawer ── */
+  .mtb-drawer-link {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 13px 12px;
+    border-radius: 11px;
+    text-decoration: none;
+    color: var(--text-primary);
+    font-size: 15px;
+    font-weight: 500;
+    transition: background 0.18s, color 0.18s;
+    margin-bottom: 2px;
+  }
+  .mtb-drawer-link:hover,
+  .mtb-drawer-link:active {
+    background: rgba(59, 130, 246, 0.08);
+    color: #3b82f6;
+  }
+  .mtb-drawer-link svg { opacity: 0.4; flex-shrink: 0; }
+  .mtb-drawer-link:hover svg { opacity: 0.9; }
+  .mtb-drawer-link-text {
+    display: flex;
+    align-items: center;
+  }
+
+  /* ── Theme toggle row ── */
+  .mtb-drawer-setting-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 13px 12px;
+    border-radius: 11px;
+    margin-bottom: 2px;
+  }
+  .mtb-drawer-setting-label {
+    display: flex;
+    align-items: center;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text-primary);
+  }
+
+  /* ── Theme toggle pill ── */
+  .mtb-theme-toggle {
+    width: 52px;
+    height: 28px;
+    border-radius: 14px;
+    border: none;
+    cursor: pointer;
+    position: relative;
+    transition: background 0.3s;
+    background: #e5e7eb;
+    padding: 0;
+    flex-shrink: 0;
+  }
+  .mtb-theme-toggle.dark {
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  }
+  .mtb-theme-thumb {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  }
+  .mtb-theme-toggle.dark .mtb-theme-thumb {
+    transform: translateX(24px);
+  }
+
+  /* ── Footer CTA buttons ── */
+  .mtb-drawer-footer {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: auto;
+  }
+
+  .mtb-drawer-login-btn {
+    width: 100%;
+    padding: 13px;
+    border-radius: 12px;
+    border: 1.5px solid var(--border);
+    background: transparent;
+    color: var(--text-primary);
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .mtb-drawer-login-btn:hover {
+    border-color: #3b82f6;
+    color: #3b82f6;
+    background: rgba(59, 130, 246, 0.06);
+  }
+
+  .mtb-drawer-signup-btn {
+    width: 100%;
+    padding: 13px;
+    border-radius: 12px;
+    border: none;
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    color: white;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(59, 130, 246, 0.35);
+    transition: all 0.2s;
+    letter-spacing: 0.2px;
+  }
+  .mtb-drawer-signup-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.45);
+  }
+  .mtb-drawer-signup-btn:active {
+    transform: translateY(0);
+  }
+}

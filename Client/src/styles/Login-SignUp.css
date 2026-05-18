@@ -475,26 +475,22 @@
 
 .signup-prompt a:hover { color: #3b82f6; text-decoration: underline; }
 
-/* ── Responsive ── */
 @media (max-width: 768px) {
   .split-container {
-    padding: 20px 20px 30px;
+    padding-top: 72px;
+    min-height: 100vh;
+    align-items: flex-start;
   }
-
   .login-card {
     flex-direction: column;
-    height: auto;
     max-height: none;
-    width: 95%;
-    margin: 20px auto;
+    border-radius: 20px;
   }
-
-  .login-left {
-    display: none;
-  }
-
+  .login-left { display: none; }
   .login-right {
-    padding: 40px 20px;
+    width: 100%;
+    padding: 24px 20px 32px;
+    overflow-y: auto;
   }
 }
 

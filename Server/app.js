@@ -4,7 +4,7 @@ const express = require('express');
 const app = express();
 const cors = require('cors');
 const session = require('express-session');
-const MongoStore = require('connect-mongo').default; 
+const MongoStore = require('connect-mongo').default.default; 
 
 const loginRoutes = require("./routes/login.route");
 const signUpRoutes = require("./routes/signUp.route");
@@ -15,6 +15,7 @@ const profileRoutes = require("./routes/profile.route");
 const analyticsRoutes = require("./routes/analytics.routes");
 const expensesRoutes = require("./routes/expenses.route");
 const forgotPasswordRoutes = require("./routes/forgotPassword.route");
+const notificationsRoutes = require("./routes/notifications.route");
 const settleUpRoutes = require("./routes/settlup.route"); // ← add this 
 
 app.use(session({
@@ -65,6 +66,7 @@ app.use("/api/profile", profileRoutes);
 app.use("/api/", analyticsRoutes);
 app.use("/api/", expensesRoutes);
 app.use("/api/", forgotPasswordRoutes);
+app.use("/api/", notificationsRoutes);
 app.use("/api/settlements", settleUpRoutes);     
 
 const path = require('path');

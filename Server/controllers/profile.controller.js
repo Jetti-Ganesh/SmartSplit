@@ -29,6 +29,8 @@ exports.getProfile = async (req, res) => {
         isEmailVerified: user.isEmailVerified,
         isPhoneVerified: user.isPhoneVerified,
         signupMethod: user.signupMethod,
+        twoFactorEnabled: user.twoFactorEnabled || false,
+        twoFactorMethod: user.twoFactorMethod || 'email',
       },
     });
   } catch (err) {
@@ -70,6 +72,8 @@ exports.verifyPhone = async (req, res) => {
         upiList: user.upiList, isVerified: user.isVerified,
         isEmailVerified: user.isEmailVerified, isPhoneVerified: user.isPhoneVerified,
         signupMethod: user.signupMethod,
+        twoFactorEnabled: user.twoFactorEnabled || false,
+        twoFactorMethod: user.twoFactorMethod || 'email',
       },
     });
   } catch (err) {
@@ -104,6 +108,8 @@ exports.verifyEmail = async (req, res) => {
         upiList: user.upiList, isVerified: user.isVerified,
         isEmailVerified: user.isEmailVerified, isPhoneVerified: user.isPhoneVerified,
         signupMethod: user.signupMethod,
+        twoFactorEnabled: user.twoFactorEnabled || false,
+        twoFactorMethod: user.twoFactorMethod || 'email',
       },
     });
   } catch (err) {
@@ -171,6 +177,8 @@ exports.updateProfile = async (req, res) => {
         isEmailVerified: user.isEmailVerified,
         isPhoneVerified: user.isPhoneVerified,
         signupMethod: user.signupMethod,
+        twoFactorEnabled: user.twoFactorEnabled || false,
+        twoFactorMethod: user.twoFactorMethod || 'email',
       },
     });
   } catch (err) {

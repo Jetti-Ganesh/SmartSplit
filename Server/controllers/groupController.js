@@ -121,6 +121,22 @@ exports.addMember = async (req, res, next) => {
     });
     await group.save();
 
+    const adminUser = await User.findById(userId).select('name');
+    try {
+      await User.findByIdAndUpdate(newUser._id, {
+        $push: {
+          notifications: {
+            type: 'group',
+            message: `You were added to "${group.name}" by ${adminUser?.name || 'a group admin'}.`,
+            isRead: false,
+            createdAt: new Date()
+          }
+        }
+      });
+    } catch (notifyErr) {
+      console.error('Notification save failed for new group member:', notifyErr);
+    }
+
     const updatedGroup = await Group.findById(groupId)
       .populate('members.userId', 'name email');
     

@@ -390,16 +390,31 @@ body {
 
 /* active link and active profile highlights */
 .nav-links a.active {
-  color: var(--accent-cyan) !important;
+  color: var(--accent, #3b82f6) !important;
+  font-weight: 600;
+  position: relative;
 }
-
 .nav-links a.active::after {
-  width: 100% !important;
-  background: var(--accent-gradient) !important;
+  content: '' !important;
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #3b82f6, #8b5cf6) !important;
+  border-radius: 2px;
+  transform: scaleX(1) !important;
+  opacity: 1 !important;
+  width: auto !important;
 }
 
 .profile-icon-btn.active {
   color: var(--accent-cyan) !important;
   background: var(--bg-card) !important;
   box-shadow: 0 0 10px rgba(0, 229, 255, 0.2);
+}
+
+.settings-icon-btn.active {
+  color: #3b82f6;
+  background: rgba(59,130,246,0.1);
 }

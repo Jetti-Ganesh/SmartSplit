@@ -114,6 +114,7 @@ const Navbar = ({ isDark, toggleTheme, forceShow }) => {
 
                 <li>
                   <a
+                    className={location.pathname === "/signUp" ? "active" : ""}
                     onClick={() => handleNavClick("/signUp")}
                     style={{ cursor: "pointer" }}
                   >
@@ -122,6 +123,7 @@ const Navbar = ({ isDark, toggleTheme, forceShow }) => {
                 </li>
                 <li>
                   <a
+                    className={location.pathname === "/Login" ? "active" : ""}
                     onClick={() => handleNavClick("/Login")}
                     style={{ cursor: "pointer" }}
                   >
@@ -154,7 +156,7 @@ const Navbar = ({ isDark, toggleTheme, forceShow }) => {
             {isLoggedIn ? (
               <>
                 <button 
-                  className="settings-icon-btn" 
+                  className={`settings-icon-btn ${isSettingsOpen ? 'active' : ''}`}
                   onClick={() => setIsSettingsOpen(true)}
                   aria-label="Settings"
                 >

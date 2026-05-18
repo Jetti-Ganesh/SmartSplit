@@ -12,6 +12,20 @@ const userSchema = new mongoose.Schema(
     isEmailVerified: { type: Boolean, default: false },
     isPhoneVerified: { type: Boolean, default: false },
     signupMethod:    { type: String, enum: ['email', 'phone', 'google'], default: 'email' },
+    twoFactorEnabled: { type: Boolean, default: false },
+    twoFactorMethod:  { type: String, enum: ['email', 'phone'], default: 'email' },
+    notifications: [
+      {
+        type: {
+          type: String,
+          enum: ['success', 'error', 'info', 'group', 'system'],
+          default: 'info'
+        },
+        message: { type: String, required: true },
+        isRead: { type: Boolean, default: false },
+        createdAt: { type: Date, default: Date.now }
+      }
+    ]
   },
   { timestamps: true }
 );

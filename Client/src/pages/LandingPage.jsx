@@ -1,30 +1,24 @@
 import '../styles/LandingPage.css'
-import { useNavigate, useOutletContext } from 'react-router-dom'
+import { Navigate, useOutletContext } from 'react-router-dom'
+import { useSelector } from 'react-redux'
 import Hero from '../components/Hero'
 import Features from '../components/Features'
 import HowItWorks from '../components/HowItWorks'
 import Testimonials from '../components/Testimonials'
 import Footer from '../components/Footer'
-import SettingsDrawer from '../components/SettingsDrawer'
-import { useState } from 'react'
+import MobileTopBar from '../components/MobileTopBar'
 
 const LandingPage = () => {
   const { isDark, toggleTheme } = useOutletContext()
-  const navigate = useNavigate()
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false)
+  const isLoggedIn = useSelector((state) => state.auth.isLoggedIn)
+
+  if (isLoggedIn) {
+    return <Navigate to="/Dashboard" replace />
+  }
 
   return (
     <>
-       {/* ── MOBILE TOP BAR ── */} 
-      <div className="mobile-top-bar">
-        <div className="mobile-top-logo" onClick={() => navigate("/")}>
-          <span className="logo-icon">⚡</span>
-          <span>SplitSmart</span>
-        </div>
-        <button className="mobile-top-settings" onClick={() => setIsSettingsOpen(true)}>
-          ⚙️
-        </button>
-      </div>
+      <MobileTopBar isDark={isDark} toggleTheme={toggleTheme} showHamburger={true} />
       <main className="landing-page-main">
         <Hero />
         <Features />
@@ -32,12 +26,6 @@ const LandingPage = () => {
         <Testimonials />
       </main>
       <Footer />
-      <SettingsDrawer 
-        isOpen={isSettingsOpen} 
-        onClose={() => setIsSettingsOpen(false)} 
-        isDark={isDark} 
-        toggleTheme={toggleTheme} 
-      />
     </>
   )
 }
