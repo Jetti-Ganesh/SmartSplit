@@ -47,7 +47,6 @@ exports.sendResetOtp = async (req, res) => {
     }
   } else {
     // Replace with Twilio/MSG91 in production
-    console.log(`[DEV] Password reset OTP for ${identifier}: ${OTP}`);
     return res.status(200).json({ message: 'Reset OTP sent', devOtp: OTP });
   }
 };

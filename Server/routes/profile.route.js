@@ -4,8 +4,6 @@ const { protect } = require('../middlewares/auth');
 
 const router = express.Router();
 
-console.log('Profile routes loaded');
-
 router.get('/', protect, getProfile);
 router.put('/', protect, updateProfile);
 router.patch('/verify-phone', protect, verifyPhone);
