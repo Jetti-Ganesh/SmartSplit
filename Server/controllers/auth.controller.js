@@ -78,6 +78,14 @@ exports.signUpUser = async (req, res) => {
     if (signupMethod === 'phone' && !phone)
       return res.status(400).json({ message: 'Phone number is required.' });
 
+    const identifier = signupMethod === 'email'
+      ? String(email).trim().toLowerCase()
+      : String(phone).replace(/\D/g, '').slice(-10);
+
+    if (!req.session?.otpVerified || (req.session.otpIdentifier && req.session.otpIdentifier !== identifier)) {
+      return res.status(400).json({ message: 'OTP not verified for this contact. Please verify before signing up.' });
+    }
+
     // Check duplicates
     if (email) {
       const exists = await User.findOne({ email });
@@ -110,6 +118,9 @@ exports.signUpUser = async (req, res) => {
     await user.save();
 
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
+    req.session.otp = null;
+    req.session.otpVerified = false;
+    req.session.otpIdentifier = null;
     await mailer.sendWelcomeEmail(email , name); // Send welcome email with name as part before @
     res.status(201).json({
       message: 'Account created successfully.',

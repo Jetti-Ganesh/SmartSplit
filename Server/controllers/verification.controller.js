@@ -2,10 +2,32 @@ const mailer = require('../utils/mailer');
 const crypto = require('crypto');
 
 const generateOTP = () => crypto.randomInt(100000, 999999).toString();
+const otpStore = new Map();
+const OTP_TTL_MS = 5 * 60 * 1000; // 5 minutes
+
+const cleanupExpiredOtps = () => {
+  const now = Date.now();
+  for (const [key, record] of otpStore) {
+    if (record.expiresAt <= now) {
+      otpStore.delete(key);
+    }
+  }
+};
+
+const normalizeIdentifier = (email, phone) => {
+  if (email) {
+    return String(email).trim().toLowerCase();
+  }
+  if (phone) {
+    return String(phone).replace(/\D/g, '').slice(-10);
+  }
+  return null;
+};
 
 exports.sendOtp = async (req, res) => {
-  const { email, phone } = req.body;
+  cleanupExpiredOtps();
 
+  const { email, phone } = req.body;
   const isEmailValid = email && String(email).trim() !== '' && String(email) !== 'undefined' && String(email) !== 'null';
   const isPhoneValid = phone && String(phone).trim() !== '' && String(phone) !== 'undefined' && String(phone) !== 'null';
 
@@ -14,8 +36,16 @@ exports.sendOtp = async (req, res) => {
   }
 
   const OTP = generateOTP();
+  const identifier = normalizeIdentifier(isEmailValid ? email : null, isPhoneValid ? phone : null);
+  if (identifier) {
+    otpStore.set(identifier, {
+      otp: OTP,
+      expiresAt: Date.now() + OTP_TTL_MS,
+    });
+  }
+
   req.session.otp = OTP;
-  req.session.otpIdentifier = isEmailValid ? email : phone;
+  req.session.otpIdentifier = identifier;
 
   if (isEmailValid) {
     try {
@@ -111,12 +141,31 @@ exports.sendOtp = async (req, res) => {
 };
 
 exports.verifyOtp = async (req, res) => {
-  const { enteredOtp } = req.body;
+  cleanupExpiredOtps();
+  const { enteredOtp, email, phone } = req.body;
+
+  const identifier = normalizeIdentifier(email, phone);
+  if (identifier && otpStore.has(identifier)) {
+    const record = otpStore.get(identifier);
+    if (!record || record.expiresAt <= Date.now()) {
+      otpStore.delete(identifier);
+      return res.status(400).json({ message: 'OTP expired. Please request a new one.' });
+    }
+    if (record.otp !== enteredOtp) {
+      return res.status(400).json({ message: 'Invalid OTP. Please try again.' });
+    }
+    otpStore.delete(identifier);
+    req.session.otpVerified = true;
+    req.session.otpIdentifier = identifier;
+    return res.status(200).json({ message: 'OTP verified successfully.' });
+  }
+
   if (!req.session.otp) {
     return res.status(400).json({ message: 'No OTP found. Please request a new one.' });
   }
   if (req.session.otp === enteredOtp) {
     req.session.otpVerified = true;
+    req.session.otpIdentifier = identifier || req.session.otpIdentifier;
     return res.status(200).json({ message: 'OTP verified successfully.' });
   }
   return res.status(400).json({ message: 'Invalid OTP. Please try again.' });

@@ -123,7 +123,11 @@ const SettingsDrawer = ({ isOpen, onClose, isDark, toggleTheme }) => {
     setCpError('');
     setCpSuccess('');
     try {
-      await api.post('/verify-otp', { enteredOtp: cpOtp }, { withCredentials: true });
+      await api.post('/verify-otp', {
+        enteredOtp: cpOtp,
+        email: user.email || undefined,
+        phone: user.phone || undefined,
+      }, { withCredentials: true });
       setCpStep(2);
       setCpError('');
       setCpSuccess('');
@@ -201,7 +205,11 @@ const SettingsDrawer = ({ isOpen, onClose, isDark, toggleTheme }) => {
     setTwoFAError('');
     setTwoFASuccess('');
     try {
-      await api.post('/verify-otp', { enteredOtp: twoFAOtp }, { withCredentials: true });
+      await api.post('/verify-otp', {
+        enteredOtp: twoFAOtp,
+        email: twoFAMethod === 'email' ? user.email : undefined,
+        phone: twoFAMethod === 'sms' ? (profileUser?.phone || user.phone) : undefined,
+      }, { withCredentials: true });
       await api.post('/enable-2fa', { method: twoFAMethod }, { withCredentials: true });
       showNotification('🔐 Two-Factor Authentication enabled!', 'success');
       setTwoFASuccess('🔐 Two-Factor Auth enabled!');
@@ -295,14 +303,6 @@ const SettingsDrawer = ({ isOpen, onClose, isDark, toggleTheme }) => {
                 <input type="checkbox" defaultChecked />
                 <span className="slider round"></span>
               </label>
-            </div>
-            <div className="settings-item">
-              <span className="settings-label">Currency</span>
-              <select className="settings-select">
-                <option value="INR">₹ INR</option>
-                <option value="USD">$ USD</option>
-                <option value="EUR">€ EUR</option>
-              </select>
             </div>
           </div>
 
