@@ -1,0 +1,1807 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>SmartSplit — Full App Documentation</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Syne:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg: #0d0f14;
+  --surface: #141720;
+  --card: #1a1f2e;
+  --border: #252c3f;
+  --accent: #6c63ff;
+  --accent2: #00d4aa;
+  --accent3: #ff6b6b;
+  --amber: #ffb347;
+  --text: #e8eaf0;
+  --muted: #8892a4;
+  --tag-bg: #1e2438;
+  --code-bg: #0a0c12;
+  --get: #00d4aa;
+  --post: #6c63ff;
+  --put: #ffb347;
+  --patch: #7ecfff;
+  --delete: #ff6b6b;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-size:15px;line-height:1.7}
+a{color:var(--accent);text-decoration:none}
+a:hover{text-decoration:underline}
+
+/* HEADER */
+.header{background:linear-gradient(135deg,#10121a 0%,#1a1040 50%,#0a1628 100%);border-bottom:1px solid var(--border);padding:56px 48px 40px;position:relative;overflow:hidden}
+.header::before{content:'';position:absolute;top:-80px;right:-80px;width:400px;height:400px;background:radial-gradient(circle,rgba(108,99,255,.18) 0%,transparent 70%);pointer-events:none}
+.header::after{content:'';position:absolute;bottom:-60px;left:10%;width:300px;height:300px;background:radial-gradient(circle,rgba(0,212,170,.1) 0%,transparent 70%);pointer-events:none}
+.header-inner{max-width:860px;margin:0 auto;position:relative;z-index:1}
+.logo-row{display:flex;align-items:center;gap:16px;margin-bottom:24px}
+.logo-box{width:52px;height:52px;background:linear-gradient(135deg,#6c63ff,#00d4aa);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:800;color:#fff;font-family:'Syne',sans-serif;letter-spacing:-1px}
+.app-name{font-family:'Syne',sans-serif;font-size:28px;font-weight:800;letter-spacing:-0.5px;color:#fff}
+.app-version{background:rgba(108,99,255,.2);border:1px solid rgba(108,99,255,.4);color:#a89cff;font-size:11px;padding:3px 10px;border-radius:20px;font-family:'JetBrains Mono',monospace}
+h1{font-family:'Syne',sans-serif;font-size:42px;font-weight:800;letter-spacing:-1.5px;color:#fff;line-height:1.1;margin-bottom:14px}
+h1 span{background:linear-gradient(90deg,#6c63ff,#00d4aa);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.header p{font-size:16px;color:var(--muted);max-width:600px;line-height:1.7}
+.stack-pills{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}
+.pill{background:var(--tag-bg);border:1px solid var(--border);border-radius:20px;padding:4px 14px;font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace}
+.pill.react{color:#61dafb;border-color:#1e3a4a}
+.pill.node{color:#84cc16;border-color:#1e2e10}
+.pill.mongo{color:#4ade80;border-color:#152810}
+.pill.redux{color:#a78bfa;border-color:#2a1e4a}
+
+/* LAYOUT */
+.container{display:grid;grid-template-columns:260px 1fr;min-height:100vh;max-width:1200px;margin:0 auto}
+
+/* SIDEBAR */
+.sidebar{background:var(--surface);border-right:1px solid var(--border);padding:28px 20px;position:sticky;top:0;height:100vh;overflow-y:auto}
+.sidebar::-webkit-scrollbar{width:4px}
+.sidebar::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+.nav-section{margin-bottom:24px}
+.nav-label{font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;padding:0 8px}
+.nav-item{display:block;padding:7px 12px;border-radius:8px;font-size:13px;color:var(--muted);transition:all .15s;margin-bottom:2px;border:1px solid transparent}
+.nav-item:hover{background:var(--card);color:var(--text);text-decoration:none}
+.nav-item.active{background:rgba(108,99,255,.15);border-color:rgba(108,99,255,.3);color:#a89cff}
+.nav-dot{display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:8px;background:var(--border)}
+.nav-dot.get{background:var(--get)}
+.nav-dot.post{background:var(--post)}
+.nav-dot.put{background:var(--put)}
+.nav-dot.patch{background:var(--patch)}
+.nav-dot.auth{background:var(--accent3)}
+
+/* MAIN */
+.main{padding:40px 48px;overflow-x:hidden}
+
+/* SECTION */
+.section{margin-bottom:64px;scroll-margin-top:24px}
+.section-header{display:flex;align-items:center;gap:14px;margin-bottom:28px;padding-bottom:16px;border-bottom:1px solid var(--border)}
+.section-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.section-icon.purple{background:rgba(108,99,255,.15)}
+.section-icon.teal{background:rgba(0,212,170,.15)}
+.section-icon.red{background:rgba(255,107,107,.15)}
+.section-icon.amber{background:rgba(255,179,71,.15)}
+.section-icon.blue{background:rgba(126,207,255,.15)}
+.section-icon.pink{background:rgba(255,105,180,.15)}
+.section-icon.green{background:rgba(132,204,22,.15)}
+h2{font-family:'Syne',sans-serif;font-size:24px;font-weight:700;color:#fff;letter-spacing:-0.5px}
+.section-sub{font-size:13px;color:var(--muted);margin-top:2px}
+
+/* FLOW STEPS */
+.flow-steps{counter-reset:step;display:flex;flex-direction:column;gap:0}
+.flow-step{display:grid;grid-template-columns:48px 1fr;gap:16px;position:relative}
+.flow-step::before{content:'';position:absolute;left:23px;top:50px;bottom:-16px;width:1px;background:var(--border);z-index:0}
+.flow-step:last-child::before{display:none}
+.step-num{width:48px;height:48px;border-radius:50%;background:var(--card);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:var(--accent);flex-shrink:0;z-index:1;position:relative}
+.step-body{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 22px;margin-bottom:16px}
+.step-title{font-family:'Syne',sans-serif;font-size:15px;font-weight:600;color:#fff;margin-bottom:6px}
+.step-desc{font-size:14px;color:var(--muted);line-height:1.6}
+.step-desc code{font-family:'JetBrains Mono',monospace;font-size:12px;background:var(--code-bg);border:1px solid var(--border);padding:1px 6px;border-radius:4px;color:var(--accent2)}
+
+/* ENDPOINT CARD */
+.endpoint-card{background:var(--card);border:1px solid var(--border);border-radius:14px;margin-bottom:20px;overflow:hidden}
+.ep-header{display:flex;align-items:center;gap:12px;padding:16px 22px;cursor:pointer;border-bottom:1px solid transparent;transition:border-color .2s}
+.ep-header[data-open="true"]{border-color:var(--border)}
+.method-badge{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;padding:4px 10px;border-radius:6px;min-width:58px;text-align:center;letter-spacing:.5px}
+.GET   {background:rgba(0,212,170,.15);color:var(--get);border:1px solid rgba(0,212,170,.25)}
+.POST  {background:rgba(108,99,255,.15);color:#a89cff;border:1px solid rgba(108,99,255,.25)}
+.PUT   {background:rgba(255,179,71,.15);color:var(--amber);border:1px solid rgba(255,179,71,.25)}
+.PATCH {background:rgba(126,207,255,.15);color:var(--patch);border:1px solid rgba(126,207,255,.25)}
+.DELETE{background:rgba(255,107,107,.15);color:var(--accent3);border:1px solid rgba(255,107,107,.25)}
+.ep-path{font-family:'JetBrains Mono',monospace;font-size:14px;color:#fff;font-weight:500}
+.ep-desc{margin-left:auto;font-size:13px;color:var(--muted)}
+.lock-icon{font-size:13px;margin-left:8px}
+.ep-body{padding:20px 22px;display:none}
+.ep-body.open{display:block}
+
+/* TABLES */
+.param-table{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:12px}
+.param-table th{text-align:left;padding:8px 12px;font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border)}
+.param-table td{padding:9px 12px;border-bottom:1px solid var(--border);vertical-align:top}
+.param-table tr:last-child td{border-bottom:none}
+.param-name{font-family:'JetBrains Mono',monospace;color:var(--accent2);font-size:12px}
+.param-type{background:var(--tag-bg);border:1px solid var(--border);border-radius:4px;padding:2px 8px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted)}
+.req-badge{background:rgba(255,107,107,.12);border:1px solid rgba(255,107,107,.25);color:var(--accent3);border-radius:4px;padding:2px 7px;font-size:11px;font-family:'JetBrains Mono',monospace}
+.opt-badge{background:rgba(136,146,164,.08);border:1px solid var(--border);color:var(--muted);border-radius:4px;padding:2px 7px;font-size:11px;font-family:'JetBrains Mono',monospace}
+
+/* CODE BLOCKS */
+.code-block{background:var(--code-bg);border:1px solid var(--border);border-radius:10px;padding:16px 20px;font-family:'JetBrains Mono',monospace;font-size:12.5px;line-height:1.65;overflow-x:auto;color:#b0b8cc;white-space:pre;margin-bottom:12px}
+.code-label{font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.key{color:#a89cff}
+.str{color:var(--accent2)}
+.num{color:var(--amber)}
+.bool{color:var(--accent3)}
+.cmt{color:#3d4a5c}
+
+/* FEATURE CARDS */
+.feature-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;margin-bottom:28px}
+.feature-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px;transition:border-color .2s}
+.feature-card:hover{border-color:rgba(108,99,255,.4)}
+.feat-icon{font-size:28px;margin-bottom:12px;display:block}
+.feat-title{font-family:'Syne',sans-serif;font-size:14px;font-weight:600;color:#fff;margin-bottom:5px}
+.feat-desc{font-size:12.5px;color:var(--muted);line-height:1.5}
+
+/* MODEL CARDS */
+.model-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:22px;margin-bottom:20px}
+.model-title{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;color:#fff;margin-bottom:14px;display:flex;align-items:center;gap:10px}
+.model-badge{font-size:12px;background:rgba(108,99,255,.15);border:1px solid rgba(108,99,255,.3);color:#a89cff;padding:2px 10px;border-radius:6px;font-family:'JetBrains Mono',monospace;font-weight:400}
+.field-row{display:grid;grid-template-columns:160px 100px 1fr;gap:12px;align-items:start;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px}
+.field-row:last-child{border-bottom:none}
+.field-name{font-family:'JetBrains Mono',monospace;color:var(--accent2);font-size:12px}
+.field-type{color:var(--amber);font-family:'JetBrains Mono',monospace;font-size:12px}
+.field-desc{color:var(--muted)}
+
+/* CALLOUT */
+.callout{border-radius:10px;padding:14px 18px;margin-bottom:16px;font-size:13.5px;line-height:1.6;border-left:3px solid}
+.callout.info{background:rgba(126,207,255,.07);border-color:var(--patch);color:#b0cfe8}
+.callout.warn{background:rgba(255,179,71,.07);border-color:var(--amber);color:#d4a86a}
+.callout.success{background:rgba(0,212,170,.07);border-color:var(--accent2);color:#7cc9b8}
+.callout strong{color:inherit;font-weight:600}
+
+/* FLOW DIAGRAM */
+.flow-diagram{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:28px;margin-bottom:24px;overflow-x:auto}
+.flow-row{display:flex;align-items:center;justify-content:center;gap:0;flex-wrap:nowrap;margin-bottom:8px}
+.flow-box{background:var(--tag-bg);border:1px solid var(--border);border-radius:10px;padding:10px 16px;font-size:12.5px;text-align:center;white-space:nowrap;min-width:110px}
+.flow-box.active{background:rgba(108,99,255,.2);border-color:rgba(108,99,255,.5);color:#c4beff}
+.flow-box.green{background:rgba(0,212,170,.1);border-color:rgba(0,212,170,.35);color:#7ecfc0}
+.flow-box.red{background:rgba(255,107,107,.1);border-color:rgba(255,107,107,.3);color:#f09090}
+.flow-box.amber{background:rgba(255,179,71,.1);border-color:rgba(255,179,71,.3);color:#d4a06a}
+.flow-arrow{padding:0 6px;color:var(--muted);font-size:16px}
+.flow-label{font-size:11px;color:var(--muted);text-align:center;margin-bottom:16px}
+
+/* ROUTE TABLE */
+.route-table{width:100%;border-collapse:collapse;margin-bottom:12px;font-size:13px}
+.route-table th{padding:10px 14px;text-align:left;font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--muted);background:var(--surface);border-bottom:1px solid var(--border)}
+.route-table td{padding:10px 14px;border-bottom:1px solid var(--border);vertical-align:middle}
+.route-table tr:last-child td{border-bottom:none}
+.route-table tr:hover td{background:rgba(255,255,255,.02)}
+
+/* SECTION DIVIDER */
+.divider{border:none;border-top:1px solid var(--border);margin:20px 0}
+
+/* SCROLLBAR */
+.main::-webkit-scrollbar{width:6px}
+.main::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+
+/* RESPONSIVE */
+@media(max-width:900px){
+  .container{grid-template-columns:1fr}
+  .sidebar{display:none}
+  .main{padding:24px 20px}
+  h1{font-size:28px}
+  .header{padding:32px 20px 24px}
+  .feature-grid{grid-template-columns:1fr 1fr}
+}
+
+/* TOC FLOAT */
+.toc-section{display:flex;flex-direction:column;gap:2px}
+
+/* Back to top */
+.back-top{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);border:1px solid var(--border);border-radius:8px;padding:4px 12px;background:var(--card);cursor:pointer;transition:all .15s;margin-bottom:32px}
+.back-top:hover{color:var(--text);border-color:rgba(108,99,255,.4);text-decoration:none}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-inner">
+    <div class="logo-row">
+      <div class="logo-box">SS</div>
+      <div>
+        <div class="app-name">SmartSplit</div>
+        <span class="app-version">v1.0 · Full Stack</span>
+      </div>
+    </div>
+    <h1>Complete App <span>Documentation</span></h1>
+    <p>Every feature, every endpoint, every flow — from the moment the user lands on the page to the final settlement. Written by reading your actual codebase.</p>
+    <div class="stack-pills">
+      <span class="pill react">React + Vite</span>
+      <span class="pill redux">Redux Toolkit</span>
+      <span class="pill node">Node.js + Express</span>
+      <span class="pill mongo">MongoDB Atlas</span>
+      <span class="pill">React Router v6</span>
+      <span class="pill">JWT Auth</span>
+      <span class="pill">Fast2SMS / Nodemailer</span>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <div class="nav-section">
+    <div class="nav-label">Overview</div>
+    <a class="nav-item active" href="#overview">🗺️ App Overview</a>
+    <a class="nav-item" href="#architecture">🏗️ Architecture</a>
+    <a class="nav-item" href="#models">🗄️ Data Models</a>
+  </div>
+  <div class="nav-section">
+    <div class="nav-label">Auth Flows</div>
+    <a class="nav-item" href="#signup"><span class="nav-dot post"></span>Sign Up</a>
+    <a class="nav-item" href="#otp"><span class="nav-dot patch"></span>OTP Verification</a>
+    <a class="nav-item" href="#login"><span class="nav-dot post"></span>Login</a>
+    <a class="nav-item" href="#google"><span class="nav-dot post"></span>Google Auth</a>
+    <a class="nav-item" href="#forgot"><span class="nav-dot auth"></span>Forgot Password</a>
+    <a class="nav-item" href="#twofa"><span class="nav-dot auth"></span>2FA</a>
+  </div>
+  <div class="nav-section">
+    <div class="nav-label">Core Features</div>
+    <a class="nav-item" href="#groups">👥 Groups</a>
+    <a class="nav-item" href="#expenses">💸 Expenses</a>
+    <a class="nav-item" href="#settle">🤝 Settle Up</a>
+    <a class="nav-item" href="#analytics">📊 Analytics</a>
+    <a class="nav-item" href="#profile">👤 Profile</a>
+    <a class="nav-item" href="#notifications">🔔 Notifications</a>
+  </div>
+  <div class="nav-section">
+    <div class="nav-label">Frontend</div>
+    <a class="nav-item" href="#pages">📄 Pages & Routes</a>
+    <a class="nav-item" href="#state">🧠 Redux State</a>
+    <a class="nav-item" href="#theme">🌗 Theme System</a>
+  </div>
+  <div class="nav-section">
+    <div class="nav-label">Backend Internals</div>
+    <a class="nav-item" href="#middleware">🔐 Auth Middleware</a>
+    <a class="nav-item" href="#errors">⚠️ Error Handling</a>
+    <a class="nav-item" href="#mailer">📧 Mailer</a>
+  </div>
+</nav>
+
+<!-- MAIN CONTENT -->
+<main class="main">
+
+<!-- ═══════════════════════════════════════════════
+     SECTION 1 — OVERVIEW
+══════════════════════════════════════════════════ -->
+<section class="section" id="overview">
+  <div class="section-header">
+    <div class="section-icon purple">🗺️</div>
+    <div>
+      <h2>App Overview</h2>
+      <div class="section-sub">What is SmartSplit and what does it do?</div>
+    </div>
+  </div>
+
+  <p style="color:var(--muted);margin-bottom:20px;font-size:14px;">SmartSplit is a full-stack expense-splitting app — like Splitwise, but built by you. Users create groups, add expenses, split them equally or by exact amounts, and settle debts. There's also a full analytics dashboard, profile management, and notifications.</p>
+
+  <div class="feature-grid">
+    <div class="feature-card">
+      <span class="feat-icon">🔐</span>
+      <div class="feat-title">Auth System</div>
+      <div class="feat-desc">Email + Phone signup, OTP verify, Google OAuth, JWT tokens, 2FA support</div>
+    </div>
+    <div class="feature-card">
+      <span class="feat-icon">👥</span>
+      <div class="feat-title">Groups</div>
+      <div class="feat-desc">Create groups, invite via code, add members by email, role-based access</div>
+    </div>
+    <div class="feature-card">
+      <span class="feat-icon">💸</span>
+      <div class="feat-title">Expenses</div>
+      <div class="feat-desc">Add expenses with categories, split equally or by exact amounts</div>
+    </div>
+    <div class="feature-card">
+      <span class="feat-icon">🤝</span>
+      <div class="feat-title">Settle Up</div>
+      <div class="feat-desc">View who owes whom, record payments, simplify debt chains</div>
+    </div>
+    <div class="feature-card">
+      <span class="feat-icon">📊</span>
+      <div class="feat-title">Analytics</div>
+      <div class="feat-desc">Spending trends, category breakdown, group comparison, smart insights</div>
+    </div>
+    <div class="feature-card">
+      <span class="feat-icon">👤</span>
+      <div class="feat-title">Profile</div>
+      <div class="feat-desc">Avatar, UPI IDs, email/phone verify, change password, 2FA toggle</div>
+    </div>
+    <div class="feature-card">
+      <span class="feat-icon">🔔</span>
+      <div class="feat-title">Notifications</div>
+      <div class="feat-desc">In-app notifications for login, group joins, member additions</div>
+    </div>
+    <div class="feature-card">
+      <span class="feat-icon">🌗</span>
+      <div class="feat-title">Dark / Light Theme</div>
+      <div class="feat-desc">CSS custom property based theme toggle, persisted in Redux</div>
+    </div>
+  </div>
+
+  <div class="callout info">
+    <strong>User Journey at a Glance:</strong> Landing Page → Sign Up → OTP Verify → Dashboard → Create/Join Group → Add Expense → Split → Settle Up → Analytics
+  </div>
+
+  <!-- Overall flow diagram -->
+  <div class="flow-diagram">
+    <div style="font-size:12px;color:var(--muted);margin-bottom:18px;font-weight:600;letter-spacing:.5px;">FULL APPLICATION FLOW</div>
+
+    <div class="flow-row">
+      <div class="flow-box">🌐 Landing Page</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box active">📝 Sign Up</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box amber">📱 OTP Verify</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box green">✅ Account Created</div>
+    </div>
+    <div class="flow-label">New User Path</div>
+
+    <div class="flow-row">
+      <div class="flow-box">🔑 Login</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box active">🏠 Dashboard</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box">👥 Groups</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box">💸 Add Expense</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box green">🤝 Settle Up</div>
+    </div>
+    <div class="flow-label">Core Usage Loop</div>
+
+    <div class="flow-row">
+      <div class="flow-box amber">🔍 Analytics</div>
+      <div class="flow-arrow">←</div>
+      <div class="flow-box active">📊 Activity Page</div>
+      <div class="flow-arrow">←</div>
+      <div class="flow-box">📅 Filter by Period</div>
+      <div class="flow-arrow">←</div>
+      <div class="flow-box">💡 Smart Insight</div>
+    </div>
+    <div class="flow-label">Analytics Flow (fetches from all expenses user participates in)</div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     SECTION 2 — ARCHITECTURE
+══════════════════════════════════════════════════ -->
+<section class="section" id="architecture">
+  <div class="section-header">
+    <div class="section-icon teal">🏗️</div>
+    <div>
+      <h2>Architecture</h2>
+      <div class="section-sub">How frontend and backend talk to each other</div>
+    </div>
+  </div>
+
+  <div class="flow-diagram">
+    <div style="font-size:12px;color:var(--muted);margin-bottom:18px;font-weight:600;">PROJECT STRUCTURE</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+      <div>
+        <div style="color:var(--accent2);font-size:12px;font-family:'JetBrains Mono',monospace;margin-bottom:10px;">📁 Client/</div>
+        <div class="code-block" style="margin:0">src/
+  App.jsx           ← Routes defined here
+  main.jsx          ← Redux store + React mount
+  pages/            ← One file per screen
+  components/       ← Reusable UI pieces
+  services/         ← API calls + Redux slices
+  store/            ← Redux store config
+  styles/           ← Per-component CSS files
+  context/          ← NotificationContext
+utils/              ← Helper functions</div>
+      </div>
+      <div>
+        <div style="color:var(--accent);font-size:12px;font-family:'JetBrains Mono',monospace;margin-bottom:10px;">📁 Server/</div>
+        <div class="code-block" style="margin:0">index.js          ← Start server + DB connect
+app.js            ← Express + all middleware
+routes/           ← Route definitions
+controllers/      ← Business logic
+models/           ← Mongoose schemas
+middlewares/      ← auth.js (JWT protect)
+utils/            ← mailer.js
+db/               ← db.js (MongoDB connect)</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout info">
+    <strong>How they connect:</strong> The React frontend runs on <code style="color:var(--accent2)">localhost:5173</code>. The Express backend runs on <code style="color:var(--accent2)">localhost:5000</code>. All API calls go to <code style="color:var(--accent2)">/api/...</code> with a <code style="color:var(--accent2)">Bearer token</code> in the Authorization header. In production, Express serves the React build directly from <code style="color:var(--accent2)">Client/dist</code>.
+  </div>
+
+  <div class="callout warn">
+    <strong>Session + JWT:</strong> SmartSplit uses BOTH session (for OTP storage during signup/forgot-password flow) AND JWT (for protecting all API routes after login). The session is stored in MongoDB via <code>connect-mongo</code>. JWT is signed with <code>JWT_SECRET</code> and expires in 7 days.
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     SECTION 3 — DATA MODELS
+══════════════════════════════════════════════════ -->
+<section class="section" id="models">
+  <div class="section-header">
+    <div class="section-icon blue">🗄️</div>
+    <div>
+      <h2>Data Models</h2>
+      <div class="section-sub">MongoDB schemas — the shape of your data</div>
+    </div>
+  </div>
+
+  <!-- User Model -->
+  <div class="model-card">
+    <div class="model-title">👤 User <span class="model-badge">users collection</span></div>
+    <div class="field-row" style="font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--muted)"><div>Field</div><div>Type</div><div>Description</div></div>
+    <div class="field-row"><div class="field-name">name</div><div class="field-type">String</div><div class="field-desc">Required. Full display name.</div></div>
+    <div class="field-row"><div class="field-name">email</div><div class="field-type">String</div><div class="field-desc">Unique (sparse). Lowercase. Signup via email sets this.</div></div>
+    <div class="field-row"><div class="field-name">phone</div><div class="field-type">String</div><div class="field-desc">Unique (sparse). Stripped to 10 digits. Signup via phone sets this.</div></div>
+    <div class="field-row"><div class="field-name">password</div><div class="field-type">String</div><div class="field-desc">bcrypt hashed. Google users get a placeholder <code style="color:var(--accent2);font-size:11px">google_&lt;googleId&gt;</code>.</div></div>
+    <div class="field-row"><div class="field-name">avatar</div><div class="field-type">String</div><div class="field-desc">Base64 image or URL. Up to 5MB.</div></div>
+    <div class="field-row"><div class="field-name">defaultUpi</div><div class="field-type">String</div><div class="field-desc">Preferred UPI ID for settlements.</div></div>
+    <div class="field-row"><div class="field-name">upiList</div><div class="field-type">String[]</div><div class="field-desc">List of all UPI IDs the user has added.</div></div>
+    <div class="field-row"><div class="field-name">isEmailVerified</div><div class="field-type">Boolean</div><div class="field-desc">True after OTP verify on email.</div></div>
+    <div class="field-row"><div class="field-name">isPhoneVerified</div><div class="field-type">Boolean</div><div class="field-desc">True after OTP verify on phone.</div></div>
+    <div class="field-row"><div class="field-name">signupMethod</div><div class="field-type">enum</div><div class="field-desc"><code style="color:var(--accent2);font-size:11px">'email' | 'phone' | 'google'</code></div></div>
+    <div class="field-row"><div class="field-name">twoFactorEnabled</div><div class="field-type">Boolean</div><div class="field-desc">Whether 2FA is active for this account.</div></div>
+    <div class="field-row"><div class="field-name">twoFactorMethod</div><div class="field-type">enum</div><div class="field-desc"><code style="color:var(--accent2);font-size:11px">'email' | 'phone'</code></div></div>
+    <div class="field-row"><div class="field-name">notifications</div><div class="field-type">Object[]</div><div class="field-desc">Embedded array. Each has: <code style="color:var(--accent2);font-size:11px">type, message, isRead, createdAt</code></div></div>
+  </div>
+
+  <!-- Group Model -->
+  <div class="model-card">
+    <div class="model-title">👥 Group <span class="model-badge">groups collection</span></div>
+    <div class="field-row" style="font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--muted)"><div>Field</div><div>Type</div><div>Description</div></div>
+    <div class="field-row"><div class="field-name">name</div><div class="field-type">String</div><div class="field-desc">Group name. Max 50 chars. Required.</div></div>
+    <div class="field-row"><div class="field-name">icon</div><div class="field-type">String</div><div class="field-desc">Emoji icon. Defaults to 🫂</div></div>
+    <div class="field-row"><div class="field-name">createdBy</div><div class="field-type">ObjectId</div><div class="field-desc">Ref to User. The admin who created this group.</div></div>
+    <div class="field-row"><div class="field-name">members</div><div class="field-type">Object[]</div><div class="field-desc">Array of <code style="color:var(--accent2);font-size:11px">{userId, role: 'admin'|'member', joinedAt}</code></div></div>
+    <div class="field-row"><div class="field-name">inviteCode</div><div class="field-type">String</div><div class="field-desc">Auto-generated 6-char uppercase code. Unique. Used for join-by-code.</div></div>
+    <div class="field-row"><div class="field-name">isActive</div><div class="field-type">Boolean</div><div class="field-desc">Soft delete flag. Default true.</div></div>
+  </div>
+
+  <!-- Expense Model -->
+  <div class="model-card">
+    <div class="model-title">💸 Expense <span class="model-badge">expenses collection</span></div>
+    <div class="field-row" style="font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--muted)"><div>Field</div><div>Type</div><div>Description</div></div>
+    <div class="field-row"><div class="field-name">groupId</div><div class="field-type">ObjectId</div><div class="field-desc">Which group this expense belongs to.</div></div>
+    <div class="field-row"><div class="field-name">description</div><div class="field-type">String</div><div class="field-desc">What the expense was. Max 200 chars.</div></div>
+    <div class="field-row"><div class="field-name">amount</div><div class="field-type">Number</div><div class="field-desc">Total bill amount in INR.</div></div>
+    <div class="field-row"><div class="field-name">category</div><div class="field-type">enum</div><div class="field-desc"><code style="color:var(--accent2);font-size:11px">Food | Rent | Travel | Entertainment | Shopping | Utilities | Health | Other</code></div></div>
+    <div class="field-row"><div class="field-name">paidBy</div><div class="field-type">ObjectId</div><div class="field-desc">Ref to User. Who actually paid the bill.</div></div>
+    <div class="field-row"><div class="field-name">splitType</div><div class="field-type">enum</div><div class="field-desc"><code style="color:var(--accent2);font-size:11px">equal | exact | percent | shares</code></div></div>
+    <div class="field-row"><div class="field-name">splitDetails</div><div class="field-type">Object[]</div><div class="field-desc">Per-person: <code style="color:var(--accent2);font-size:11px">{userId, amount, percentage?, shares?}</code>. Must sum to total.</div></div>
+    <div class="field-row"><div class="field-name">createdBy</div><div class="field-type">ObjectId</div><div class="field-desc">Who entered this expense (may differ from paidBy).</div></div>
+  </div>
+
+  <!-- Settlement Model -->
+  <div class="model-card">
+    <div class="model-title">🤝 Settlement <span class="model-badge">settlements collection</span></div>
+    <div class="field-row" style="font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--muted)"><div>Field</div><div>Type</div><div>Description</div></div>
+    <div class="field-row"><div class="field-name">groupId</div><div class="field-type">ObjectId</div><div class="field-desc">Settlement is scoped to a group.</div></div>
+    <div class="field-row"><div class="field-name">from</div><div class="field-type">ObjectId</div><div class="field-desc">Who is paying (the debtor).</div></div>
+    <div class="field-row"><div class="field-name">to</div><div class="field-type">ObjectId</div><div class="field-desc">Who receives payment (the creditor).</div></div>
+    <div class="field-row"><div class="field-name">amount</div><div class="field-type">Number</div><div class="field-desc">How much was paid.</div></div>
+    <div class="field-row"><div class="field-name">method</div><div class="field-type">enum</div><div class="field-desc"><code style="color:var(--accent2);font-size:11px">upi | cash | bank_transfer | other</code></div></div>
+    <div class="field-row"><div class="field-name">status</div><div class="field-type">enum</div><div class="field-desc"><code style="color:var(--accent2);font-size:11px">pending | completed | disputed</code>. Default: completed.</div></div>
+    <div class="field-row"><div class="field-name">notes</div><div class="field-type">String</div><div class="field-desc">Optional note about the payment.</div></div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     SECTION 4 — SIGN UP
+══════════════════════════════════════════════════ -->
+<section class="section" id="signup">
+  <div class="section-header">
+    <div class="section-icon purple">📝</div>
+    <div>
+      <h2>Sign Up Flow</h2>
+      <div class="section-sub">How a new user creates an account</div>
+    </div>
+  </div>
+
+  <div class="callout info">
+    <strong>The key rule:</strong> OTP must be verified BEFORE account creation. The session stores <code>otpVerified=true</code> after OTP is confirmed. If this flag isn't set, signup is rejected.
+  </div>
+
+  <div class="flow-steps">
+    <div class="flow-step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <div class="step-title">User opens Sign Up page</div>
+        <div class="step-desc">User chooses to sign up via <strong>email</strong> or <strong>phone number</strong>. This sets the <code>signupMethod</code>.</div>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <div class="step-title">Send OTP — <code>POST /api/send-otp</code></div>
+        <div class="step-desc">Frontend sends <code>email</code> or <code>phone</code>. Server generates a 6-digit OTP using <code>crypto.randomInt(100000, 999999)</code>. Stores OTP in both a <code>Map</code> (with TTL) and in the session. Sends via Nodemailer (email) or Fast2SMS → Textbelt fallback (phone).</div>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <div class="step-title">Verify OTP — <code>POST /api/verify-otp</code></div>
+        <div class="step-desc">User enters the OTP. Server checks the <code>otpStore</code> Map first (preferred), then session fallback. Checks expiry. On success, sets <code>req.session.otpVerified = true</code>.</div>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="step-num">4</div>
+      <div class="step-body">
+        <div class="step-title">Create Account — <code>POST /api/signUp</code></div>
+        <div class="step-desc">Only proceeds if <code>req.session.otpVerified === true</code>. Checks for duplicate email/phone. Hashes password with bcrypt (10 salt rounds). Saves user. Issues JWT (7 days). Sends welcome email. Clears OTP session.</div>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="step-num">5</div>
+      <div class="step-body">
+        <div class="step-title">Redirect to Dashboard</div>
+        <div class="step-desc">JWT token stored in Redux <code>authSlice</code>. User is now logged in. Redirect to <code>/dashboard</code>.</div>
+      </div>
+    </div>
+  </div>
+
+  <br/>
+  <div class="endpoint-card" id="ep-send-otp">
+    <div class="ep-header" onclick="toggleEp(this)" data-open="true">
+      <span class="method-badge POST">POST</span>
+      <span class="ep-path">/api/send-otp</span>
+      <span class="ep-desc">Send OTP to email or phone</span>
+    </div>
+    <div class="ep-body open">
+      <div class="code-label">Request Body</div>
+      <div class="code-block"><span class="cmt">// Send one of these — not both</span>
+{ <span class="key">"email"</span>: <span class="str">"ganesh@example.com"</span> }
+<span class="cmt">// OR</span>
+{ <span class="key">"phone"</span>: <span class="str">"9876543210"</span> }</div>
+      <div class="code-label">Success Response (200)</div>
+      <div class="code-block">{ <span class="key">"message"</span>: <span class="str">"OTP sent to your email."</span>,
+  <span class="key">"devOtp"</span>: <span class="str">"482910"</span> <span class="cmt">// returned in dev mode for phone</span>
+}</div>
+      <table class="param-table">
+        <tr><th>Field</th><th>Type</th><th>Required?</th><th>Notes</th></tr>
+        <tr><td class="param-name">email</td><td><span class="param-type">string</span></td><td><span class="opt-badge">optional</span></td><td style="font-size:12px;color:var(--muted)">One of email or phone required</td></tr>
+        <tr><td class="param-name">phone</td><td><span class="param-type">string</span></td><td><span class="opt-badge">optional</span></td><td style="font-size:12px;color:var(--muted)">10-digit Indian number</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="endpoint-card">
+    <div class="ep-header" onclick="toggleEp(this)" data-open="false">
+      <span class="method-badge POST">POST</span>
+      <span class="ep-path">/api/verify-otp</span>
+      <span class="ep-desc">Verify the OTP</span>
+    </div>
+    <div class="ep-body">
+      <div class="code-label">Request Body</div>
+      <div class="code-block">{ <span class="key">"enteredOtp"</span>: <span class="str">"482910"</span>,
+  <span class="key">"email"</span>: <span class="str">"ganesh@example.com"</span> <span class="cmt">// or phone</span>
+}</div>
+      <div class="code-label">Success Response (200)</div>
+      <div class="code-block">{ <span class="key">"message"</span>: <span class="str">"OTP verified successfully."</span> }</div>
+      <div class="callout warn" style="margin-top:12px">After this, <code>req.session.otpVerified = true</code> is stored. This is the gate to signup.</div>
+    </div>
+  </div>
+
+  <div class="endpoint-card">
+    <div class="ep-header" onclick="toggleEp(this)" data-open="false">
+      <span class="method-badge POST">POST</span>
+      <span class="ep-path">/api/signUp</span>
+      <span class="ep-desc">Create account (after OTP verify)</span>
+    </div>
+    <div class="ep-body">
+      <div class="code-label">Request Body</div>
+      <div class="code-block">{ <span class="key">"name"</span>: <span class="str">"Ganesh Jetti"</span>,
+  <span class="key">"email"</span>: <span class="str">"ganesh@example.com"</span>,
+  <span class="key">"password"</span>: <span class="str">"mySecret123"</span>,
+  <span class="key">"signupMethod"</span>: <span class="str">"email"</span>
+}</div>
+      <div class="code-label">Success Response (201)</div>
+      <div class="code-block">{ <span class="key">"message"</span>: <span class="str">"Account created successfully."</span>,
+  <span class="key">"token"</span>: <span class="str">"eyJhbGci..."</span>,
+  <span class="key">"user"</span>: {
+    <span class="key">"id"</span>: <span class="str">"64abc..."</span>,
+    <span class="key">"name"</span>: <span class="str">"Ganesh Jetti"</span>,
+    <span class="key">"email"</span>: <span class="str">"ganesh@example.com"</span>,
+    <span class="key">"isEmailVerified"</span>: <span class="bool">true</span>
+  }
+}</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     SECTION 5 — LOGIN
+══════════════════════════════════════════════════ -->
+<section class="section" id="login">
+  <div class="section-header">
+    <div class="section-icon teal">🔑</div>
+    <div>
+      <h2>Login Flow</h2>
+      <div class="section-sub">Email or phone + password → JWT token</div>
+    </div>
+  </div>
+
+  <div class="flow-steps">
+    <div class="flow-step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <div class="step-title">User submits login form</div>
+        <div class="step-desc">Provides <code>email</code> or <code>phone</code> + <code>password</code>. <code>POST /api/login</code>.</div>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <div class="step-title">Server finds user</div>
+        <div class="step-desc">If email: finds by email. If phone: strips spaces, <code>+91</code> prefix, finds by 10-digit number. User not found → 401.</div>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <div class="step-title">Password check</div>
+        <div class="step-desc"><code>bcrypt.compare(password, user.password)</code>. Wrong password → 401. Match → proceed.</div>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="step-num">4</div>
+      <div class="step-body">
+        <div class="step-title">JWT issued + notification added</div>
+        <div class="step-desc"><code>jwt.sign({userId}, JWT_SECRET, {expiresIn: '7d'})</code>. Also pushes a <code>"Logged in successfully"</code> notification to the user's notifications array. Returns token + user object.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="endpoint-card">
+    <div class="ep-header" onclick="toggleEp(this)" data-open="true">
+      <span class="method-badge POST">POST</span>
+      <span class="ep-path">/api/login</span>
+      <span class="ep-desc">Login with email or phone</span>
+    </div>
+    <div class="ep-body open">
+      <div class="code-label">Request Body (email login)</div>
+      <div class="code-block">{ <span class="key">"email"</span>: <span class="str">"ganesh@example.com"</span>,
+  <span class="key">"password"</span>: <span class="str">"mySecret123"</span>
+}</div>
+      <div class="code-label">Request Body (phone login)</div>
+      <div class="code-block">{ <span class="key">"phone"</span>: <span class="str">"9876543210"</span>,
+  <span class="key">"password"</span>: <span class="str">"mySecret123"</span>
+}</div>
+      <div class="code-label">Success Response (200)</div>
+      <div class="code-block">{ <span class="key">"message"</span>: <span class="str">"Login successful."</span>,
+  <span class="key">"token"</span>: <span class="str">"eyJhbGci..."</span>,
+  <span class="key">"user"</span>: {
+    <span class="key">"id"</span>: <span class="str">"64abc..."</span>,
+    <span class="key">"name"</span>: <span class="str">"Ganesh"</span>,
+    <span class="key">"email"</span>: <span class="str">"ganesh@example.com"</span>,
+    <span class="key">"isEmailVerified"</span>: <span class="bool">true</span>
+  }
+}</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     SECTION 6 — GOOGLE AUTH
+══════════════════════════════════════════════════ -->
+<section class="section" id="google">
+  <div class="section-header">
+    <div class="section-icon amber">🔵</div>
+    <div>
+      <h2>Google Auth</h2>
+      <div class="section-sub">One-click login / signup with Google</div>
+    </div>
+  </div>
+
+  <div class="callout info">
+    <strong>How it works:</strong> The frontend uses the Google SDK to get the user's Google profile (name, email, googleId). It then sends that to your backend. If the email already exists in DB, it logs them in. If not, it auto-creates a new account. No OTP step needed.
+  </div>
+
+  <div class="endpoint-card">
+    <div class="ep-header" onclick="toggleEp(this)" data-open="true">
+      <span class="method-badge POST">POST</span>
+      <span class="ep-path">/api/google-auth</span>
+      <span class="ep-desc">Sign in or sign up with Google</span>
+    </div>
+    <div class="ep-body open">
+      <div class="code-label">Request Body</div>
+      <div class="code-block">{ <span class="key">"name"</span>: <span class="str">"Ganesh Jetti"</span>,
+  <span class="key">"email"</span>: <span class="str">"ganesh@gmail.com"</span>,
+  <span class="key">"googleId"</span>: <span class="str">"108237491823749182"</span>
+}</div>
+      <div class="code-label">Success Response (200)</div>
+      <div class="code-block">{ <span class="key">"message"</span>: <span class="str">"Google auth successful."</span>,
+  <span class="key">"token"</span>: <span class="str">"eyJhbGci..."</span>,
+  <span class="key">"user"</span>: { <span class="key">"id"</span>: <span class="str">"..."</span>, <span class="key">"name"</span>: <span class="str">"Ganesh"</span> }
+}</div>
+      <div class="callout warn" style="margin-top:12px"><strong>Note:</strong> Google users cannot log in with email+password later because their password is stored as <code>google_&lt;googleId&gt;</code> — not a real hash.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     SECTION 7 — FORGOT PASSWORD
+══════════════════════════════════════════════════ -->
+<section class="section" id="forgot">
+  <div class="section-header">
+    <div class="section-icon red">🔒</div>
+    <div>
+      <h2>Forgot Password</h2>
+      <div class="section-sub">3-step OTP-based password reset</div>
+    </div>
+  </div>
+
+  <div class="flow-steps">
+    <div class="flow-step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <div class="step-title">Request OTP — <code>POST /api/forgot-password</code></div>
+        <div class="step-desc">User provides email or phone. Server checks if account exists. Sends OTP via email (Nodemailer) or console (phone dev mode). Stores in session.</div>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <div class="step-title">Verify OTP — <code>POST /api/verify-reset-otp</code></div>
+        <div class="step-desc">User submits the OTP. Server matches session OTP. Sets <code>req.session.resetVerified = true</code>.</div>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <div class="step-title">Set New Password — <code>POST /api/reset-password</code></div>
+        <div class="step-desc">Requires <code>resetVerified === true</code> in session. Validates new password (min 6 chars, must match confirm). bcrypt hashes + saves. Clears reset session vars.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     SECTION 8 — 2FA
+══════════════════════════════════════════════════ -->
+<section class="section" id="twofa">
+  <div class="section-header">
+    <div class="section-icon pink">🛡️</div>
+    <div>
+      <h2>Two-Factor Auth (2FA)</h2>
+      <div class="section-sub">Enable or disable extra login protection</div>
+    </div>
+  </div>
+
+  <div class="callout info">
+    <strong>How it works:</strong> 2FA settings are stored in the User model. Enabling/disabling is a simple PATCH. The actual 2FA challenge (sending OTP during login) would need to be implemented in the login controller — the infrastructure (fields + enable/disable endpoints) is already there.
+  </div>
+
+  <div class="endpoint-card">
+    <div class="ep-header" onclick="toggleEp(this)" data-open="false">
+      <span class="method-badge POST">POST</span>
+      <span class="ep-path">/api/enable-2fa</span>
+      <span class="ep-desc">Enable 2FA <span class="lock-icon">🔐</span> Protected</span>
+    </div>
+    <div class="ep-body">
+      <div class="code-label">Request Body</div>
+      <div class="code-block">{ <span class="key">"method"</span>: <span class="str">"email"</span> } <span class="cmt">// or "phone"</span></div>
+      <div class="code-label">Success Response (200)</div>
+      <div class="code-block">{ <span class="key">"message"</span>: <span class="str">"2FA enabled successfully."</span> }</div>
+    </div>
+  </div>
+
+  <div class="endpoint-card">
+    <div class="ep-header" onclick="toggleEp(this)" data-open="false">
+      <span class="method-badge POST">POST</span>
+      <span class="ep-path">/api/disable-2fa</span>
+      <span class="ep-desc">Disable 2FA <span class="lock-icon">🔐</span> Protected</span>
+    </div>
+    <div class="ep-body">
+      <div class="code-label">Success Response (200)</div>
+      <div class="code-block">{ <span class="key">"message"</span>: <span class="str">"2FA disabled."</span> }</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     SECTION 9 — GROUPS
+══════════════════════════════════════════════════ -->
+<section class="section" id="groups">
+  <div class="section-header">
+    <div class="section-icon teal">👥</div>
+    <div>
+      <h2>Groups</h2>
+      <div class="section-sub">Create, join, manage expense groups</div>
+    </div>
+  </div>
+
+  <div class="callout info">
+    <strong>Groups are the core unit of SmartSplit.</strong> Every expense belongs to a group. When you create a group, you automatically become its admin. You can then add members by email, or share a 6-character invite code for them to join themselves.
+  </div>
+
+  <div class="flow-steps">
+    <div class="flow-step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <div class="step-title">Create Group</div>
+        <div class="step-desc">Admin provides name, icon (emoji), optional description. A unique <code>inviteCode</code> is auto-generated by a Mongoose pre-save hook using <code>Math.random().toString(36).substring(2,8).toUpperCase()</code>. Creator is added as <code>role: 'admin'</code>.</div>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <div class="step-title">Add Member by Email</div>
+        <div class="step-desc">Admin sends <code>POST /api/add-member/:groupId</code> with the member's email. Server finds user by email, checks if not already a member, pushes to <code>group.members</code>. Sends the new member an in-app notification.</div>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <div class="step-title">Join by Invite Code</div>
+        <div class="step-desc">Anyone with the code sends <code>POST /api/join-group</code> with the code. Server finds group by <code>inviteCode</code> (case-insensitive). Adds user as <code>role: 'member'</code>. Sends welcome notification.</div>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="step-num">4</div>
+      <div class="step-body">
+        <div class="step-title">Get All Groups with Balances</div>
+        <div class="step-desc"><code>GET /api/getgroups</code> fetches all groups where user is a member. For each group, it calculates the user's net balance by scanning all expenses: what others owe you minus what you owe others. Returns <code>userBalance: {owed, owing, net}</code> for each group.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="endpoint-card">
+    <div class="ep-header" onclick="toggleEp(this)" data-open="true">
+      <span class="method-badge POST">POST</span>
+      <span class="ep-path">/api/create-group</span>
+      <span class="ep-desc">Create a new group 🔐</span>
+    </div>
+    <div class="ep-body open">
+      <div class="code-label">Request Body</div>
+      <div class="code-block">{ <span class="key">"name"</span>: <span class="str">"Goa Trip 2025"</span>,
+  <span class="key">"icon"</span>: <span class="str">"🏖️"</span>,
+  <span class="key">"description"</span>: <span class="str">"Beach vacation expenses"</span>
+}</div>
+      <div class="code-label">Success Response (201)</div>
+      <div class="code-block">{ <span class="key">"success"</span>: <span class="bool">true</span>,
+  <span class="key">"data"</span>: {
+    <span class="key">"_id"</span>: <span class="str">"64xyz..."</span>,
+    <span class="key">"name"</span>: <span class="str">"Goa Trip 2025"</span>,
+    <span class="key">"icon"</span>: <span class="str">"🏖️"</span>,
+    <span class="key">"inviteCode"</span>: <span class="str">"XY7K2M"</span>,
+    <span class="key">"members"</span>: [{ <span class="key">"userId"</span>: {...}, <span class="key">"role"</span>: <span class="str">"admin"</span> }]
+  }
+}</div>
+    </div>
+  </div>
+
+  <div class="endpoint-card">
+    <div class="ep-header" onclick="toggleEp(this)" data-open="false">
+      <span class="method-badge">GET</span>
+      <span class="ep-path">/api/getgroups</span>
+      <span class="ep-desc">Get all groups for current user 🔐</span>
+    </div>
+    <div class="ep-body">
+      <div class="code-label">Response includes balance per group</div>
+      <div class="code-block">{ <span class="key">"success"</span>: <span class="bool">true</span>,
+  <span class="key">"data"</span>: [{
+    <span class="key">"_id"</span>: <span class="str">"64xyz..."</span>,
+    <span class="key">"name"</span>: <span class="str">"Goa Trip 2025"</span>,
+    <span class="key">"members"</span>: [...],
+    <span class="key">"userBalance"</span>: {
+      <span class="key">"owed"</span>: <span class="num">1500</span>,   <span class="cmt">// others owe you ₹1500</span>
+      <span class="key">"owing"</span>: <span class="num">300</span>,    <span class="cmt">// you owe ₹300</span>
+      <span class="key">"net"</span>: <span class="num">1200</span>     <span class="cmt">// net = you're owed ₹1200</span>
+    }
+  }]
+}</div>
+    </div>
+  </div>
+
+  <div class="endpoint-card">
+    <div class="ep-header" onclick="toggleEp(this)" data-open="false">
+      <span class="method-badge POST">POST</span>
+      <span class="ep-path">/api/add-member/:groupId</span>
+      <span class="ep-desc">Add member by email (admin only) 🔐</span>
+    </div>
+    <div class="ep-body">
+      <div class="code-label">Request Body</div>
+      <div class="code-block">{ <span class="key">"email"</span>: <span class="str">"friend@gmail.com"</span> }</div>
+      <div class="callout warn" style="margin-top:12px">Only group admins can add members. Server checks <code>members.role === 'admin'</code> before proceeding.</div>
+    </div>
+  </div>
+
+  <div class="endpoint-card">
+    <div class="ep-header" onclick="toggleEp(this)" data-open="false">
+      <span class="method-badge POST">POST</span>
+      <span class="ep-path">/api/join-group</span>
+      <span class="ep-desc">Join a group using invite code 🔐</span>
+    </div>
+    <div class="ep-body">
+      <div class="code-label">Request Body</div>
+      <div class="code-block">{ <span class="key">"code"</span>: <span class="str">"XY7K2M"</span> }</div>
+      <div class="code-label">Success Response (200)</div>
+      <div class="code-block">{ <span class="key">"message"</span>: <span class="str">"🎉 Joined \"Goa Trip 2025\" successfully!"</span> }</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     SECTION 10 — EXPENSES
+══════════════════════════════════════════════════ -->
+<section class="section" id="expenses">
+  <div class="section-header">
+    <div class="section-icon amber">💸</div>
+    <div>
+      <h2>Expenses</h2>
+      <div class="section-sub">Add and view expenses inside a group</div>
+    </div>
+  </div>
+
+  <div class="callout info">
+    <strong>Split types supported:</strong> <code>equal</code> (divide equally among selected members) and <code>exact</code> (you specify each person's exact share). The server validates that splitDetails always sum to the total amount (±₹0.10 tolerance for float errors).
+  </div>
+
+  <div class="flow-steps">
+    <div class="flow-step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <div class="step-title">User opens a group → clicks "Add Expense"</div>
+        <div class="step-desc">User fills: description, amount, category, who paid (<code>paidBy</code>), split type, members to split between.</div>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <div class="step-title">Server validates membership</div>
+        <div class="step-desc">Checks that the group exists and the current user is a member. Non-members get a 403.</div>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <div class="step-title">Split calculation</div>
+        <div class="step-desc">
+          <strong>Equal split:</strong> Converts to "paisa" (×100) to avoid float errors. Divides total among members. Adds remainder to first person.<br/><br/>
+          <strong>Exact split:</strong> Uses the splitDetails you provide. Validates sum is within ±₹0.10 of total.
+        </div>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="step-num">4</div>
+      <div class="step-body">
+        <div class="step-title">Expense saved, returned populated</div>
+        <div class="step-desc">Mongoose pre-save hook also validates split sum. Response includes populated <code>paidBy.name</code> and <code>splitDetails[].userId.name</code>.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="endpoint-card">
+    <div class="ep-header" onclick="toggleEp(this)" data-open="true">
+      <span class="method-badge POST">POST</span>
+      <span class="ep-path">/api/create-expense</span>
+      <span class="ep-desc">Add an expense to a group 🔐</span>
+    </div>
+    <div class="ep-body open">
+      <div class="code-label">Equal Split Example</div>
+      <div class="code-block">{ <span class="key">"groupId"</span>: <span class="str">"64xyz..."</span>,
+  <span class="key">"description"</span>: <span class="str">"Dinner at Hyderabad House"</span>,
+  <span class="key">"amount"</span>: <span class="num">1200</span>,
+  <span class="key">"category"</span>: <span class="str">"Food"</span>,
+  <span class="key">"paidBy"</span>: <span class="str">"64abc..."</span>, <span class="cmt">// userId of who paid</span>
+  <span class="key">"splitType"</span>: <span class="str">"equal"</span>,
+  <span class="key">"selectedMembers"</span>: [<span class="str">"64abc..."</span>, <span class="str">"64def..."</span>, <span class="str">"64ghi..."</span>]
+}</div>
+      <div class="code-label">Exact Split Example</div>
+      <div class="code-block">{ <span class="key">"groupId"</span>: <span class="str">"64xyz..."</span>,
+  <span class="key">"description"</span>: <span class="str">"Hotel bill"</span>,
+  <span class="key">"amount"</span>: <span class="num">3000</span>,
+  <span class="key">"splitType"</span>: <span class="str">"exact"</span>,
+  <span class="key">"splitDetails"</span>: [
+    { <span class="key">"userId"</span>: <span class="str">"64abc..."</span>, <span class="key">"amount"</span>: <span class="num">2000</span> },
+    { <span class="key">"userId"</span>: <span class="str">"64def..."</span>, <span class="key">"amount"</span>: <span class="num">1000</span> }
+  ]
+}</div>
+      <div class="code-label">Success Response (201)</div>
+      <div class="code-block">{ <span class="key">"success"</span>: <span class="bool">true</span>,
+  <span class="key">"data"</span>: {
+    <span class="key">"_id"</span>: <span class="str">"64exp..."</span>,
+    <span class="key">"description"</span>: <span class="str">"Dinner at Hyderabad House"</span>,
+    <span class="key">"amount"</span>: <span class="num">1200</span>,
+    <span class="key">"paidBy"</span>: { <span class="key">"name"</span>: <span class="str">"Ganesh"</span> },
+    <span class="key">"splitDetails"</span>: [
+      { <span class="key">"userId"</span>: { <span class="key">"name"</span>: <span class="str">"Ganesh"</span> }, <span class="key">"amount"</span>: <span class="num">400</span> },
+      { <span class="key">"userId"</span>: { <span class="key">"name"</span>: <span class="str">"Ravi"</span> }, <span class="key">"amount"</span>: <span class="num">400</span> },
+      { <span class="key">"userId"</span>: { <span class="key">"name"</span>: <span class="str">"Suresh"</span> }, <span class="key">"amount"</span>: <span class="num">400</span> }
+    ]
+  }
+}</div>
+    </div>
+  </div>
+
+  <div class="endpoint-card">
+    <div class="ep-header" onclick="toggleEp(this)" data-open="false">
+      <span class="method-badge">GET</span>
+      <span class="ep-path">/api/getexpenses/:groupId</span>
+      <span class="ep-desc">Get all expenses for a group 🔐</span>
+    </div>
+    <div class="ep-body">
+      <div class="callout info">Returns all expenses sorted by date (newest first). Only group members can view. Each expense is populated with payer and participant names.</div>
+      <div class="code-label">Response</div>
+      <div class="code-block">{ <span class="key">"success"</span>: <span class="bool">true</span>,
+  <span class="key">"data"</span>: [
+    { <span class="key">"description"</span>: <span class="str">"Dinner"</span>, <span class="key">"amount"</span>: <span class="num">1200</span>, ... },
+    ...
+  ]
+}</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     SECTION 11 — SETTLE UP
+══════════════════════════════════════════════════ -->
+<section class="section" id="settle">
+  <div class="section-header">
+    <div class="section-icon green">🤝</div>
+    <div>
+      <h2>Settle Up</h2>
+      <div class="section-sub">Calculate balances, record payments, simplify debts</div>
+    </div>
+  </div>
+
+  <div class="callout success">
+    <strong>How balances are calculated:</strong> For every expense, each splitDetails entry means that person owes the payer their share. The server builds a pairwise "who owes whom" map, then applies all recorded settlements to reduce those debts. Net result = current outstanding balances.
+  </div>
+
+  <div class="flow-steps">
+    <div class="flow-step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <div class="step-title">View balances — <code>GET /api/settlements/:groupId/balances</code></div>
+        <div class="step-desc">Scans all expenses in the group. Builds a pairwise debt map. Applies all recorded settlements to reduce debts. Returns final outstanding debts + settlement history.</div>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <div class="step-title">Simplify debts — <code>GET /api/settlements/:groupId/simplify</code></div>
+        <div class="step-desc">Runs the debt simplification algorithm: calculates each person's net balance, separates creditors and debtors, matches them greedily to minimize the number of transactions needed to settle everything.</div>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <div class="step-title">Record payment — <code>POST /api/settlements</code></div>
+        <div class="step-desc">When someone pays, this records the settlement. Security check: you must be either the payer (<code>from</code>) or receiver (<code>to</code>). Future balance calculations automatically subtract this payment from the outstanding debt.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="endpoint-card">
+    <div class="ep-header" onclick="toggleEp(this)" data-open="true">
+      <span class="method-badge">GET</span>
+      <span class="ep-path">/api/settlements/:groupId/balances</span>
+      <span class="ep-desc">Who owes whom in a group 🔐</span>
+    </div>
+    <div class="ep-body open">
+      <div class="code-label">Response</div>
+      <div class="code-block">{ <span class="key">"success"</span>: <span class="bool">true</span>,
+  <span class="key">"data"</span>: {
+    <span class="key">"balances"</span>: [
+      { <span class="key">"from"</span>: <span class="str">"64def..."</span>, <span class="key">"fromName"</span>: <span class="str">"Ravi"</span>,
+        <span class="key">"to"</span>: <span class="str">"64abc..."</span>, <span class="key">"toName"</span>: <span class="str">"Ganesh"</span>,
+        <span class="key">"amount"</span>: <span class="num">800</span> }  <span class="cmt">// Ravi owes Ganesh ₹800</span>
+    ],
+    <span class="key">"settlements"</span>: [...], <span class="cmt">// Last 10 payments</span>
+    <span class="key">"group"</span>: { <span class="key">"name"</span>: <span class="str">"Goa Trip 2025"</span> }
+  }
+}</div>
+    </div>
+  </div>
+
+  <div class="endpoint-card">
+    <div class="ep-header" onclick="toggleEp(this)" data-open="false">
+      <span class="method-badge POST">POST</span>
+      <span class="ep-path">/api/settlements</span>
+      <span class="ep-desc">Record a payment 🔐</span>
+    </div>
+    <div class="ep-body">
+      <div class="code-label">Request Body</div>
+      <div class="code-block">{ <span class="key">"groupId"</span>: <span class="str">"64xyz..."</span>,
+  <span class="key">"from"</span>: <span class="str">"64def..."</span>,   <span class="cmt">// who paid</span>
+  <span class="key">"to"</span>: <span class="str">"64abc..."</span>,     <span class="cmt">// who received</span>
+  <span class="key">"amount"</span>: <span class="num">800</span>,
+  <span class="key">"method"</span>: <span class="str">"upi"</span>,
+  <span class="key">"notes"</span>: <span class="str">"PhonePe transfer"</span>
+}</div>
+    </div>
+  </div>
+
+  <div class="endpoint-card">
+    <div class="ep-header" onclick="toggleEp(this)" data-open="false">
+      <span class="method-badge">GET</span>
+      <span class="ep-path">/api/settlements/:groupId/simplify</span>
+      <span class="ep-desc">Simplify all debts 🔐</span>
+    </div>
+    <div class="ep-body">
+      <div class="callout success">Runs the greedy simplification algorithm. Example: A→B ₹100, B→C ₹100 simplifies to A→C ₹100 (one transfer instead of two).</div>
+      <div class="code-label">Response</div>
+      <div class="code-block">{ <span class="key">"data"</span>: {
+    <span class="key">"current"</span>: [<span class="cmt">...original debts...</span>],
+    <span class="key">"simplified"</span>: [<span class="cmt">...minimized debts...</span>],
+    <span class="key">"savings"</span>: <span class="num">2</span> <span class="cmt">// saved 2 transactions</span>
+  }
+}</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     SECTION 12 — ANALYTICS
+══════════════════════════════════════════════════ -->
+<section class="section" id="analytics">
+  <div class="section-header">
+    <div class="section-icon blue">📊</div>
+    <div>
+      <h2>Analytics</h2>
+      <div class="section-sub">Spending insights, trends, and category breakdown</div>
+    </div>
+  </div>
+
+  <div class="callout info">
+    <strong>All analytics are based on the user's share</strong> — not the full expense amount. So if a ₹900 dinner was split 3 ways, your analytics show ₹300, not ₹900. This is done via MongoDB aggregation pipeline filtering on <code>splitDetails.userId</code>.
+  </div>
+
+  <div class="flow-steps">
+    <div class="flow-step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <div class="step-title">Period filter</div>
+        <div class="step-desc">Query param <code>?period=7d</code> or <code>month</code> (default) or <code>custom</code> (with <code>startDate</code> + <code>endDate</code>). All 8 analytics data points use this date range.</div>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <div class="step-title">8 data points computed in one call</div>
+        <div class="step-desc">
+          <strong>① Total Spent</strong> — sum of your shares.<br/>
+          <strong>② Total Owed to You</strong> — you paid, others owe you.<br/>
+          <strong>③ Total You Owe</strong> — others paid, you owe.<br/>
+          <strong>④ Category Breakdown</strong> — your share per category with % + color + emoji.<br/>
+          <strong>⑤ Spending Trend</strong> — per-day chart (your spend vs group average).<br/>
+          <strong>⑥ Expense List</strong> — last 50 expenses you're in.<br/>
+          <strong>⑦ Group Breakdown</strong> — spend per group.<br/>
+          <strong>⑧ Smart Insight</strong> — auto-generated text message based on your data.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="endpoint-card">
+    <div class="ep-header" onclick="toggleEp(this)" data-open="true">
+      <span class="method-badge">GET</span>
+      <span class="ep-path">/api/analytics?period=month</span>
+      <span class="ep-desc">Full analytics dashboard data 🔐</span>
+    </div>
+    <div class="ep-body open">
+      <div class="code-label">Query Params</div>
+      <table class="param-table">
+        <tr><th>Param</th><th>Values</th><th>Description</th></tr>
+        <tr><td class="param-name">period</td><td><span class="param-type">7d | month | custom</span></td><td style="font-size:12px;color:var(--muted)">Time range for data</td></tr>
+        <tr><td class="param-name">startDate</td><td><span class="param-type">ISO date</span></td><td style="font-size:12px;color:var(--muted)">Only if period=custom</td></tr>
+        <tr><td class="param-name">endDate</td><td><span class="param-type">ISO date</span></td><td style="font-size:12px;color:var(--muted)">Only if period=custom</td></tr>
+      </table>
+      <div class="code-label">Response Shape</div>
+      <div class="code-block">{ <span class="key">"success"</span>: <span class="bool">true</span>,
+  <span class="key">"data"</span>: {
+    <span class="key">"insight"</span>: <span class="str">"🍕 67% of your spending was on Food this month."</span>,
+    <span class="key">"summary"</span>: {
+      <span class="key">"spent"</span>: <span class="str">"₹4,500"</span>,
+      <span class="key">"owed"</span>:  <span class="str">"₹1,200"</span>, <span class="cmt">// others owe you</span>
+      <span class="key">"owe"</span>:   <span class="str">"₹300"</span>   <span class="cmt">// you owe others</span>
+    },
+    <span class="key">"trend"</span>: {
+      <span class="key">"labels"</span>: [<span class="str">"1 May"</span>, <span class="str">"2 May"</span>, ...],
+      <span class="key">"mine"</span>: [<span class="num">450</span>, <span class="num">0</span>, <span class="num">200</span>, ...],    <span class="cmt">// your daily spend</span>
+      <span class="key">"avg"</span>: [<span class="num">320</span>, <span class="num">100</span>, <span class="num">180</span>, ...]     <span class="cmt">// group average</span>
+    },
+    <span class="key">"categories"</span>: [
+      { <span class="key">"name"</span>: <span class="str">"Food"</span>, <span class="key">"amount"</span>: <span class="num">3000</span>,
+        <span class="key">"pct"</span>: <span class="num">67</span>, <span class="key">"color"</span>: <span class="str">"#10B981"</span>, <span class="key">"emoji"</span>: <span class="str">"🍕"</span> }
+    ],
+    <span class="key">"topExpense"</span>: { <span class="key">"desc"</span>: <span class="str">"Hotel"</span>, <span class="key">"amount"</span>: <span class="num">5000</span>, ... },
+    <span class="key">"dailyAvg"</span>: <span class="num">150</span>,
+    <span class="key">"pendingSettlements"</span>: <span class="num">2</span>
+  }
+}</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     SECTION 13 — PROFILE
+══════════════════════════════════════════════════ -->
+<section class="section" id="profile">
+  <div class="section-header">
+    <div class="section-icon pink">👤</div>
+    <div>
+      <h2>Profile</h2>
+      <div class="section-sub">View and update user profile, verify contacts</div>
+    </div>
+  </div>
+
+  <div class="endpoint-card">
+    <div class="ep-header" onclick="toggleEp(this)" data-open="false">
+      <span class="method-badge">GET</span>
+      <span class="ep-path">/api/profile</span>
+      <span class="ep-desc">Get current user profile 🔐</span>
+    </div>
+    <div class="ep-body">
+      <div class="code-label">Response</div>
+      <div class="code-block">{ <span class="key">"success"</span>: <span class="bool">true</span>,
+  <span class="key">"user"</span>: {
+    <span class="key">"id"</span>: <span class="str">"64abc..."</span>,
+    <span class="key">"name"</span>: <span class="str">"Ganesh Jetti"</span>,
+    <span class="key">"email"</span>: <span class="str">"ganesh@gmail.com"</span>,
+    <span class="key">"phone"</span>: <span class="str">"9876543210"</span>,
+    <span class="key">"avatar"</span>: <span class="str">"data:image/png;base64,..."</span>,
+    <span class="key">"defaultUpi"</span>: <span class="str">"ganesh@upi"</span>,
+    <span class="key">"upiList"</span>: [<span class="str">"ganesh@upi"</span>, <span class="str">"ganesh@ybl"</span>],
+    <span class="key">"isEmailVerified"</span>: <span class="bool">true</span>,
+    <span class="key">"isPhoneVerified"</span>: <span class="bool">false</span>,
+    <span class="key">"twoFactorEnabled"</span>: <span class="bool">false</span>
+  }
+}</div>
+    </div>
+  </div>
+
+  <div class="endpoint-card">
+    <div class="ep-header" onclick="toggleEp(this)" data-open="false">
+      <span class="method-badge PUT">PUT</span>
+      <span class="ep-path">/api/profile</span>
+      <span class="ep-desc">Update profile (name, avatar, UPI, etc.) 🔐</span>
+    </div>
+    <div class="ep-body">
+      <div class="code-label">Request Body (all fields optional)</div>
+      <div class="code-block">{ <span class="key">"name"</span>: <span class="str">"Ganesh Jetti"</span>,
+  <span class="key">"avatar"</span>: <span class="str">"data:image/png;base64,..."</span>, <span class="cmt">// max 5MB</span>
+  <span class="key">"defaultUpi"</span>: <span class="str">"ganesh@upi"</span>,
+  <span class="key">"upiList"</span>: [<span class="str">"ganesh@upi"</span>, <span class="str">"ganesh@ybl"</span>]
+}</div>
+    </div>
+  </div>
+
+  <div class="endpoint-card">
+    <div class="ep-header" onclick="toggleEp(this)" data-open="false">
+      <span class="method-badge PATCH">PATCH</span>
+      <span class="ep-path">/api/profile/verify-email</span>
+      <span class="ep-desc">Verify and link a new email 🔐</span>
+    </div>
+    <div class="ep-body">
+      <div class="code-label">Request Body</div>
+      <div class="code-block">{ <span class="key">"email"</span>: <span class="str">"newemail@example.com"</span> }</div>
+      <div class="callout info">Checks for duplicate email across users. Sets <code>isEmailVerified = true</code>.</div>
+    </div>
+  </div>
+
+  <div class="endpoint-card">
+    <div class="ep-header" onclick="toggleEp(this)" data-open="false">
+      <span class="method-badge PATCH">PATCH</span>
+      <span class="ep-path">/api/profile/verify-phone</span>
+      <span class="ep-desc">Verify and link a new phone 🔐</span>
+    </div>
+    <div class="ep-body">
+      <div class="code-label">Request Body</div>
+      <div class="code-block">{ <span class="key">"phone"</span>: <span class="str">"9876543210"</span> }</div>
+    </div>
+  </div>
+
+  <div class="endpoint-card">
+    <div class="ep-header" onclick="toggleEp(this)" data-open="false">
+      <span class="method-badge POST">POST</span>
+      <span class="ep-path">/api/change-password</span>
+      <span class="ep-desc">Change password (logged-in user) 🔐</span>
+    </div>
+    <div class="ep-body">
+      <div class="code-label">Request Body</div>
+      <div class="code-block">{ <span class="key">"newPassword"</span>: <span class="str">"newSecret456"</span>,
+  <span class="key">"confirmPassword"</span>: <span class="str">"newSecret456"</span>
+}</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     SECTION 14 — NOTIFICATIONS
+══════════════════════════════════════════════════ -->
+<section class="section" id="notifications">
+  <div class="section-header">
+    <div class="section-icon amber">🔔</div>
+    <div>
+      <h2>Notifications</h2>
+      <div class="section-sub">In-app notification system</div>
+    </div>
+  </div>
+
+  <div class="callout info">
+    <strong>Stored inside the User document</strong> as an embedded array. Not a separate collection. Notifications are added when: user logs in, user is added to a group, user joins via invite code. The endpoint fetches them sorted newest first.
+  </div>
+
+  <div class="endpoint-card">
+    <div class="ep-header" onclick="toggleEp(this)" data-open="true">
+      <span class="method-badge">GET</span>
+      <span class="ep-path">/api/notifications</span>
+      <span class="ep-desc">Get all notifications for current user 🔐</span>
+    </div>
+    <div class="ep-body open">
+      <div class="code-label">Response</div>
+      <div class="code-block">{ <span class="key">"success"</span>: <span class="bool">true</span>,
+  <span class="key">"data"</span>: [
+    { <span class="key">"type"</span>: <span class="str">"group"</span>,
+      <span class="key">"message"</span>: <span class="str">"You were added to \"Goa Trip\" by Ganesh."</span>,
+      <span class="key">"isRead"</span>: <span class="bool">false</span>,
+      <span class="key">"createdAt"</span>: <span class="str">"2025-05-01T..."</span> },
+    { <span class="key">"type"</span>: <span class="str">"success"</span>,
+      <span class="key">"message"</span>: <span class="str">"Logged in successfully."</span>,
+      <span class="key">"isRead"</span>: <span class="bool">false</span> }
+  ]
+}</div>
+      <div class="code-label">Notification Types</div>
+      <table class="param-table">
+        <tr><th>Type</th><th>When triggered</th></tr>
+        <tr><td class="param-name">success</td><td style="font-size:12px;color:var(--muted)">After successful login</td></tr>
+        <tr><td class="param-name">group</td><td style="font-size:12px;color:var(--muted)">Added to a group / joined via code</td></tr>
+        <tr><td class="param-name">info</td><td style="font-size:12px;color:var(--muted)">General informational messages</td></tr>
+        <tr><td class="param-name">error / system</td><td style="font-size:12px;color:var(--muted)">Error events and system messages</td></tr>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     SECTION 15 — PAGES & ROUTES
+══════════════════════════════════════════════════ -->
+<section class="section" id="pages">
+  <div class="section-header">
+    <div class="section-icon purple">📄</div>
+    <div>
+      <h2>Frontend Pages & Routes</h2>
+      <div class="section-sub">React Router v6 routes defined in App.jsx</div>
+    </div>
+  </div>
+
+  <div class="model-card">
+    <div class="model-title">All Pages</div>
+    <table class="route-table">
+      <tr><th>Route</th><th>Component</th><th>Access</th><th>Purpose</th></tr>
+      <tr><td class="param-name">/</td><td style="font-size:13px;color:var(--muted)">LandingPage</td><td><span class="opt-badge">Public</span></td><td style="font-size:12px;color:var(--muted)">Marketing page. Hero, Features, HowItWorks, Testimonials</td></tr>
+      <tr><td class="param-name">/login</td><td style="font-size:13px;color:var(--muted)">Login</td><td><span class="opt-badge">Public</span></td><td style="font-size:12px;color:var(--muted)">Login form + Google sign-in</td></tr>
+      <tr><td class="param-name">/signup</td><td style="font-size:13px;color:var(--muted)">SignUp</td><td><span class="opt-badge">Public</span></td><td style="font-size:12px;color:var(--muted)">Sign up form with OTP step</td></tr>
+      <tr><td class="param-name">/forgot-password</td><td style="font-size:13px;color:var(--muted)">ForgotPassword</td><td><span class="opt-badge">Public</span></td><td style="font-size:12px;color:var(--muted)">3-step password reset flow</td></tr>
+      <tr><td class="param-name">/dashboard</td><td style="font-size:13px;color:var(--muted)">Dashboard</td><td><span class="req-badge">Auth</span></td><td style="font-size:12px;color:var(--muted)">Overview of all groups + balances</td></tr>
+      <tr><td class="param-name">/groups</td><td style="font-size:13px;color:var(--muted)">Groups</td><td><span class="req-badge">Auth</span></td><td style="font-size:12px;color:var(--muted)">List of user's groups</td></tr>
+      <tr><td class="param-name">/groups/:id</td><td style="font-size:13px;color:var(--muted)">GroupDetail</td><td><span class="req-badge">Auth</span></td><td style="font-size:12px;color:var(--muted)">Single group view: expenses, members, add expense</td></tr>
+      <tr><td class="param-name">/settle</td><td style="font-size:13px;color:var(--muted)">SettleUp</td><td><span class="req-badge">Auth</span></td><td style="font-size:12px;color:var(--muted)">View outstanding debts, record payments</td></tr>
+      <tr><td class="param-name">/activity</td><td style="font-size:13px;color:var(--muted)">Activity</td><td><span class="req-badge">Auth</span></td><td style="font-size:12px;color:var(--muted)">Full analytics dashboard with charts</td></tr>
+      <tr><td class="param-name">/profile</td><td style="font-size:13px;color:var(--muted)">Profile</td><td><span class="req-badge">Auth</span></td><td style="font-size:12px;color:var(--muted)">View/edit profile, UPI IDs, avatar</td></tr>
+      <tr><td class="param-name">/settings</td><td style="font-size:13px;color:var(--muted)">Settings</td><td><span class="req-badge">Auth</span></td><td style="font-size:12px;color:var(--muted)">Theme toggle, 2FA, change password</td></tr>
+    </table>
+  </div>
+
+  <div class="callout info">
+    <strong>Mobile UI:</strong> The app has a dedicated <code>BottomNavbareM</code> component for mobile navigation and a <code>MobileTopBar</code> for the header on mobile. <code>SettingsDrawer</code> is a slide-in panel for quick settings.
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     SECTION 16 — STATE MANAGEMENT
+══════════════════════════════════════════════════ -->
+<section class="section" id="state">
+  <div class="section-header">
+    <div class="section-icon teal">🧠</div>
+    <div>
+      <h2>Redux State</h2>
+      <div class="section-sub">Global state slices and their purpose</div>
+    </div>
+  </div>
+
+  <div class="feature-grid">
+    <div class="feature-card">
+      <span class="feat-icon">🔑</span>
+      <div class="feat-title">authSlice</div>
+      <div class="feat-desc">Stores <code>token</code> and <code>user</code> object after login. Used by all protected API calls to attach Authorization header.</div>
+    </div>
+    <div class="feature-card">
+      <span class="feat-icon">👤</span>
+      <div class="feat-title">profileSlice</div>
+      <div class="feat-desc">Stores the full profile data fetched from <code>/api/profile</code>. Updated after profile changes.</div>
+    </div>
+    <div class="feature-card">
+      <span class="feat-icon">🌗</span>
+      <div class="feat-title">themeSlice</div>
+      <div class="feat-desc">Stores <code>theme: 'light' | 'dark'</code>. Toggle action switches the value. CSS variables respond to a class on <code>document.body</code>.</div>
+    </div>
+  </div>
+
+  <div class="callout info">
+    <strong>API service files:</strong> <code>groupAPI.js</code>, <code>expenseAPI.js</code>, <code>settleUpAPI.js</code>, <code>analytics.service.js</code> — each wraps <code>fetch</code> calls with the JWT token from Redux auth state.
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     SECTION 17 — THEME SYSTEM
+══════════════════════════════════════════════════ -->
+<section class="section" id="theme">
+  <div class="section-header">
+    <div class="section-icon amber">🌗</div>
+    <div>
+      <h2>Theme System</h2>
+      <div class="section-sub">Dark / Light mode via CSS custom properties</div>
+    </div>
+  </div>
+
+  <div class="callout success">
+    <strong>Implementation:</strong> CSS custom properties (variables) are defined in <code>index.css</code> for both <code>:root</code> (light) and <code>[data-theme="dark"]</code>. React's <code>themeSlice</code> stores the preference. The <code>ThemeToggle</code> component dispatches the toggle action and applies <code>data-theme</code> attribute to <code>document.documentElement</code>.
+  </div>
+
+  <div class="code-block"><span class="cmt">/* index.css — CSS variables approach */</span>
+:root {
+  --bg-primary: #ffffff;
+  --text-primary: #1a1a2e;
+  --accent: #6c63ff;
+}
+
+[data-theme="dark"] {
+  --bg-primary: #0d0f14;
+  --text-primary: #e8eaf0;
+  --accent: #a89cff;
+}</div>
+
+  <div class="code-block"><span class="cmt">// themeSlice.js — Redux slice</span>
+const themeSlice = createSlice({
+  name: 'theme',
+  initialState: { theme: 'light' },
+  reducers: {
+    toggleTheme: (state) => {
+      state.theme = state.theme === 'light' ? 'dark' : 'light';
+    }
+  }
+});</div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     SECTION 18 — AUTH MIDDLEWARE
+══════════════════════════════════════════════════ -->
+<section class="section" id="middleware">
+  <div class="section-header">
+    <div class="section-icon red">🔐</div>
+    <div>
+      <h2>Auth Middleware</h2>
+      <div class="section-sub">How every protected route is guarded</div>
+    </div>
+  </div>
+
+  <div class="callout warn">
+    <strong>Every route marked 🔐</strong> in this doc passes through the <code>protect</code> middleware in <code>middlewares/auth.js</code>.
+  </div>
+
+  <div class="flow-steps">
+    <div class="flow-step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <div class="step-title">Extract token from header</div>
+        <div class="step-desc">Looks for <code>Authorization: Bearer &lt;token&gt;</code>. If missing → 401 "Not authorized".</div>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <div class="step-title">Verify JWT</div>
+        <div class="step-desc"><code>jwt.verify(token, process.env.JWT_SECRET)</code>. Invalid token → 401. Expired → 401 with "Token expired" message.</div>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <div class="step-title">Find user in DB</div>
+        <div class="step-desc"><code>User.findById(decoded.userId)</code>. If user deleted/not found → 401. Otherwise attaches full user object to <code>req.user</code>.</div>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="step-num">4</div>
+      <div class="step-body">
+        <div class="step-title">Pass control to controller</div>
+        <div class="step-desc"><code>next()</code> is called. Controller now has <code>req.user._id</code>, <code>req.user.name</code>, etc. ready to use.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="code-block"><span class="cmt">// Example: How frontend attaches token to every request</span>
+fetch('/api/getgroups', {
+  headers: {
+    <span class="str">'Authorization'</span>: <span class="str">`Bearer ${token}`</span>,  <span class="cmt">// token from Redux store</span>
+    <span class="str">'Content-Type'</span>: <span class="str">'application/json'</span>
+  }
+});</div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     SECTION 19 — ERROR HANDLING
+══════════════════════════════════════════════════ -->
+<section class="section" id="errors">
+  <div class="section-header">
+    <div class="section-icon amber">⚠️</div>
+    <div>
+      <h2>Error Handling</h2>
+      <div class="section-sub">Global error handler in app.js</div>
+    </div>
+  </div>
+
+  <div class="model-card">
+    <div class="model-title">Error Types Handled</div>
+    <div class="field-row" style="font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--muted)"><div>Error</div><div>Code</div><div>Response</div></div>
+    <div class="field-row"><div class="field-name">Split mismatch</div><div class="field-type" style="color:var(--accent3)">400</div><div class="field-desc">"Split amounts must equal total amount"</div></div>
+    <div class="field-row"><div class="field-name">ValidationError</div><div class="field-type" style="color:var(--accent3)">400</div><div class="field-desc">Mongoose field validation failed. Returns array of messages.</div></div>
+    <div class="field-row"><div class="field-name">CastError</div><div class="field-type" style="color:var(--accent3)">400</div><div class="field-desc">"Invalid ID format" — bad ObjectId in URL.</div></div>
+    <div class="field-row"><div class="field-name">Default</div><div class="field-type" style="color:var(--accent3)">500</div><div class="field-desc">Internal server error. Returns <code>err.message</code>.</div></div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     SECTION 20 — MAILER
+══════════════════════════════════════════════════ -->
+<section class="section" id="mailer">
+  <div class="section-header">
+    <div class="section-icon blue">📧</div>
+    <div>
+      <h2>Email (Mailer)</h2>
+      <div class="section-sub">Nodemailer + Gmail SMTP</div>
+    </div>
+  </div>
+
+  <div class="callout info">
+    <strong>3 email types are sent:</strong>
+  </div>
+
+  <div class="feature-grid">
+    <div class="feature-card">
+      <span class="feat-icon">🎉</span>
+      <div class="feat-title">Welcome Email</div>
+      <div class="feat-desc">Sent after successful email signup. Contains user's name. Triggered in <code>signUpUser</code> controller.</div>
+    </div>
+    <div class="feature-card">
+      <span class="feat-icon">🔢</span>
+      <div class="feat-title">OTP Email</div>
+      <div class="feat-desc">6-digit OTP for signup verification. Valid for 5 minutes (in-memory TTL). Sent via <code>mailer.sendOTP()</code>.</div>
+    </div>
+    <div class="feature-card">
+      <span class="feat-icon">🔑</span>
+      <div class="feat-title">Password Reset OTP</div>
+      <div class="feat-desc">Sent during forgot-password flow. HTML email with styled OTP. Valid for 10 minutes (session-based).</div>
+    </div>
+  </div>
+
+  <div class="callout warn">
+    <strong>Phone OTP:</strong> Attempts Fast2SMS first (your active key is hardcoded — move to env!). Falls back to Textbelt free tier. If both fail, logs OTP to server console and returns it in the response as <code>devOtp</code>.
+  </div>
+</section>
+
+<!-- QUICK REFERENCE -->
+<section class="section">
+  <div class="section-header">
+    <div class="section-icon teal">⚡</div>
+    <div>
+      <h2>Quick Reference — All Endpoints</h2>
+      <div class="section-sub">Every API route at a glance</div>
+    </div>
+  </div>
+
+  <table class="route-table">
+    <tr><th>Method</th><th>Endpoint</th><th>Auth</th><th>What it does</th></tr>
+    <tr>
+      <td><span class="method-badge POST" style="display:inline-block;font-size:10px;padding:2px 8px">POST</span></td>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#c4beff">/api/send-otp</td>
+      <td>❌</td>
+      <td style="font-size:12px;color:var(--muted)">Send OTP to email or phone</td>
+    </tr>
+    <tr>
+      <td><span class="method-badge POST" style="display:inline-block;font-size:10px;padding:2px 8px">POST</span></td>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#c4beff">/api/verify-otp</td>
+      <td>❌</td>
+      <td style="font-size:12px;color:var(--muted)">Verify signup OTP</td>
+    </tr>
+    <tr>
+      <td><span class="method-badge POST" style="display:inline-block;font-size:10px;padding:2px 8px">POST</span></td>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#c4beff">/api/signUp</td>
+      <td>❌</td>
+      <td style="font-size:12px;color:var(--muted)">Create account (after OTP)</td>
+    </tr>
+    <tr>
+      <td><span class="method-badge POST" style="display:inline-block;font-size:10px;padding:2px 8px">POST</span></td>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#c4beff">/api/login</td>
+      <td>❌</td>
+      <td style="font-size:12px;color:var(--muted)">Login with email/phone + password</td>
+    </tr>
+    <tr>
+      <td><span class="method-badge POST" style="display:inline-block;font-size:10px;padding:2px 8px">POST</span></td>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#c4beff">/api/google-auth</td>
+      <td>❌</td>
+      <td style="font-size:12px;color:var(--muted)">Login or signup with Google</td>
+    </tr>
+    <tr>
+      <td><span class="method-badge POST" style="display:inline-block;font-size:10px;padding:2px 8px">POST</span></td>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#c4beff">/api/forgot-password</td>
+      <td>❌</td>
+      <td style="font-size:12px;color:var(--muted)">Send password reset OTP</td>
+    </tr>
+    <tr>
+      <td><span class="method-badge POST" style="display:inline-block;font-size:10px;padding:2px 8px">POST</span></td>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#c4beff">/api/verify-reset-otp</td>
+      <td>❌</td>
+      <td style="font-size:12px;color:var(--muted)">Verify reset OTP</td>
+    </tr>
+    <tr>
+      <td><span class="method-badge POST" style="display:inline-block;font-size:10px;padding:2px 8px">POST</span></td>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#c4beff">/api/reset-password</td>
+      <td>❌</td>
+      <td style="font-size:12px;color:var(--muted)">Set new password after OTP verify</td>
+    </tr>
+    <tr>
+      <td><span class="method-badge POST" style="display:inline-block;font-size:10px;padding:2px 8px">POST</span></td>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#c4beff">/api/change-password</td>
+      <td>🔐</td>
+      <td style="font-size:12px;color:var(--muted)">Change password (logged-in user)</td>
+    </tr>
+    <tr>
+      <td><span class="method-badge POST" style="display:inline-block;font-size:10px;padding:2px 8px">POST</span></td>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#c4beff">/api/enable-2fa</td>
+      <td>🔐</td>
+      <td style="font-size:12px;color:var(--muted)">Enable two-factor authentication</td>
+    </tr>
+    <tr>
+      <td><span class="method-badge POST" style="display:inline-block;font-size:10px;padding:2px 8px">POST</span></td>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#c4beff">/api/disable-2fa</td>
+      <td>🔐</td>
+      <td style="font-size:12px;color:var(--muted)">Disable two-factor authentication</td>
+    </tr>
+    <tr>
+      <td><span class="method-badge POST" style="display:inline-block;font-size:10px;padding:2px 8px">POST</span></td>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#c4beff">/api/create-group</td>
+      <td>🔐</td>
+      <td style="font-size:12px;color:var(--muted)">Create a new group</td>
+    </tr>
+    <tr>
+      <td><span class="method-badge GET" style="display:inline-block;font-size:10px;padding:2px 8px;background:rgba(0,212,170,.15);color:var(--get);border:1px solid rgba(0,212,170,.25)">GET</span></td>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#c4beff">/api/getgroups</td>
+      <td>🔐</td>
+      <td style="font-size:12px;color:var(--muted)">Get user's groups with balances</td>
+    </tr>
+    <tr>
+      <td><span class="method-badge POST" style="display:inline-block;font-size:10px;padding:2px 8px">POST</span></td>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#c4beff">/api/add-member/:groupId</td>
+      <td>🔐 Admin</td>
+      <td style="font-size:12px;color:var(--muted)">Add member by email</td>
+    </tr>
+    <tr>
+      <td><span class="method-badge POST" style="display:inline-block;font-size:10px;padding:2px 8px">POST</span></td>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#c4beff">/api/join-group</td>
+      <td>🔐</td>
+      <td style="font-size:12px;color:var(--muted)">Join group via invite code</td>
+    </tr>
+    <tr>
+      <td><span class="method-badge POST" style="display:inline-block;font-size:10px;padding:2px 8px">POST</span></td>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#c4beff">/api/create-expense</td>
+      <td>🔐</td>
+      <td style="font-size:12px;color:var(--muted)">Add expense to a group</td>
+    </tr>
+    <tr>
+      <td><span class="method-badge GET" style="display:inline-block;font-size:10px;padding:2px 8px;background:rgba(0,212,170,.15);color:var(--get);border:1px solid rgba(0,212,170,.25)">GET</span></td>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#c4beff">/api/getexpenses/:groupId</td>
+      <td>🔐</td>
+      <td style="font-size:12px;color:var(--muted)">Get all expenses in a group</td>
+    </tr>
+    <tr>
+      <td><span class="method-badge GET" style="display:inline-block;font-size:10px;padding:2px 8px;background:rgba(0,212,170,.15);color:var(--get);border:1px solid rgba(0,212,170,.25)">GET</span></td>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#c4beff">/api/settlements/:groupId/balances</td>
+      <td>🔐</td>
+      <td style="font-size:12px;color:var(--muted)">Get balance breakdown for group</td>
+    </tr>
+    <tr>
+      <td><span class="method-badge POST" style="display:inline-block;font-size:10px;padding:2px 8px">POST</span></td>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#c4beff">/api/settlements</td>
+      <td>🔐</td>
+      <td style="font-size:12px;color:var(--muted)">Record a payment/settlement</td>
+    </tr>
+    <tr>
+      <td><span class="method-badge GET" style="display:inline-block;font-size:10px;padding:2px 8px;background:rgba(0,212,170,.15);color:var(--get);border:1px solid rgba(0,212,170,.25)">GET</span></td>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#c4beff">/api/settlements/:groupId/simplify</td>
+      <td>🔐</td>
+      <td style="font-size:12px;color:var(--muted)">Simplify all debts in a group</td>
+    </tr>
+    <tr>
+      <td><span class="method-badge GET" style="display:inline-block;font-size:10px;padding:2px 8px;background:rgba(0,212,170,.15);color:var(--get);border:1px solid rgba(0,212,170,.25)">GET</span></td>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#c4beff">/api/analytics</td>
+      <td>🔐</td>
+      <td style="font-size:12px;color:var(--muted)">Full analytics dashboard data</td>
+    </tr>
+    <tr>
+      <td><span class="method-badge GET" style="display:inline-block;font-size:10px;padding:2px 8px;background:rgba(0,212,170,.15);color:var(--get);border:1px solid rgba(0,212,170,.25)">GET</span></td>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#c4beff">/api/profile</td>
+      <td>🔐</td>
+      <td style="font-size:12px;color:var(--muted)">Get user profile</td>
+    </tr>
+    <tr>
+      <td><span class="method-badge PUT" style="display:inline-block;font-size:10px;padding:2px 8px;background:rgba(255,179,71,.15);color:var(--amber);border:1px solid rgba(255,179,71,.25)">PUT</span></td>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#c4beff">/api/profile</td>
+      <td>🔐</td>
+      <td style="font-size:12px;color:var(--muted)">Update profile (name, avatar, UPI)</td>
+    </tr>
+    <tr>
+      <td><span class="method-badge PATCH" style="display:inline-block;font-size:10px;padding:2px 8px;background:rgba(126,207,255,.15);color:var(--patch);border:1px solid rgba(126,207,255,.25)">PATCH</span></td>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#c4beff">/api/profile/verify-email</td>
+      <td>🔐</td>
+      <td style="font-size:12px;color:var(--muted)">Verify and link email</td>
+    </tr>
+    <tr>
+      <td><span class="method-badge PATCH" style="display:inline-block;font-size:10px;padding:2px 8px;background:rgba(126,207,255,.15);color:var(--patch);border:1px solid rgba(126,207,255,.25)">PATCH</span></td>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#c4beff">/api/profile/verify-phone</td>
+      <td>🔐</td>
+      <td style="font-size:12px;color:var(--muted)">Verify and link phone number</td>
+    </tr>
+    <tr>
+      <td><span class="method-badge GET" style="display:inline-block;font-size:10px;padding:2px 8px;background:rgba(0,212,170,.15);color:var(--get);border:1px solid rgba(0,212,170,.25)">GET</span></td>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#c4beff">/api/notifications</td>
+      <td>🔐</td>
+      <td style="font-size:12px;color:var(--muted)">Get all notifications for user</td>
+    </tr>
+  </table>
+</section>
+
+<!-- FOOTER -->
+<div style="border-top:1px solid var(--border);padding-top:32px;margin-top:8px;text-align:center">
+  <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:700;color:var(--muted);margin-bottom:8px">SmartSplit Docs</div>
+  <p style="font-size:13px;color:var(--muted)">Generated by reading the actual source code of <code style="color:var(--accent2);font-size:12px">github.com/Jetti-Ganesh/SmartSplit</code></p>
+  <p style="font-size:12px;color:#3d4a5c;margin-top:6px">Built with React + Vite + Redux · Node.js + Express · MongoDB Atlas</p>
+</div>
+
+</main>
+</div>
+
+<script>
+function toggleEp(header) {
+  const isOpen = header.getAttribute('data-open') === 'true';
+  const body = header.nextElementSibling;
+  if (isOpen) {
+    header.setAttribute('data-open', 'false');
+    body.classList.remove('open');
+  } else {
+    header.setAttribute('data-open', 'true');
+    body.classList.add('open');
+  }
+}
+
+// Active nav highlight on scroll
+const sections = document.querySelectorAll('.section');
+const navItems = document.querySelectorAll('.nav-item');
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      navItems.forEach(item => {
+        item.classList.remove('active');
+        if (item.getAttribute('href') === '#' + entry.target.id) {
+          item.classList.add('active');
+        }
+      });
+    }
+  });
+}, { threshold: 0.2, rootMargin: '-60px 0px -60% 0px' });
+sections.forEach(s => observer.observe(s));
+</script>
+</body>
+</html>

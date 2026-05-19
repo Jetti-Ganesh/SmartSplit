@@ -45,7 +45,11 @@ app.use(cors({
     const normalizedOrigin = origin.replace(/\/$/, "");
     const normalizedAllowed = allowedOrigin.replace(/\/$/, "");
 
-    if (normalizedOrigin === normalizedAllowed || normalizedOrigin === 'http://localhost:5173') {
+    if (
+      normalizedOrigin === normalizedAllowed ||
+      normalizedOrigin === 'http://localhost:5173' ||
+      normalizedOrigin === 'http://localhost:5000'
+    ) {
       callback(null, true);
     } else {
       callback(new Error('Not allowed by CORS'));
