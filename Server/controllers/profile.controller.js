@@ -54,7 +54,7 @@ exports.verifyPhone = async (req, res) => {
 
     const userId = req.user._id;
     // Check for duplicate phone
-    const dup = await User.findOne({ phone: stripped, _id: { $ne: userId } });
+    const dup = await User.findOne({ phone });
     if (dup) return res.status(409).json({ message: 'This phone number is already linked to another account.' });
 
     const user = await User.findById(userId);

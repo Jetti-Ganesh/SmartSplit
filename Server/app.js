@@ -17,6 +17,7 @@ const expensesRoutes = require("./routes/expenses.route");
 const forgotPasswordRoutes = require("./routes/forgotPassword.route");
 const notificationsRoutes = require("./routes/notifications.route");
 const settleUpRoutes = require("./routes/settlup.route"); // ← add this 
+const walletRoutes = require("./routes/wallet.route"); // ← add this
 
 app.use(session({
   secret: "My_Secret",
@@ -68,6 +69,7 @@ app.use("/api/", expensesRoutes);
 app.use("/api/", forgotPasswordRoutes);
 app.use("/api/", notificationsRoutes);
 app.use("/api/settlements", settleUpRoutes);
+app.use("/api/wallet", walletRoutes);
 
 const path = require('path');
 app.use(express.static(path.join(__dirname, '..', 'Client', 'dist')));

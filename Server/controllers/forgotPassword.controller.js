@@ -2,6 +2,8 @@ const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const transporter = require('../utils/mailer');
 const User = require('../models/user.model');
+const { getMaxListeners } = require('cluster');
+const { sendOTP } = require('../utils/mailer');
 
 const generateOTP = () => crypto.randomInt(100000, 999999).toString();
 
@@ -28,18 +30,9 @@ exports.sendResetOtp = async (req, res) => {
   req.session.resetVerified = false;
 
   if (email) {
-    // Send via email
-    const mailOptions = {
-      from: process.env.EMAIL_USER,
-      to: identifier,
-      subject: 'SmartSplit — Password Reset OTP',
-      html: `<h3>Password Reset Request</h3>
-             <p>Use the OTP below to reset your SmartSplit password:</p>
-             <h2 style="letter-spacing:8px;color:#6d28d9;">${OTP}</h2>
-             <p>This OTP is valid for 10 minutes. Ignore this email if you did not request a reset.</p>`,
-    };
+    // Send via email (using nodemailer)
     try {
-      await transporter.sendMail(mailOptions);
+      await sendOTP(identifier, OTP);
       return res.status(200).json({ message: 'Reset OTP sent' });
     } catch (err) {
       console.error('Error sending reset email:', err);

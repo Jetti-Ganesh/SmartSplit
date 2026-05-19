@@ -1,5 +1,7 @@
 const mailer = require('../utils/mailer');
 const crypto = require('crypto');
+const { verifyPhone } = require('./profile.controller');
+const User = require('../models/user.model');
 
 const generateOTP = () => crypto.randomInt(100000, 999999).toString();
 const otpStore = new Map();
@@ -65,67 +67,17 @@ exports.sendOtp = async (req, res) => {
     let normalized = phone.replace(/\s+/g, '').replace(/^(\+91|0)/, '');
     const clean10Digits = normalized.slice(-10);
     const withCountryCode = `+91${clean10Digits}`;
+    if(clean10Digits.length !== 10 || !/^\d{10}$/.test(clean10Digits)) {
+      return res.status(400).json({ message: 'Invalid phone number format.' });
+    }
+    const dup = await User.findOne({ phone });
+    if (dup) return res.status(409).json({ message: 'This phone number is already linked to another account.' });
 
     let smsSentReal = false;
 
-    // 1. Try Fast2SMS since you provided your active key!
-    const fast2smsKey = "PQbTRfA7Jpw0slqg8yiuKeoEzIUnG6OcVHFXZS2vW315kjtYm49z8tLj4sekF3Af5rHODlqaJCETb2xK";
-    try {
-      console.log(`Sending real OTP SMS via Fast2SMS to ${clean10Digits}...`);
-      const response = await fetch('https://www.fast2sms.com/dev/bulkV2', {
-        method: 'POST',
-        headers: {
-          'authorization': fast2smsKey,
-          'Content-Type': 'application/json',
-          'accept': 'application/json'
-        },
-        body: JSON.stringify({
-          route: 'q',
-          message: `Your SplitSmart OTP is: ${OTP}. Valid for 10 minutes. Do not share.`,
-          language: 'english',
-          numbers: clean10Digits
-        })
-      });
-
-      const resData = await response.json();
-      if (response.ok && resData.return === true) {
-        console.log(`SMS successfully sent via Fast2SMS to ${clean10Digits}. Message ID:`, resData.request_id);
-        smsSentReal = true;
-      } else {
-        console.warn('Fast2SMS returned error:', resData.message || resData);
-      }
-    } catch (err) {
-      console.warn('Fast2SMS fetch error:', err.message);
-    }
-
-    // 2. If Android Gateway didn't work or was bypassed, try free Textbelt API
-    if (!smsSentReal) {
-      try {
-        console.log(`Attempting to send real SMS via Textbelt free tier to ${withCountryCode}...`);
-        const tbResponse = await fetch('https://textbelt.com/text', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            phone: withCountryCode,
-            message: `Your SplitSmart OTP is: ${OTP}. Valid for 10 minutes.`,
-            key: 'textbelt',
-          }),
-        });
-        const tbData = await tbResponse.json();
-        if (tbResponse.ok && tbData.success) {
-          console.log(`SMS successfully sent via Textbelt free tier to ${withCountryCode}.`);
-          smsSentReal = true;
-        } else {
-          console.warn('Textbelt free tier returned error:', tbData.error || 'Quota limit reached');
-        }
-      } catch (err) {
-        console.warn('Textbelt fetch error:', err.message);
-      }
-    }
-
     // 3. Fallback: print to console and always return the generated OTP so they can complete signup instantly!
     console.log(`[DEV OTP HINT] Phone OTP for ${withCountryCode}: ${OTP}`);
-    
+
     if (smsSentReal) {
       return res.status(200).json({
         message: 'OTP sent to your mobile number.',

@@ -2,18 +2,18 @@ const mongoose = require('mongoose');
 
 const userSchema = new mongoose.Schema(
   {
-    name:            { type: String, required: true, trim: true },
-    email:           { type: String, lowercase: true, trim: true },
-    phone:           { type: String, trim: true },
-    password:        { type: String, required: true },
-    avatar:          { type: String, default: '' },
-    defaultUpi:      { type: String, default: '' },
-    upiList:         { type: [String], default: [] },
+    name: { type: String, required: true, trim: true },
+    email: { type: String, lowercase: true, trim: true },
+    phone: { type: String, trim: true },
+    password: { type: String, required: true },
+    avatar: { type: String, default: '' },
+    defaultUpi: { type: String, default: '' },
+    upiList: { type: [String], default: [] },
     isEmailVerified: { type: Boolean, default: false },
     isPhoneVerified: { type: Boolean, default: false },
-    signupMethod:    { type: String, enum: ['email', 'phone', 'google'], default: 'email' },
+    signupMethod: { type: String, enum: ['email', 'phone', 'google'], default: 'email' },
     twoFactorEnabled: { type: Boolean, default: false },
-    twoFactorMethod:  { type: String, enum: ['email', 'phone'], default: 'email' },
+    twoFactorMethod: { type: String, enum: ['email', 'phone'], default: 'email' },
     notifications: [
       {
         type: {
@@ -25,7 +25,8 @@ const userSchema = new mongoose.Schema(
         isRead: { type: Boolean, default: false },
         createdAt: { type: Date, default: Date.now }
       }
-    ]
+    ],
+    walletBalance: { type: Number, default: 0 , min: 0},
   },
   { timestamps: true }
 );
