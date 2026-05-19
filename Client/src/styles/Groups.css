@@ -527,19 +527,14 @@ body.light .form-input {
 
 .icons-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
-  gap: 14px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
   width: 100%;
-  padding: 18px;
-  background: rgba(255, 255, 255, 0.015);
-  border: 1px solid rgba(255, 255, 255, 0.04);
-  border-radius: 16px;
-  align-items: start;
 }
 
 body.light .icons-grid {
-  background: rgba(0, 0, 0, 0.015);
-  border-color: rgba(0, 0, 0, 0.04);
+  background: transparent;
+  border-color: transparent;
 }
 
 @keyframes activePulse {
@@ -557,47 +552,34 @@ body.light .icons-grid {
 }
 
 .icon-btn {
-  width: 100%;
-  min-height: 96px;
-  justify-self: center;
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  background: transparent;
-  border-radius: 12px;
-  cursor: pointer;
-  transition: all 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 12px;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  padding: 16px 8px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
   color: var(--text-color);
-}
-
-body.light .icon-btn {
-  background: transparent;
-  border-color: rgba(148, 163, 184, 0.3);
+  text-align: center;
 }
 
 .icon-btn:hover {
-  border-color: #a78bfa;
-  background: rgba(167, 139, 250, 0.06);
-  transform: translateY(-4px);
-  box-shadow: 0 8px 20px rgba(167, 139, 250, 0.12);
+  background: rgba(16, 185, 129, 0.05);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(16, 185, 129, 0.08);
+  border-color: rgba(16, 185, 129, 0.3);
 }
 
 .icon-btn.active {
-  background: linear-gradient(180deg, rgba(139,92,246,0.12), rgba(124,58,237,0.06)) !important;
-  border-color: #a78bfa !important;
-  color: #a78bfa !important;
-  box-shadow: 0 8px 24px rgba(124,58,237,0.16) !important;
-  transform: translateY(-4px);
-}
-
-body.light .icon-btn.active {
-  background: rgba(139, 92, 246, 0.08) !important;
-  border-color: #8b5cf6 !important;
-  color: #8b5cf6 !important;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(16, 185, 129, 0.05));
+  border-color: #10b981;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(16, 185, 129, 0.15);
 }
 
 .error-text {
@@ -659,16 +641,15 @@ body.light .icon-btn.active {
   }
 
   .icons-grid {
-    grid-template-columns: repeat(4, minmax(84px, 1fr));
-    gap: 10px;
-    margin: 8px auto 0;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
     width: 100%;
   }
 
   .icon-btn {
-    min-height: 84px;
-    padding: 10px;
-    border-radius: 10px;
+    padding: 16px 8px;
+    border-radius: 16px;
   }
 
   .form-input {
@@ -768,13 +749,11 @@ body.light .code-input {
 }
 
 .icon-symbol {
-  font-size: 28px;
-  line-height: 1;
+  font-size: 24px;
 }
 
 .icon-label {
-  font-size: 13px;
-  color: var(--text-muted);
-  font-weight: 700;
-  text-align: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-color);
 }
