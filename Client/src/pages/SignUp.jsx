@@ -214,8 +214,8 @@ function SignUp() {
             <div className="left-bg"></div>
             <div className="left-content">
               <div className="logo-container">
-                <div className="logo-icon">⚡</div>
-                <h2>SplitSmart</h2>
+                <div className="logo-icon">💸</div>
+                <h2>SmartSplit</h2>
               </div>
               <h1 className="welcome-title">Hello, Friend!</h1>
               <p className="welcome-desc">
@@ -232,8 +232,8 @@ function SignUp() {
             <div className="right-content">
 
               <div className="mobile-logo">
-                <div className="logo-icon">⚡</div>
-                <h2>SplitSmart</h2>
+                <div className="logo-icon">💸</div>
+                <h2>SmartSplit</h2>
               </div>
 
               <h2 className="signin-title">Create Account</h2>

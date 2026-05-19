@@ -94,8 +94,8 @@ function Login() {
             <div className="right-content">
 
               <div className="mobile-logo">
-                <div className="logo-icon">⚡</div>
-                <h2>SplitSmart</h2>
+                <div className="logo-icon">💸</div>
+                <h2>SmartSplit</h2>
               </div>
 
               <h2 className="signin-title">Sign In</h2>

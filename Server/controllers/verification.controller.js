@@ -1,5 +1,6 @@
 const mailer = require('../utils/mailer');
 const crypto = require('crypto');
+const Otp = require('../models/otp.model');
 
 const generateOTP = () => crypto.randomInt(100000, 999999).toString();
 const otpStore = new Map();
@@ -42,6 +43,14 @@ exports.sendOtp = async (req, res) => {
       otp: OTP,
       expiresAt: Date.now() + OTP_TTL_MS,
     });
+    // Store in MongoDB with auto-TTL
+    try {
+      await Otp.deleteMany({ identifier });
+      await Otp.create({ identifier, otp: OTP });
+      console.log(`✅ Persisted OTP for ${identifier} in MongoDB`);
+    } catch (dbErr) {
+      console.error('⚠️ Failed to persist OTP in MongoDB:', dbErr.message);
+    }
   }
 
   req.session.otp = OTP;
@@ -145,6 +154,30 @@ exports.verifyOtp = async (req, res) => {
   const { enteredOtp, email, phone } = req.body;
 
   const identifier = normalizeIdentifier(email, phone);
+
+  // 1. Try DB-backed verification first (robust against server restarts & session loss)
+  if (identifier) {
+    try {
+      const record = await Otp.findOne({ identifier });
+      if (record) {
+        if (record.otp !== enteredOtp) {
+          return res.status(400).json({ message: 'Invalid OTP. Please try again.' });
+        }
+        // Mark as verified in DB
+        record.verified = true;
+        await record.save();
+
+        req.session.otpVerified = true;
+        req.session.otpIdentifier = identifier;
+        console.log(`✅ Verified OTP for ${identifier} in MongoDB`);
+        return res.status(200).json({ message: 'OTP verified successfully.' });
+      }
+    } catch (dbErr) {
+      console.error('⚠️ DB OTP verification failed:', dbErr.message);
+    }
+  }
+
+  // 2. In-memory fallback
   if (identifier && otpStore.has(identifier)) {
     const record = otpStore.get(identifier);
     if (!record || record.expiresAt <= Date.now()) {

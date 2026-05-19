@@ -82,7 +82,28 @@ exports.signUpUser = async (req, res) => {
       ? String(email).trim().toLowerCase()
       : String(phone).replace(/\D/g, '').slice(-10);
 
-    if (!req.session?.otpVerified || (req.session.otpIdentifier && req.session.otpIdentifier !== identifier)) {
+    const Otp = require('../models/otp.model');
+    let isVerified = false;
+
+    try {
+      const otpRecord = await Otp.findOne({ identifier, verified: true });
+      if (otpRecord) {
+        isVerified = true;
+        await Otp.deleteMany({ identifier });
+        console.log(`✅ MongoDB verified OTP found and cleared for signup identifier: ${identifier}`);
+      }
+    } catch (dbErr) {
+      console.error('⚠️ DB check for verified OTP failed:', dbErr.message);
+    }
+
+    if (!isVerified) {
+      if (req.session?.otpVerified && req.session.otpIdentifier === identifier) {
+        isVerified = true;
+        console.log(`✅ Session verified OTP found for signup identifier: ${identifier}`);
+      }
+    }
+
+    if (!isVerified) {
       return res.status(400).json({ message: 'OTP not verified for this contact. Please verify before signing up.' });
     }
 

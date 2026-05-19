@@ -15,10 +15,6 @@ import ThemeToggle from "../components/ThemeToggle";
 import BottomNavbareM from "../components/BottomNavbareM";
 import SettingsDrawer from "../components/SettingsDrawer";
 import "../styles/Profile.css";
-// ─────────────────────────────────────────────────────
-// ── CONSTANTS 
-// ─────────────────────────────────────────────────────
-
 
 
 const INITIAL_USER = {
