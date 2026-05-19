@@ -8,7 +8,16 @@ import { useOutletContext } from 'react-router-dom';
 import { useNotification } from '../context/NotificationContext';
 import '../styles/Groups.css';
 
-const PREDEFINED_ICONS = ['🏠', '🏨', '✈️', '🎉', '🛒', '⛱️', '🎓', '⚽', '🎮', '🏪', '🚗', '👥'];
+const PREDEFINED_ICONS = [
+  { icon: '🍕', label: 'Food' },
+  { icon: '🏠', label: 'Rent' },
+  { icon: '✈️', label: 'Travel' },
+  { icon: '🎉', label: 'Fun' },
+  { icon: '🛒', label: 'Shopping' },
+  { icon: '💡', label: 'Utilities' },
+  { icon: '🩺', label: 'Health' },
+  { icon: '➕', label: 'Other' }
+];
 function Groups() {
   const [addGroups, { isLoading: isCreatingGroup }] = useCreateGroupMutation();
   const [joinGroup, { isLoading: isJoiningGroup }] = useJoinGroupMutation();
@@ -280,14 +289,15 @@ function Groups() {
                 <div className="form-group">
                   <label>Choose Icon</label>
                   <div className="icons-grid">
-                    {PREDEFINED_ICONS.map(icon => (
+                    {PREDEFINED_ICONS.map(({ icon, label }) => (
                       <button
                         type="button"
-                        key={icon}
+                        key={label}
                         className={`icon-btn ${newGroupIcon === icon ? 'active' : ''}`}
                         onClick={() => setNewGroupIcon(icon)}
                       >
-                        {icon}
+                        <div className="icon-symbol">{icon}</div>
+                        <div className="icon-label">{label}</div>
                       </button>
                     ))}
                   </div>

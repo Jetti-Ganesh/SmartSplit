@@ -15,10 +15,8 @@ exports.createExpense = async (req, res, next) => {
       selectedMembers, // Array of user IDs to split between
       splitDetails      // For exact/percent/shares (optional)
     } = req.body;
-    console.log('Request body:', req.body);
     
     const userId = req.user.id;
-    console.log('Current user ID:', userId);
     
     // Normalize and validate required fields
     amount = Number(amount);

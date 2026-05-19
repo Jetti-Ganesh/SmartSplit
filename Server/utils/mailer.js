@@ -19,7 +19,6 @@ const EMAIL_FROM = cleanEnvValue(process.env.RESEND_FROM || `SplitSmart <${EMAIL
 const resend = RESEND_API_KEY && ResendClass ? new ResendClass(RESEND_API_KEY) : null;
 
 if (resend) {
-  console.log('✅ Resend client initialized.');
 } else {
   console.warn('⚠️ RESEND_API_KEY is not set. Falling back to SMTP if EMAIL_USER/EMAIL_PASS are available.');
 }
@@ -49,7 +48,8 @@ const transporter = nodemailer.createTransport({
 transporter.verify((error, success) => {
   if (error) {
     console.error('❌ SMTP Email Config Error:', error);
-  } else {
+  }
+  else {
     console.log('✅ SMTP Email Service Ready!');
   }
 });
@@ -86,8 +86,8 @@ const sendEmail = async (mailOptions) => {
 
 // Send OTP Email
 exports.sendOTP = async (email, otp) => {
-  try {
-    const response = await sendEmail({
+    try {
+      const response = await sendEmail({
       to: email,
       subject: 'Your SplitSmart OTP Code',
       text: `Your SplitSmart OTP Code is: ${otp}. It expires in 5 minutes.`,
@@ -103,7 +103,8 @@ exports.sendOTP = async (email, otp) => {
         </div>
       `
     });
-    console.log('✅ OTP Email Sent:', response.id || response.response || response);
+    
+    console.log('✅ OTP Email Sent to:', email, response.id || response.response || response);
     return { success: true, message: 'OTP sent to email' };
   } catch (error) {
     console.error('❌ Email Send Error:', error.message, error);
@@ -132,8 +133,9 @@ exports.sendWelcomeEmail = async (email, name) => {
         </div>
       `
     });
-    console.log('✅ Welcome Email Sent to:', email, response.id || response.response || response);
+    
   } catch (error) {
     console.error('❌ Welcome Email Error:', error.message, error);
   }
+  console.log('✅ Welcome Email Sent to:', email);
 };

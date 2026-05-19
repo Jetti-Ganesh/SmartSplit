@@ -9,8 +9,6 @@ exports.protect = async (req, res, next) => {
   try {
     // 1. Get token from request header
     let token;
-    console.log('🔐 Protect middleware called');
-    console.log('Authorization header:', req.headers.authorization);
     // Check if Authorization header exists and starts with "Bearer"
     if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
       // Extract token from "Bearer <token>"
@@ -27,7 +25,6 @@ exports.protect = async (req, res, next) => {
     
     // 2. Verify token and decode payload
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    console.log("✅ Token verified. Decoded:", decoded);
     
     // decoded = {
     //   id: "67abcd12345678",
