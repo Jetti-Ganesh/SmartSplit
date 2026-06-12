@@ -1,4 +1,5 @@
 /* d:\jack\SmartSplit\Client\src\styles\Activity.css */
+/*added comments to test the pr*/
 
 .activity-page {
   padding-top: calc(var(--navbar-height, 72px) + 12px);
@@ -688,4 +689,4 @@
   background: linear-gradient(135deg, rgba(245,158,11,0.12), rgba(217,119,6,0.06));
   border-color: rgba(245,158,11,0.2);
 }
-.card-amber .s-value { color: #f59e0b; }
+.card-amber .s-value { color: #f59e0b; }
