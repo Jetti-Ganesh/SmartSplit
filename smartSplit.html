@@ -1,0 +1,1962 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SplitSmart - Groups & Settle Up Pages UI Guide</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #10B981;
+            --primary-dark: #059669;
+            --danger: #EF4444;
+            --success: #22C55E;
+            --warning: #F59E0B;
+            --gray-50: #F9FAFB;
+            --gray-100: #F3F4F6;
+            --gray-200: #E5E7EB;
+            --gray-300: #D1D5DB;
+            --gray-600: #4B5563;
+            --gray-800: #1F2937;
+            --gray-900: #111827;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-family: 'Syne', sans-serif;
+            font-size: 3rem;
+            font-weight: 800;
+            color: white;
+            text-align: center;
+            margin-bottom: 20px;
+            text-shadow: 2px 4px 8px rgba(0,0,0,0.3);
+        }
+
+        .subtitle {
+            text-align: center;
+            color: rgba(255,255,255,0.9);
+            font-size: 1.2rem;
+            margin-bottom: 40px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(600px, 1fr));
+            gap: 30px;
+            margin-bottom: 60px;
+        }
+
+        .page-preview {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .preview-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            padding: 25px;
+            color: white;
+        }
+
+        .preview-header h2 {
+            font-family: 'Syne', sans-serif;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .preview-header p {
+            opacity: 0.95;
+            font-size: 0.95rem;
+        }
+
+        .preview-body {
+            padding: 0;
+            background: var(--gray-50);
+        }
+
+        /* Mobile Phone Mockup */
+        .phone-mockup {
+            background: #1F2937;
+            border-radius: 40px;
+            padding: 12px;
+            max-width: 380px;
+            margin: 30px auto;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.25);
+        }
+
+        .phone-screen {
+            background: white;
+            border-radius: 28px;
+            overflow: hidden;
+            height: 720px;
+            position: relative;
+        }
+
+        .phone-notch {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 150px;
+            height: 25px;
+            background: #1F2937;
+            border-radius: 0 0 20px 20px;
+            z-index: 10;
+        }
+
+        /* GROUPS PAGE DESIGN */
+        .groups-page {
+            height: 100%;
+            overflow-y: auto;
+            background: linear-gradient(to bottom, #F0FDF4 0%, white 100%);
+        }
+
+        .page-header {
+            padding: 35px 20px 20px;
+            background: linear-gradient(135deg, var(--primary) 0%, #059669 100%);
+            color: white;
+            position: relative;
+        }
+
+        .page-header h1 {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            text-shadow: none;
+            text-align: left;
+        }
+
+        .page-header .subtitle {
+            font-size: 0.9rem;
+            opacity: 0.95;
+            text-align: left;
+            margin: 0;
+            color: rgba(255,255,255,0.95);
+        }
+
+        .groups-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            padding: 20px;
+            margin-top: -25px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 16px;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            border: 2px solid var(--gray-100);
+        }
+
+        .stat-card .label {
+            font-size: 0.75rem;
+            color: var(--gray-600);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+        }
+
+        .stat-card .value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--gray-900);
+        }
+
+        .stat-card.owed .value {
+            color: var(--success);
+        }
+
+        .stat-card.owing .value {
+            color: var(--danger);
+        }
+
+        .section-header {
+            padding: 20px 20px 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .section-header h3 {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--gray-900);
+        }
+
+        .create-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .groups-list {
+            padding: 0 20px 100px;
+        }
+
+        .group-card {
+            background: white;
+            border-radius: 16px;
+            padding: 18px;
+            margin-bottom: 12px;
+            border: 2px solid var(--gray-100);
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .group-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 5px;
+            height: 100%;
+            background: var(--primary);
+        }
+
+        .group-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+            border-color: var(--primary);
+        }
+
+        .group-card-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+
+        .group-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--primary) 0%, #059669 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .group-info h4 {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--gray-900);
+            margin-bottom: 4px;
+        }
+
+        .group-meta {
+            font-size: 0.8rem;
+            color: var(--gray-600);
+        }
+
+        .group-balance {
+            padding: 12px;
+            background: var(--gray-50);
+            border-radius: 10px;
+            margin-top: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .balance-label {
+            font-size: 0.8rem;
+            color: var(--gray-600);
+            font-weight: 500;
+        }
+
+        .balance-amount {
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        .balance-amount.positive {
+            color: var(--success);
+        }
+
+        .balance-amount.negative {
+            color: var(--danger);
+        }
+
+        /* SETTLE UP PAGE DESIGN */
+        .settle-page {
+            height: 100%;
+            overflow-y: auto;
+            background: white;
+        }
+
+        .settle-header {
+            padding: 35px 20px 25px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .settle-header h1 {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.6rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+            text-shadow: none;
+            text-align: left;
+        }
+
+        .settle-header .group-name {
+            font-size: 0.9rem;
+            opacity: 0.95;
+        }
+
+        .balance-summary {
+            background: white;
+            margin: -20px 20px 0;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+        }
+
+        .summary-title {
+            font-size: 0.75rem;
+            color: var(--gray-600);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+        }
+
+        .balances-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .balance-box {
+            text-align: center;
+            padding: 12px;
+            background: var(--gray-50);
+            border-radius: 12px;
+        }
+
+        .balance-box .label {
+            font-size: 0.75rem;
+            color: var(--gray-600);
+            margin-bottom: 6px;
+        }
+
+        .balance-box .amount {
+            font-size: 1.6rem;
+            font-weight: 700;
+        }
+
+        .debts-section {
+            padding: 25px 20px;
+        }
+
+        .debts-section h3 {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--gray-900);
+            margin-bottom: 16px;
+        }
+
+        .debt-card {
+            background: white;
+            border: 2px solid var(--gray-200);
+            border-radius: 16px;
+            padding: 18px;
+            margin-bottom: 12px;
+        }
+
+        .debt-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 14px;
+        }
+
+        .debt-parties {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--gray-900);
+        }
+
+        .debt-arrow {
+            color: var(--gray-400);
+        }
+
+        .debt-amount {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--danger);
+        }
+
+        .debt-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .debt-btn {
+            padding: 10px 16px;
+            border-radius: 12px;
+            border: none;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .debt-btn.primary {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .debt-btn.secondary {
+            background: var(--gray-100);
+            color: var(--gray-700);
+        }
+
+        .debt-btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .simplify-section {
+            padding: 0 20px 20px;
+        }
+
+        .simplify-card {
+            background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%);
+            border-radius: 16px;
+            padding: 20px;
+            border: 2px solid #FBBF24;
+        }
+
+        .simplify-card h4 {
+            font-family: 'Syne', sans-serif;
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--gray-900);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .simplify-card p {
+            font-size: 0.85rem;
+            color: var(--gray-700);
+            margin-bottom: 14px;
+        }
+
+        .simplify-btn {
+            width: 100%;
+            padding: 12px;
+            background: var(--warning);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(251, 191, 36, 0.4);
+        }
+
+        .history-section {
+            padding: 20px;
+            background: var(--gray-50);
+        }
+
+        .history-section h3 {
+            font-family: 'Syne', sans-serif;
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--gray-900);
+            margin-bottom: 14px;
+        }
+
+        .history-item {
+            background: white;
+            padding: 14px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            border: 1px solid var(--gray-200);
+            font-size: 0.85rem;
+        }
+
+        .history-item .date {
+            color: var(--gray-600);
+            font-size: 0.75rem;
+            margin-bottom: 4px;
+        }
+
+        .history-item .detail {
+            color: var(--gray-900);
+            font-weight: 500;
+        }
+
+        .history-item .amount {
+            color: var(--success);
+            font-weight: 700;
+        }
+
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            border-top: 1px solid var(--gray-200);
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-around;
+            box-shadow: 0 -4px 12px rgba(0,0,0,0.05);
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            color: var(--gray-600);
+            font-size: 0.7rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .nav-item.active {
+            color: var(--primary);
+        }
+
+        .nav-icon {
+            font-size: 1.4rem;
+        }
+
+        /* Code Section */
+        .code-section {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin-top: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+        }
+
+        .code-section h2 {
+            font-family: 'Syne', sans-serif;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--gray-900);
+            margin-bottom: 20px;
+        }
+
+        .step {
+            background: var(--gray-50);
+            border-left: 4px solid var(--primary);
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+        }
+
+        .step h3 {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--gray-900);
+            margin-bottom: 10px;
+        }
+
+        .step-number {
+            display: inline-block;
+            background: var(--primary);
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 32px;
+            font-weight: 700;
+            margin-right: 10px;
+        }
+
+        pre {
+            background: #1F2937;
+            color: #E5E7EB;
+            padding: 20px;
+            border-radius: 12px;
+            overflow-x: auto;
+            font-size: 0.85rem;
+            line-height: 1.6;
+            margin: 15px 0;
+        }
+
+        .file-path {
+            background: var(--gray-900);
+            color: #10B981;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            display: inline-block;
+            margin: 8px 0;
+        }
+
+        .note {
+            background: #DBEAFE;
+            border-left: 4px solid #3B82F6;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-size: 0.9rem;
+            color: #1E3A8A;
+        }
+
+        .warning {
+            background: #FEE2E2;
+            border-left: 4px solid #EF4444;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-size: 0.9rem;
+            color: #7F1D1D;
+        }
+
+        .checklist {
+            background: white;
+            border: 2px solid var(--gray-200);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .checklist h4 {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--gray-900);
+            margin-bottom: 15px;
+        }
+
+        .checklist-item {
+            padding: 10px;
+            border-bottom: 1px solid var(--gray-200);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .checklist-item:last-child {
+            border-bottom: none;
+        }
+
+        .checkbox {
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--primary);
+            border-radius: 4px;
+            flex-shrink: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>SplitSmart UI Design Guide</h1>
+        <p class="subtitle">Groups Page & Settle Up Page - Complete UI & Development Guide</p>
+
+        <!-- UI PREVIEWS -->
+        <div class="grid">
+            <!-- GROUPS PAGE PREVIEW -->
+            <div class="page-preview">
+                <div class="preview-header">
+                    <h2>📱 Groups Page</h2>
+                    <p>View all groups and create new ones</p>
+                </div>
+                <div class="preview-body">
+                    <div class="phone-mockup">
+                        <div class="phone-screen">
+                            <div class="phone-notch"></div>
+                            <div class="groups-page">
+                                <!-- Header -->
+                                <div class="page-header">
+                                    <h1>My Groups</h1>
+                                    <p class="subtitle">Manage your expense groups</p>
+                                </div>
+
+                                <!-- Summary Stats -->
+                                <div class="groups-stats">
+                                    <div class="stat-card owed">
+                                        <div class="label">You're Owed</div>
+                                        <div class="value">₹2,450</div>
+                                    </div>
+                                    <div class="stat-card owing">
+                                        <div class="label">You Owe</div>
+                                        <div class="value">₹1,200</div>
+                                    </div>
+                                </div>
+
+                                <!-- Section Header -->
+                                <div class="section-header">
+                                    <h3>All Groups (3)</h3>
+                                    <button class="create-btn">
+                                        <span>➕</span> New Group
+                                    </button>
+                                </div>
+
+                                <!-- Groups List -->
+                                <div class="groups-list">
+                                    <!-- Group Card 1 -->
+                                    <div class="group-card">
+                                        <div class="group-card-header">
+                                            <div class="group-icon">🏠</div>
+                                            <div class="group-info">
+                                                <h4>Flat 301 Roommates</h4>
+                                                <p class="group-meta">4 members • Last activity: 2h ago</p>
+                                            </div>
+                                        </div>
+                                        <div class="group-balance">
+                                            <span class="balance-label">Your balance:</span>
+                                            <span class="balance-amount negative">You owe ₹800</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Group Card 2 -->
+                                    <div class="group-card">
+                                        <div class="group-card-header">
+                                            <div class="group-icon">🏖️</div>
+                                            <div class="group-info">
+                                                <h4>Goa Trip 2024</h4>
+                                                <p class="group-meta">6 members • Last activity: 1d ago</p>
+                                            </div>
+                                        </div>
+                                        <div class="group-balance">
+                                            <span class="balance-label">Your balance:</span>
+                                            <span class="balance-amount positive">You're owed ₹1,650</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Group Card 3 -->
+                                    <div class="group-card">
+                                        <div class="group-card-header">
+                                            <div class="group-icon">🍕</div>
+                                            <div class="group-info">
+                                                <h4>Office Lunch Squad</h4>
+                                                <p class="group-meta">5 members • Last activity: 3h ago</p>
+                                            </div>
+                                        </div>
+                                        <div class="group-balance">
+                                            <span class="balance-label">Your balance:</span>
+                                            <span class="balance-amount positive">You're owed ₹800</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Bottom Nav -->
+                                <div class="bottom-nav">
+                                    <div class="nav-item">
+                                        <div class="nav-icon">🏠</div>
+                                        <div>Home</div>
+                                    </div>
+                                    <div class="nav-item active">
+                                        <div class="nav-icon">👥</div>
+                                        <div>Groups</div>
+                                    </div>
+                                    <div class="nav-item">
+                                        <div class="nav-icon">➕</div>
+                                        <div>Add</div>
+                                    </div>
+                                    <div class="nav-item">
+                                        <div class="nav-icon">📊</div>
+                                        <div>Activity</div>
+                                    </div>
+                                    <div class="nav-item">
+                                        <div class="nav-icon">👤</div>
+                                        <div>Profile</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SETTLE UP PAGE PREVIEW -->
+            <div class="page-preview">
+                <div class="preview-header">
+                    <h2>💰 Settle Up Page</h2>
+                    <p>View and settle group balances</p>
+                </div>
+                <div class="preview-body">
+                    <div class="phone-mockup">
+                        <div class="phone-screen">
+                            <div class="phone-notch"></div>
+                            <div class="settle-page">
+                                <!-- Header -->
+                                <div class="settle-header">
+                                    <h1>Settle Up</h1>
+                                    <p class="group-name">🏠 Flat 301 Roommates</p>
+                                </div>
+
+                                <!-- Balance Summary -->
+                                <div class="balance-summary">
+                                    <div class="summary-title">Your Balance</div>
+                                    <div class="balances-grid">
+                                        <div class="balance-box">
+                                            <div class="label">You Owe</div>
+                                            <div class="amount" style="color: var(--danger);">₹800</div>
+                                        </div>
+                                        <div class="balance-box">
+                                            <div class="label">You're Owed</div>
+                                            <div class="amount" style="color: var(--success);">₹350</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Debts Section -->
+                                <div class="debts-section">
+                                    <h3>Outstanding Debts</h3>
+
+                                    <!-- Debt Card 1 -->
+                                    <div class="debt-card">
+                                        <div class="debt-header">
+                                            <div class="debt-parties">
+                                                <span>You</span>
+                                                <span class="debt-arrow">→</span>
+                                                <span>Amit</span>
+                                            </div>
+                                            <div class="debt-amount">₹500</div>
+                                        </div>
+                                        <div class="debt-actions">
+                                            <button class="debt-btn primary">Pay via UPI</button>
+                                            <button class="debt-btn secondary">Mark Settled</button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Debt Card 2 -->
+                                    <div class="debt-card">
+                                        <div class="debt-header">
+                                            <div class="debt-parties">
+                                                <span>You</span>
+                                                <span class="debt-arrow">→</span>
+                                                <span>Priya</span>
+                                            </div>
+                                            <div class="debt-amount">₹300</div>
+                                        </div>
+                                        <div class="debt-actions">
+                                            <button class="debt-btn primary">Pay via UPI</button>
+                                            <button class="debt-btn secondary">Mark Settled</button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Debt Card 3 (You're Owed) -->
+                                    <div class="debt-card" style="border-color: var(--success);">
+                                        <div class="debt-header">
+                                            <div class="debt-parties">
+                                                <span>Rahul</span>
+                                                <span class="debt-arrow">→</span>
+                                                <span>You</span>
+                                            </div>
+                                            <div class="debt-amount" style="color: var(--success);">₹350</div>
+                                        </div>
+                                        <div class="debt-actions">
+                                            <button class="debt-btn primary">Request Payment</button>
+                                            <button class="debt-btn secondary">Remind</button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Simplify Section -->
+                                <div class="simplify-section">
+                                    <div class="simplify-card">
+                                        <h4>✨ Simplify Debts</h4>
+                                        <p>Reduce 3 transactions to 2. Save time!</p>
+                                        <button class="simplify-btn">Simplify Now</button>
+                                    </div>
+                                </div>
+
+                                <!-- History Section -->
+                                <div class="history-section">
+                                    <h3>Recent Settlements</h3>
+                                    <div class="history-item">
+                                        <div class="date">Dec 25, 2024</div>
+                                        <div class="detail">You paid Amit <span class="amount">₹1,000</span></div>
+                                    </div>
+                                    <div class="history-item">
+                                        <div class="date">Dec 20, 2024</div>
+                                        <div class="detail">Priya paid You <span class="amount">₹450</span></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- DEVELOPMENT GUIDE -->
+        <div class="code-section">
+            <h2>🚀 Step-by-Step Development Guide</h2>
+
+            <!-- GROUPS PAGE BACKEND -->
+            <div class="step">
+                <h3><span class="step-number">1</span>Groups Page - Backend Setup</h3>
+                
+                <p><strong>Create Group Model</strong></p>
+                <div class="file-path">server/src/models/Group.js</div>
+                <pre>const mongoose = require('mongoose');
+
+const groupSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: [true, 'Group name is required'],
+    trim: true,
+    maxlength: [50, 'Group name cannot exceed 50 characters']
+  },
+  icon: {
+    type: String,
+    default: '👥'
+  },
+  createdBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  },
+  members: [{
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true
+    },
+    role: {
+      type: String,
+      enum: ['admin', 'member'],
+      default: 'member'
+    },
+    joinedAt: {
+      type: Date,
+      default: Date.now
+    }
+  }],
+  inviteCode: {
+    type: String,
+    unique: true
+  },
+  isActive: {
+    type: Boolean,
+    default: true
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now
+  }
+});
+
+// Generate invite code before saving
+groupSchema.pre('save', function(next) {
+  if (!this.inviteCode) {
+    this.inviteCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+  }
+  next();
+});
+
+module.exports = mongoose.model('Group', groupSchema);</pre>
+
+                <p><strong>Create Group Controller</strong></p>
+                <div class="file-path">server/src/controllers/groupController.js</div>
+                <pre>const Group = require('../models/Group');
+const Expense = require('../models/Expense');
+
+// Get all user's groups
+exports.getUserGroups = async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+    
+    const groups = await Group.find({
+      'members.userId': userId,
+      isActive: true
+    })
+    .populate('members.userId', 'name phone profilePic')
+    .populate('createdBy', 'name')
+    .sort({ createdAt: -1 });
+    
+    // Calculate balance for each group
+    const groupsWithBalances = await Promise.all(
+      groups.map(async (group) => {
+        const balance = await calculateUserBalanceInGroup(group._id, userId);
+        return {
+          ...group.toObject(),
+          userBalance: balance
+        };
+      })
+    );
+    
+    res.json({
+      success: true,
+      data: groupsWithBalances
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Create new group
+exports.createGroup = async (req, res, next) => {
+  try {
+    const { name, icon } = req.body;
+    const userId = req.user.id;
+    
+    const group = await Group.create({
+      name,
+      icon: icon || '👥',
+      createdBy: userId,
+      members: [{
+        userId,
+        role: 'admin'
+      }]
+    });
+    
+    const populatedGroup = await Group.findById(group._id)
+      .populate('members.userId', 'name phone profilePic');
+    
+    res.status(201).json({
+      success: true,
+      message: 'Group created successfully',
+      data: populatedGroup
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Add member to group
+exports.addMember = async (req, res, next) => {
+  try {
+    const { groupId } = req.params;
+    const { phone } = req.body;
+    const userId = req.user.id;
+    
+    // Find group
+    const group = await Group.findById(groupId);
+    if (!group) {
+      return res.status(404).json({
+        success: false,
+        message: 'Group not found'
+      });
+    }
+    
+    // Check if requester is admin
+    const requester = group.members.find(
+      m => m.userId.toString() === userId && m.role === 'admin'
+    );
+    if (!requester) {
+      return res.status(403).json({
+        success: false,
+        message: 'Only admins can add members'
+      });
+    }
+    
+    // Find user by phone
+    const User = require('../models/User');
+    const newUser = await User.findOne({ phone });
+    if (!newUser) {
+      return res.status(404).json({
+        success: false,
+        message: 'User with this phone number not found'
+      });
+    }
+    
+    // Check if already a member
+    const alreadyMember = group.members.some(
+      m => m.userId.toString() === newUser._id.toString()
+    );
+    if (alreadyMember) {
+      return res.status(400).json({
+        success: false,
+        message: 'User is already a member'
+      });
+    }
+    
+    // Add member
+    group.members.push({
+      userId: newUser._id,
+      role: 'member'
+    });
+    await group.save();
+    
+    const updatedGroup = await Group.findById(groupId)
+      .populate('members.userId', 'name phone profilePic');
+    
+    res.json({
+      success: true,
+      message: 'Member added successfully',
+      data: updatedGroup
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Helper: Calculate user balance in a group
+async function calculateUserBalanceInGroup(groupId, userId) {
+  const expenses = await Expense.find({ groupId });
+  
+  let totalOwed = 0;
+  let totalOwing = 0;
+  
+  expenses.forEach(expense => {
+    expense.splitDetails.forEach(split => {
+      if (split.userId.toString() === userId.toString()) {
+        if (expense.paidBy.toString() === userId.toString()) {
+          // User paid, calculate what others owe to user
+          const othersOwed = expense.amount - split.amount;
+          totalOwed += othersOwed;
+        } else {
+          // User owes to the person who paid
+          totalOwing += split.amount;
+        }
+      } else if (expense.paidBy.toString() === userId.toString()) {
+        // User paid, others owe to user
+        totalOwed += split.amount;
+      }
+    });
+  });
+  
+  return {
+    owed: totalOwed,
+    owing: totalOwing,
+    net: totalOwed - totalOwing
+  };
+}
+
+module.exports.calculateUserBalanceInGroup = calculateUserBalanceInGroup;</pre>
+
+                <p><strong>Create Routes</strong></p>
+                <div class="file-path">server/src/routes/group.routes.js</div>
+                <pre>const express = require('express');
+const router = express.Router();
+const { protect } = require('../middleware/auth');
+const {
+  getUserGroups,
+  createGroup,
+  addMember,
+  getGroupDetails
+} = require('../controllers/groupController');
+
+router.use(protect); // All routes require authentication
+
+router.route('/')
+  .get(getUserGroups)
+  .post(createGroup);
+
+router.post('/:groupId/members', addMember);
+router.get('/:groupId', getGroupDetails);
+
+module.exports = router;</pre>
+            </div>
+
+            <!-- GROUPS PAGE FRONTEND -->
+            <div class="step">
+                <h3><span class="step-number">2</span>Groups Page - Frontend Implementation</h3>
+                
+                <p><strong>Create Group Service</strong></p>
+                <div class="file-path">client/src/services/groupService.js</div>
+                <pre>import api from '../utils/api';
+
+export const getUserGroups = async () => {
+  const response = await api.get('/groups');
+  return response.data;
+};
+
+export const createGroup = async (groupData) => {
+  const response = await api.post('/groups', groupData);
+  return response.data;
+};
+
+export const addMemberToGroup = async (groupId, phone) => {
+  const response = await api.post(`/groups/${groupId}/members`, { phone });
+  return response.data;
+};
+
+export const getGroupDetails = async (groupId) => {
+  const response = await api.get(`/groups/${groupId}`);
+  return response.data;
+};</pre>
+
+                <p><strong>Create Groups Page Component</strong></p>
+                <div class="file-path">client/src/pages/Groups.jsx</div>
+                <pre>import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { getUserGroups } from '../services/groupService';
+
+function Groups() {
+  const navigate = useNavigate();
+  const [groups, setGroups] = useState([]);
+  const [summary, setSummary] = useState({ totalOwed: 0, totalOwing: 0 });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    loadGroups();
+  }, []);
+
+  const loadGroups = async () => {
+    try {
+      setLoading(true);
+      const response = await getUserGroups();
+      setGroups(response.data);
+      
+      // Calculate total owed and owing
+      const totals = response.data.reduce((acc, group) => {
+        if (group.userBalance) {
+          acc.totalOwed += group.userBalance.owed || 0;
+          acc.totalOwing += group.userBalance.owing || 0;
+        }
+        return acc;
+      }, { totalOwed: 0, totalOwing: 0 });
+      
+      setSummary(totals);
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to load groups');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      maximumFractionDigits: 0
+    }).format(amount);
+  };
+
+  if (loading) return <div className="loading">Loading groups...</div>;
+  if (error) return <div className="error">{error}</div>;
+
+  return (
+    <div className="groups-page">
+      {/* Header */}
+      <div className="page-header">
+        <h1>My Groups</h1>
+        <p className="subtitle">Manage your expense groups</p>
+      </div>
+
+      {/* Summary Stats */}
+      <div className="groups-stats">
+        <div className="stat-card owed">
+          <div className="label">You're Owed</div>
+          <div className="value">{formatCurrency(summary.totalOwed)}</div>
+        </div>
+        <div className="stat-card owing">
+          <div className="label">You Owe</div>
+          <div className="value">{formatCurrency(summary.totalOwing)}</div>
+        </div>
+      </div>
+
+      {/* Section Header */}
+      <div className="section-header">
+        <h3>All Groups ({groups.length})</h3>
+        <button 
+          className="create-btn"
+          onClick={() => navigate('/groups/create')}
+        >
+          <span>➕</span> New Group
+        </button>
+      </div>
+
+      {/* Groups List */}
+      <div className="groups-list">
+        {groups.length === 0 ? (
+          <div className="empty-state">
+            <p>No groups yet. Create your first group!</p>
+            <button onClick={() => navigate('/groups/create')}>
+              Create Group
+            </button>
+          </div>
+        ) : (
+          groups.map(group => (
+            <div 
+              key={group._id}
+              className="group-card"
+              onClick={() => navigate(`/groups/${group._id}`)}
+            >
+              <div className="group-card-header">
+                <div className="group-icon">{group.icon}</div>
+                <div className="group-info">
+                  <h4>{group.name}</h4>
+                  <p className="group-meta">
+                    {group.members.length} members • 
+                    Last activity: {getRelativeTime(group.createdAt)}
+                  </p>
+                </div>
+              </div>
+              
+              {group.userBalance && (
+                <div className="group-balance">
+                  <span className="balance-label">Your balance:</span>
+                  <span className={`balance-amount ${
+                    group.userBalance.net >= 0 ? 'positive' : 'negative'
+                  }`}>
+                    {group.userBalance.net >= 0 
+                      ? `You're owed ${formatCurrency(group.userBalance.net)}`
+                      : `You owe ${formatCurrency(Math.abs(group.userBalance.net))}`
+                    }
+                  </span>
+                </div>
+              )}
+            </div>
+          ))
+        )}
+      </div>
+    </div>
+  );
+}
+
+// Helper function for relative time
+function getRelativeTime(date) {
+  const now = new Date();
+  const past = new Date(date);
+  const diffMs = now - past;
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMins / 60);
+  const diffDays = Math.floor(diffHours / 24);
+  
+  if (diffMins < 60) return `${diffMins}m ago`;
+  if (diffHours < 24) return `${diffHours}h ago`;
+  return `${diffDays}d ago`;
+}
+
+export default Groups;</pre>
+            </div>
+
+            <!-- SETTLE UP PAGE BACKEND -->
+            <div class="step">
+                <h3><span class="step-number">3</span>Settle Up Page - Backend Setup</h3>
+                
+                <p><strong>Create Settlement Model</strong></p>
+                <div class="file-path">server/src/models/Settlement.js</div>
+                <pre>const mongoose = require('mongoose');
+
+const settlementSchema = new mongoose.Schema({
+  groupId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Group',
+    required: true
+  },
+  from: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  },
+  to: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  },
+  amount: {
+    type: Number,
+    required: true,
+    min: 0
+  },
+  method: {
+    type: String,
+    enum: ['upi', 'cash', 'bank_transfer', 'other'],
+    default: 'upi'
+  },
+  upiTransactionId: String,
+  notes: String,
+  settledAt: {
+    type: Date,
+    default: Date.now
+  },
+  status: {
+    type: String,
+    enum: ['pending', 'completed', 'disputed'],
+    default: 'completed'
+  }
+});
+
+module.exports = mongoose.model('Settlement', settlementSchema);</pre>
+
+                <p><strong>Create Settlement Controller</strong></p>
+                <div class="file-path">server/src/controllers/settlementController.js</div>
+                <pre>const Settlement = require('../models/Settlement');
+const Group = require('../models/Group');
+const Expense = require('../models/Expense');
+
+// Get all balances in a group
+exports.getGroupBalances = async (req, res, next) => {
+  try {
+    const { groupId } = req.params;
+    const userId = req.user.id;
+    
+    // Verify user is member
+    const group = await Group.findById(groupId);
+    if (!group) {
+      return res.status(404).json({
+        success: false,
+        message: 'Group not found'
+      });
+    }
+    
+    const isMember = group.members.some(
+      m => m.userId.toString() === userId
+    );
+    if (!isMember) {
+      return res.status(403).json({
+        success: false,
+        message: 'Not a member of this group'
+      });
+    }
+    
+    // Calculate all balances
+    const balances = await calculateAllBalances(groupId);
+    
+    // Get settlement history
+    const settlements = await Settlement.find({ groupId })
+      .populate('from to', 'name')
+      .sort({ settledAt: -1 })
+      .limit(10);
+    
+    res.json({
+      success: true,
+      data: {
+        balances,
+        settlements,
+        group: {
+          _id: group._id,
+          name: group.name,
+          icon: group.icon
+        }
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Record a settlement
+exports.recordSettlement = async (req, res, next) => {
+  try {
+    const { groupId, to, amount, method, notes } = req.body;
+    const from = req.user.id;
+    
+    if (amount <= 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Amount must be greater than 0'
+      });
+    }
+    
+    const settlement = await Settlement.create({
+      groupId,
+      from,
+      to,
+      amount,
+      method: method || 'upi',
+      notes
+    });
+    
+    const populatedSettlement = await Settlement.findById(settlement._id)
+      .populate('from to', 'name phone');
+    
+    res.status(201).json({
+      success: true,
+      message: 'Settlement recorded successfully',
+      data: populatedSettlement
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Helper: Calculate all balances in group
+async function calculateAllBalances(groupId) {
+  const expenses = await Expense.find({ groupId })
+    .populate('paidBy', 'name');
+  
+  // Track net balance for each user
+  const balances = {};
+  
+  expenses.forEach(expense => {
+    const payer = expense.paidBy._id.toString();
+    
+    expense.splitDetails.forEach(split => {
+      const user = split.userId.toString();
+      
+      if (user !== payer) {
+        // Initialize if needed
+        if (!balances[user]) balances[user] = {};
+        if (!balances[user][payer]) balances[user][payer] = 0;
+        
+        // User owes payer
+        balances[user][payer] += split.amount;
+      }
+    });
+  });
+  
+  // Convert to array format
+  const debts = [];
+  Object.keys(balances).forEach(from => {
+    Object.keys(balances[from]).forEach(to => {
+      if (balances[from][to] > 0) {
+        debts.push({
+          from,
+          to,
+          amount: balances[from][to]
+        });
+      }
+    });
+  });
+  
+  return debts;
+}
+
+// Simplify debts
+exports.simplifyDebts = async (req, res, next) => {
+  try {
+    const { groupId } = req.params;
+    
+    const currentDebts = await calculateAllBalances(groupId);
+    const simplified = simplifyDebtsAlgorithm(currentDebts);
+    
+    res.json({
+      success: true,
+      data: {
+        current: currentDebts,
+        simplified,
+        savings: currentDebts.length - simplified.length
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Debt simplification algorithm
+function simplifyDebtsAlgorithm(debts) {
+  // Calculate net balance for each person
+  const balances = {};
+  
+  debts.forEach(({ from, to, amount }) => {
+    balances[from] = (balances[from] || 0) - amount;
+    balances[to] = (balances[to] || 0) + amount;
+  });
+  
+  // Separate creditors and debtors
+  const creditors = [];
+  const debtors = [];
+  
+  Object.entries(balances).forEach(([person, balance]) => {
+    if (balance > 0.01) creditors.push({ person, amount: balance });
+    if (balance < -0.01) debtors.push({ person, amount: -balance });
+  });
+  
+  // Match debtors with creditors
+  const simplified = [];
+  let i = 0, j = 0;
+  
+  while (i < debtors.length && j < creditors.length) {
+    const debt = debtors[i];
+    const credit = creditors[j];
+    
+    const settleAmount = Math.min(debt.amount, credit.amount);
+    
+    simplified.push({
+      from: debt.person,
+      to: credit.person,
+      amount: Math.round(settleAmount * 100) / 100
+    });
+    
+    debt.amount -= settleAmount;
+    credit.amount -= settleAmount;
+    
+    if (debt.amount < 0.01) i++;
+    if (credit.amount < 0.01) j++;
+  }
+  
+  return simplified;
+}</pre>
+
+                <p><strong>Create Settlement Routes</strong></p>
+                <div class="file-path">server/src/routes/settlement.routes.js</div>
+                <pre>const express = require('express');
+const router = express.Router();
+const { protect } = require('../middleware/auth');
+const {
+  getGroupBalances,
+  recordSettlement,
+  simplifyDebts
+} = require('../controllers/settlementController');
+
+router.use(protect);
+
+router.get('/:groupId/balances', getGroupBalances);
+router.post('/', recordSettlement);
+router.get('/:groupId/simplify', simplifyDebts);
+
+module.exports = router;
+
+// Add to app.js:
+// app.use('/api/settlements', require('./routes/settlement.routes'));</pre>
+            </div>
+
+            <!-- SETTLE UP PAGE FRONTEND -->
+            <div class="step">
+                <h3><span class="step-number">4</span>Settle Up Page - Frontend Implementation</h3>
+                
+                <p><strong>Create Settlement Service</strong></p>
+                <div class="file-path">client/src/services/settlementService.js</div>
+                <pre>import api from '../utils/api';
+
+export const getGroupBalances = async (groupId) => {
+  const response = await api.get(`/settlements/${groupId}/balances`);
+  return response.data;
+};
+
+export const recordSettlement = async (settlementData) => {
+  const response = await api.post('/settlements', settlementData);
+  return response.data;
+};
+
+export const simplifyDebts = async (groupId) => {
+  const response = await api.get(`/settlements/${groupId}/simplify`);
+  return response.data;
+};</pre>
+
+                <p><strong>Create Settle Up Page Component</strong></p>
+                <div class="file-path">client/src/pages/SettleUp.jsx</div>
+                <pre>import { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
+import { 
+  getGroupBalances, 
+  recordSettlement, 
+  simplifyDebts 
+} from '../services/settlementService';
+import { getCurrentUser } from '../services/authService';
+
+function SettleUp() {
+  const { groupId } = useParams();
+  const currentUser = getCurrentUser();
+  
+  const [group, setGroup] = useState(null);
+  const [balances, setBalances] = useState([]);
+  const [settlements, setSettlements] = useState([]);
+  const [userBalance, setUserBalance] = useState({ owed: 0, owing: 0 });
+  const [simplified, setSimplified] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    loadBalances();
+  }, [groupId]);
+
+  const loadBalances = async () => {
+    try {
+      setLoading(true);
+      const response = await getGroupBalances(groupId);
+      
+      setGroup(response.data.group);
+      setBalances(response.data.balances);
+      setSettlements(response.data.settlements);
+      
+      // Calculate user's balance
+      const userDebts = response.data.balances.filter(
+        b => b.from === currentUser._id || b.to === currentUser._id
+      );
+      
+      const balance = userDebts.reduce((acc, debt) => {
+        if (debt.from === currentUser._id) {
+          acc.owing += debt.amount;
+        } else {
+          acc.owed += debt.amount;
+        }
+        return acc;
+      }, { owed: 0, owing: 0 });
+      
+      setUserBalance(balance);
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to load balances');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSimplify = async () => {
+    try {
+      const response = await simplifyDebts(groupId);
+      setSimplified(response.data);
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to simplify debts');
+    }
+  };
+
+  const handleSettle = async (debt) => {
+    try {
+      await recordSettlement({
+        groupId,
+        to: debt.to,
+        amount: debt.amount,
+        method: 'upi'
+      });
+      
+      alert('Settlement recorded successfully!'); 
+      loadBalances(); // Reload
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to record settlement');
+    }
+  };
+
+  const generateUPILink = (toUser, amount) => {
+    // In real app, fetch user's UPI ID
+    const upiId = 'user@paytm'; // Replace with actual UPI
+    return `upi://pay?pa=${upiId}&pn=${toUser.name}&am=${amount}&cu=INR&tn=SplitSmart Settlement`;
+  };
+
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      maximumFractionDigits: 0
+    }).format(amount);
+  };
+
+  if (loading) return <div className="loading">Loading...</div>;
+  if (error) return <div className="error">{error}</div>;
+
+  return (
+    <div className="settle-page">
+      {/* Header */}
+      <div className="settle-header">
+        <h1>Settle Up</h1>
+        <p className="group-name">{group?.icon} {group?.name}</p>
+      </div>
+
+      {/* Balance Summary */}
+      <div className="balance-summary">
+        <div className="summary-title">Your Balance</div>
+        <div className="balances-grid">
+          <div className="balance-box">
+            <div className="label">You Owe</div>
+            <div className="amount" style={{ color: 'var(--danger)' }}>
+              {formatCurrency(userBalance.owing)}
+            </div>
+          </div>
+          <div className="balance-box">
+            <div className="label">You're Owed</div>
+            <div className="amount" style={{ color: 'var(--success)' }}>
+              {formatCurrency(userBalance.owed)}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Debts Section */}
+      <div className="debts-section">
+        <h3>Outstanding Debts</h3>
+
+        {balances.length === 0 ? (
+          <div className="empty-state">
+            <p>All settled up! 🎉</p>
+          </div>
+        ) : (
+          balances.map((debt, index) => {
+            const isUserDebt = debt.from === currentUser._id;
+            const isUserCredit = debt.to === currentUser._id;
+            
+            if (!isUserDebt && !isUserCredit) return null;
+            
+            return (
+              <div 
+                key={index}
+                className="debt-card"
+                style={isUserCredit ? { borderColor: 'var(--success)' } : {}}
+              >
+                <div className="debt-header">
+                  <div className="debt-parties">
+                    <span>{isUserDebt ? 'You' : debt.fromUser?.name}</span>
+                    <span className="debt-arrow">→</span>
+                    <span>{isUserCredit ? 'You' : debt.toUser?.name}</span>
+                  </div>
+                  <div 
+                    className="debt-amount"
+                    style={isUserCredit ? { color: 'var(--success)' } : {}}
+                  >
+                    {formatCurrency(debt.amount)}
+                  </div>
+                </div>
+                
+                <div className="debt-actions">
+                  {isUserDebt ? (
+                    <>
+                      <a 
+                        href={generateUPILink(debt.toUser, debt.amount)}
+                        className="debt-btn primary"
+                      >
+                        Pay via UPI
+                      </a>
+                      <button 
+                        className="debt-btn secondary"
+                        onClick={() => handleSettle(debt)}
+                      >
+                        Mark Settled
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <button className="debt-btn primary">
+                        Request Payment
+                      </button>
+                      <button className="debt-btn secondary">
+                        Remind
+                      </button>
+                    </>
+                  )}
+                </div>
+              </div>
+            );
+          })
+        )}
+      </div>
+
+      {/* Simplify Section */}
+      {balances.length > 2 && (
+        <div className="simplify-section">
+          <div className="simplify-card">
+            <h4>✨ Simplify Debts</h4>
+            {simplified ? (
+              <p>
+                Reduced {simplified.current.length} transactions to {simplified.simplified.length}!
+              </p>
+            ) : (
+              <p>Reduce transactions. Save time!</p>
+            )}
+            <button 
+              className="simplify-btn"
+              onClick={handleSimplify}
+            >
+              {simplified ? 'Simplified!' : 'Simplify Now'}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* History Section */}
+      {settlements.length > 0 && (
+        <div className="history-section">
+          <h3>Recent Settlements</h3>
+          {settlements.map(settlement => (
+            <div key={settlement._id} className="history-item">
+              <div className="date">
+                {new Date(settlement.settledAt).toLocaleDateString()}
+              </div>
+              <div className="detail">
+                {settlement.from.name} paid {settlement.to.name}{' '}
+                <span className="amount">{formatCurrency(settlement.amount)}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default SettleUp;</pre>
+            </div>
+
+            <!-- TESTING CHECKLIST -->
+            <div class="checklist">
+                <h4>✅ Testing Checklist</h4>
+                
+                <div class="checklist-item">
+                    <div class="checkbox"></div>
+                    <span><strong>Groups Page:</strong> All groups display correctly</span>
+                </div>
+                <div class="checklist-item">
+                    <div class="checkbox"></div>
+                    <span>Summary cards show correct total owed/owing</span>
+                </div>
+                <div class="checklist-item">
+                    <div class="checkbox"></div>
+                    <span>Create group button navigates to create page</span>
+                </div>
+                <div class="checklist-item">
+                    <div class="checkbox"></div>
+                    <span>Group cards show accurate balance</span>
+                </div>
+                <div class="checklist-item">
+                    <div class="checkbox"></div>
+                    <span>Clicking group navigates to group details</span>
+                </div>
+                <div class="checklist-item">
+                    <div class="checkbox"></div>
+                    <span><strong>Settle Up Page:</strong> Balances calculated correctly</span>
+                </div>
+                <div class="checklist-item">
+                    <div class="checkbox"></div>
+                    <span>UPI link opens payment app</span>
+                </div>
+                <div class="checklist-item">
+                    <div class="checkbox"></div>
+                    <span>Mark settled updates balances</span>
+                </div>
+                <div class="checklist-item">
+                    <div class="checkbox"></div>
+                    <span>Simplify debts reduces transactions</span>
+                </div>
+                <div class="checklist-item">
+                    <div class="checkbox"></div>
+                    <span>Settlement history displays correctly</span>
+                </div>
+            </div>
+
+            <div class="note">
+                <strong>💡 Pro Tip:</strong> Test with 3-4 test users and create cross-debts (A owes B, B owes C, C owes A) to verify the debt simplification algorithm works correctly.
+            </div>
+
+            <div class="warning">
+                <strong>⚠️ Important:</strong> The balance calculations are simplified for this guide. In production, you'll need to account for settlements when calculating balances (subtract settled amounts from debts).
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -73,7 +73,7 @@ app.use("/api/", expensesRoutes);
 app.use("/api/", forgotPasswordRoutes);
 app.use("/api/", notificationsRoutes);
 app.use("/api/settlements", settleUpRoutes);
-app.use("/api/wallet", walletRoutes);
+app.use("/api/", walletRoutes);
 
 const path = require('path');
 app.use(express.static(path.join(__dirname, '..', 'Client', 'dist')));

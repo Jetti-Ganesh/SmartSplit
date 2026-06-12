@@ -6,12 +6,12 @@ const {
  topUp,
  getSettlements,
 
-} = require('../controllers/settleUp.controller');
+} = require('../controllers/walletTransaction.controller');
 
 router.use(protect);
 
 router.get('/wallet', getWalletTransactions);
-router.post('wallet/topup', topUp);
+router.post('/wallet/topup', topUp);
 router.get('/settlements', getSettlements);
 
 module.exports = router;

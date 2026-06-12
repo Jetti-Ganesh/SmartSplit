@@ -1,6 +1,6 @@
-const walletTransaction = require('../models/walletTransaction.model');
+const walletTransaction = require('../models/wallet.model');
 const User = require('../models/user.model');
-const Settlement = require('../models/settlement.model');
+const Settlement = require('../models/settleUp.model');
 
 exports.getWalletTransactions = async(req, res)=>
 {
