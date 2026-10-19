@@ -2,6 +2,8 @@ const Group = require('../models/group.model');
 const User = require('../models/user.model');
 const Expense = require('../models/expense.model');
 exports.getUserGroups = async (req, res, next) => {
+  console.log("fetching..");
+  
   try {
     const userId = req.user.id;
 

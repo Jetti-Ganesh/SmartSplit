@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 const WalletTransaction = require('../models/wallet.model');
+=======
+const walletTransaction = require('../models/wallet.model');
+>>>>>>> 069bee569d14aae943070fcf2b13ce4bbc84c7f5
 const User = require('../models/user.model');
 const Settlement = require('../models/settleUp.model');
 

@@ -85,6 +85,16 @@ app.use("/api/", forgotPasswordRoutes);
 app.use("/api/", notificationsRoutes);
 app.use("/api/settlements", settleUpRoutes);
 app.use("/api/", walletRoutes);
+<<<<<<< HEAD
+=======
+
+const path = require('path');
+app.use(express.static(path.join(__dirname, '..', 'Client', 'dist')));
+
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'Client', 'dist', 'index.html'));
+});
+>>>>>>> 069bee569d14aae943070fcf2b13ce4bbc84c7f5
 
 // Global Error Handler Middleware (must be last)
 app.use((err, req, res, next) => {
