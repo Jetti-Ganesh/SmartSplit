@@ -15,10 +15,12 @@ Configure these server environment variables in Vercel before using the API:
 - `JWT_SECRET` — secret used to sign authentication tokens.
 - `SESSION_SECRET` — optional; defaults to `JWT_SECRET` for session signing.
 
-`VITE_API_URL` is optional. Leave it unset to use the same-origin `/api` route.
-Only set it to an API origin if the API is intentionally hosted on a separate
-domain. Email and SMS credentials are not needed to create or sign in to a
-username/password account; features that send OTPs still require their
+`Client/.env.production` points `VITE_API_URL` to the deployed API origin;
+update it if the backend URL changes. The client appends `/api` for its API
+requests. For a separate frontend and backend deployment, set the backend's
+`CLIENT_URL` to the exact frontend origin in Vercel so cross-origin requests
+are permitted. Email and SMS credentials are not needed to create or sign in
+to a username/password account; features that send OTPs still require their
 respective provider configuration.
 
 For local development, run `node index.js` from `Server` on port `5000` and
