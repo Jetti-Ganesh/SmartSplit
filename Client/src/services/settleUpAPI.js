@@ -18,7 +18,6 @@ const baseQueryWithAuth = async (args, api, extraOptions) => {
     if (result.error && result.error.status === 401) {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
-        window.location.href = '/login';
     }
 
     return result;

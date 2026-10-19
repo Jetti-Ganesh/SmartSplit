@@ -28,13 +28,7 @@ export default function Dashboard() {
   const location = useLocation();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
-  // ── Auth guard — get user from Redux (clears properly on logout) ──
-  const { user, isLoggedIn } = useSelector((state) => state.auth);
-  useEffect(() => {
-    if (!isLoggedIn) {
-      navigate('/Login', { replace: true });
-    }
-  }, [isLoggedIn, navigate]);
+  const { user } = useSelector((state) => state.auth);
 
   const { data: Groupdata, isLoading: isFetchingGroups } = useGetGroupsQuery();
 
@@ -103,9 +97,6 @@ export default function Dashboard() {
     return new Date(timestamp).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
   };
   
-  // If not logged in yet, render nothing while redirect fires
-  if (!isLoggedIn || !user) return null;
-
   return (
     <div className="dashboard-shell">
 

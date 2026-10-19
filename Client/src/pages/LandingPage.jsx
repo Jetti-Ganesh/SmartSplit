@@ -1,6 +1,5 @@
 import '../styles/LandingPage.css'
-import { Navigate, useOutletContext } from 'react-router-dom'
-import { useSelector } from 'react-redux'
+import { useOutletContext } from 'react-router-dom'
 import Hero from '../components/Hero'
 import Features from '../components/Features'
 import HowItWorks from '../components/HowItWorks'
@@ -10,11 +9,6 @@ import MobileTopBar from '../components/MobileTopBar'
 
 const LandingPage = () => {
   const { isDark, toggleTheme } = useOutletContext()
-  const isLoggedIn = useSelector((state) => state.auth.isLoggedIn)
-
-  if (isLoggedIn) {
-    return <Navigate to="/Dashboard" replace />
-  }
 
   return (
     <>

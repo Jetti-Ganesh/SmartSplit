@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useSelector } from 'react-redux';
 import SettingsDrawer from './SettingsDrawer';
 import ThemeToggle from './ThemeToggle';
 import '../styles/MobileTopBar.css';
@@ -11,7 +10,6 @@ const MobileTopBar = ({ isDark, toggleTheme, showHamburger = false }) => {
   const menuRef = useRef(null);
   const navigate = useNavigate();
   const location = useLocation();
-  const { isLoggedIn } = useSelector(state => state.auth);
 
   // Close menu on outside click
   useEffect(() => {
@@ -67,7 +65,7 @@ const MobileTopBar = ({ isDark, toggleTheme, showHamburger = false }) => {
         </div>
 
         {/* Right side — hamburger only shown on landing pre-login */}
-        {showHamburger && !isLoggedIn && (
+        {showHamburger && (
           <div className="mtb-right">
             <button
               className={`mtb-hamburger ${menuOpen ? 'open' : ''}`}
@@ -163,9 +161,9 @@ const MobileTopBar = ({ isDark, toggleTheme, showHamburger = false }) => {
                 </button>
                 <button
                   className="mtb-drawer-signup-btn"
-                  onClick={() => navTo('/signUp')}
+                  onClick={() => navTo('/Dashboard')}
                 >
-                  Get Started Free →
+                  Explore App →
                 </button>
               </div>
             </div>

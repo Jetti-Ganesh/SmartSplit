@@ -368,7 +368,7 @@ function SettleUp() {
         </div>
       )}
 
-      {isLoggedIn && <BottomNavbareM />}
+      <BottomNavbareM />
 
       <SettingsDrawer
         isOpen={isSettingsOpen}

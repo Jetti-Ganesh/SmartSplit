@@ -1,5 +1,4 @@
 import { useNavigate, useLocation, useOutletContext } from 'react-router-dom';
-import { useSelector } from 'react-redux';
 import '../styles/Settings.css'
 import ThemeToggle from '../components/ThemeToggle';
 import BottomNavbareM from '../components/BottomNavbareM';
@@ -13,7 +12,6 @@ const USER = { name: "Rahul", email: "rahul@email.com", initial: "R" };
 function Settings(){
 
  const { isDark, toggleTheme } = useOutletContext();
-  const { isLoggedIn } = useSelector((state) => state.auth);
   const navigate  = useNavigate();
   const location  = useLocation();
 
@@ -93,7 +91,7 @@ function Settings(){
 
 
         {/* ── MOBILE BOTTOM NAV ───────────────────────────────────────── */}
-      {isLoggedIn && <BottomNavbareM />}
+      <BottomNavbareM />
         </div>
     )
 }   

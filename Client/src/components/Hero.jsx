@@ -27,8 +27,8 @@ const Hero = () => {
           </p>
 
           <div className="hero-actions">
-            <a  className="btn-primary"  onClick={() => navigate('/signUp')}>
-              Get Started <span className="btn-arrow">→</span>
+            <a className="btn-primary" onClick={() => navigate('/Dashboard')}>
+              Explore the App <span className="btn-arrow">→</span>
             </a>
             <a href="#how-it-works" className="btn-secondary">
               ▶ See How It Works

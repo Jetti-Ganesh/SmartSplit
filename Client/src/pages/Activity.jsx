@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useOutletContext } from 'react-router-dom';
-import { useSelector } from 'react-redux';
 import { fetchAnalytics } from '../services/analytics.service';
 import TrendChart from '../components/activity/TrendChart';
 import CategoryDonut from '../components/activity/CategoryDonut';
@@ -51,7 +50,6 @@ const FadeInSection = ({ children, className = "" }) => {
 
 export default function Activity() {
   const { isDark, toggleTheme } = useOutletContext();
-  const { isLoggedIn } = useSelector((state) => state.auth);
   const navigate = useNavigate();
 
   const [period, setPeriod] = useState('month');
@@ -59,6 +57,7 @@ export default function Activity() {
   const [data, setData] = useState(null);
   const [activeCat, setActiveCat] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   // Collapsible state
@@ -66,23 +65,38 @@ export default function Activity() {
   const [groupsOpen, setGroupsOpen] = useState(false);
   const [expensesOpen, setExpensesOpen] = useState(false);
 
-  useEffect(() => { loadData(); }, [period, customRange]);
-
-  const loadData = async () => {
-    setLoading(true);
-    try {
-      const res = await fetchAnalytics(period, customRange);
-      if (res.success) setData(res.data);
-    } catch (err) {
-      console.error('Failed to load analytics', err);
-      if (err.code === 'UNAUTHORIZED') {
-        navigate('/Login');
+  useEffect(() => {
+    let isCurrentRequest = true;
+    const loadData = async () => {
+      try {
+        const res = await fetchAnalytics(period, customRange);
+        if (isCurrentRequest && res.success) {
+          setData(res.data);
+          setLoadError(false);
+        }
+      } catch (err) {
+        if (isCurrentRequest) {
+          console.error('Failed to load analytics', err);
+          setLoadError(true);
+        }
+      } finally {
+        if (isCurrentRequest) setLoading(false);
       }
-    }
-    setLoading(false);
-  };
+    };
 
-  const handlePeriodChange = (newPeriod) => { setPeriod(newPeriod); setActiveCat(null); };
+    loadData();
+    return () => { isCurrentRequest = false; };
+  }, [period, customRange]);
+
+  const handlePeriodChange = (newPeriod) => {
+    setLoading(true);
+    setPeriod(newPeriod);
+    setActiveCat(null);
+  };
+  const handleCustomRangeChange = (field, value) => {
+    setLoading(true);
+    setCustomRange((range) => ({ ...range, [field]: value }));
+  };
 
   const renderSkeleton = () => (
     <div style={{ padding: 40, textAlign: 'center', color: 'var(--text-muted)', fontSize: 14 }}>
@@ -93,7 +107,9 @@ export default function Activity() {
   const renderEmptyState = () => (
     <div style={{ padding: 40, textAlign: 'center' }}>
       <div style={{ fontSize: 48, marginBottom: 16 }}>📊</div>
-      <p style={{ color: 'var(--text-muted)', marginBottom: 20, fontSize: 15, fontWeight: 600 }}>No spending data for this period.</p>
+      <p style={{ color: 'var(--text-muted)', marginBottom: 20, fontSize: 15, fontWeight: 600 }}>
+        {loadError ? 'Activity data is unavailable right now.' : 'No spending data for this period.'}
+      </p>
     </div>
   );
 
@@ -134,11 +150,11 @@ export default function Activity() {
             <div className="custom-range fade-up">
               <div className="date-field">
                 <label>From</label>
-                <input type="date" value={customRange.startDate} onChange={e => setCustomRange({ ...customRange, startDate: e.target.value })} />
+                <input type="date" value={customRange.startDate} onChange={e => handleCustomRangeChange('startDate', e.target.value)} />
               </div>
               <div className="date-field">
                 <label>To</label>
-                <input type="date" value={customRange.endDate} onChange={e => setCustomRange({ ...customRange, endDate: e.target.value })} />
+                <input type="date" value={customRange.endDate} onChange={e => handleCustomRangeChange('endDate', e.target.value)} />
               </div>
             </div>
           )}
@@ -435,7 +451,7 @@ export default function Activity() {
         )}
       </main>
 
-      {isLoggedIn && <BottomNavbareM />}
+      <BottomNavbareM />
 
       <SettingsDrawer
         isOpen={isSettingsOpen}

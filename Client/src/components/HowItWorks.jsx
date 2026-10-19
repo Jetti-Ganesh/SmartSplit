@@ -81,9 +81,9 @@ const HowItWorks = () => {
 
         {/* Bottom CTA */}
         <div className="hiw-cta">
-          <p className="hiw-cta-text">Takes less than 60 seconds to set up your first group.</p>
-          <a  className="hiw-btn" onClick={() => navigate('/signUp')} >
-            Try It Free <span className="hiw-btn-arrow">→</span>
+          <p className="hiw-cta-text">Explore expense splitting and group features without creating an account.</p>
+          <a className="hiw-btn" onClick={() => navigate('/Groups')}>
+            Explore Groups <span className="hiw-btn-arrow">→</span>
           </a>
         </div>
 

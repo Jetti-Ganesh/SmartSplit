@@ -58,60 +58,55 @@ const Navbar = ({ isDark, toggleTheme, forceShow }) => {
 
           {/* ── Nav Links ── */}
           <ul className={`nav-links ${menuOpen ? "open" : ""}`}>
-            {isLoggedIn ? (
-            <>
-                 <li>
-                  <a 
-                    className={location.pathname === "/Dashboard" ? "active" : ""}
-                    onClick={() => handleNavClick("/Dashboard")}
-                  >
-                    Dashboard
-                  </a>
-                </li>
-                <li>
-                  <a 
-                    className={location.pathname === "/Groups" ? "active" : ""}
-                    onClick={() => handleNavClick("/Groups")}
-                  >
-                   Groups
-                  </a>
-                </li>
-                <li>
-                  <a 
-                    className={location.pathname === "/SettleUp" ? "active" : ""}
-                    onClick={() => handleNavClick("/SettleUp")}
-                  >
-                    Settle Up
-                  </a>
-                </li>
-                <li>
-                  <a 
-                    className={location.pathname === "/Activity" ? "active" : ""}
-                    onClick={() => handleNavClick("/Activity")}
-                  >
-                    Activity
-                  </a>
-                </li>
-
-               </>
-            ) : (
+            <li>
+              <a
+                className={location.pathname === "/Dashboard" ? "active" : ""}
+                onClick={() => handleNavClick("/Dashboard")}
+              >
+                Dashboard
+              </a>
+            </li>
+            <li>
+              <a
+                className={location.pathname === "/Groups" ? "active" : ""}
+                onClick={() => handleNavClick("/Groups")}
+              >
+                Groups
+              </a>
+            </li>
+            <li>
+              <a
+                className={location.pathname === "/SettleUp" ? "active" : ""}
+                onClick={() => handleNavClick("/SettleUp")}
+              >
+                Settle Up
+              </a>
+            </li>
+            <li>
+              <a
+                className={location.pathname === "/Activity" ? "active" : ""}
+                onClick={() => handleNavClick("/Activity")}
+              >
+                Activity
+              </a>
+            </li>
+            <li>
+              <a href="/#features" onClick={() => setMenuOpen(false)}>
+                Features
+              </a>
+            </li>
+            <li>
+              <a href="/#how-it-works" onClick={() => setMenuOpen(false)}>
+                How It Works
+              </a>
+            </li>
+            <li>
+              <a href="/#testimonials" onClick={() => setMenuOpen(false)}>
+                Testimonials
+              </a>
+            </li>
+            {!isLoggedIn && (
               <>
-                <li>
-                  <a href="#features" onClick={() => setMenuOpen(false)}>
-                    Features
-                  </a>
-                </li>
-                <li>
-                  <a href="#how-it-works" onClick={() => setMenuOpen(false)}>
-                    How It Works
-                  </a>
-                </li>
-                <li>
-                  <a href="#testimonials" onClick={() => setMenuOpen(false)}>
-                    Testimonials
-                  </a>
-                </li>
-
                 <li>
                   <a
                     className={location.pathname === "/signUp" ? "active" : ""}
@@ -142,10 +137,10 @@ const Navbar = ({ isDark, toggleTheme, forceShow }) => {
               <li className="mobile-only mobile-menu-cta">
                 <a
                   className="nav-cta"
-                  onClick={() => handleNavClick("/signUp")}
+                  onClick={() => handleNavClick("/Dashboard")}
                   style={{ cursor: "pointer" }}
                 >
-                  Get Started
+                  Explore App
                 </a>
               </li>
             )}
@@ -179,10 +174,10 @@ const Navbar = ({ isDark, toggleTheme, forceShow }) => {
             ) : (
               <a
                 className="nav-cta"
-                onClick={() => handleNavClick("/signUp")}
+                onClick={() => handleNavClick("/Dashboard")}
                 style={{ cursor: "pointer" }}
               >
-                Get Started
+                Explore App
               </a>
             )}
           </div>

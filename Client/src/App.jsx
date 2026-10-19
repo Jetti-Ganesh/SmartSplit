@@ -8,7 +8,6 @@ import './index.css'
 function App() {
   const dispatch = useDispatch()
   const { isDark } = useSelector((state) => state.theme)
-  const { isLoggedIn } = useSelector((state) => state.auth)
 
   // Apply theme class to body
   useEffect(() => {

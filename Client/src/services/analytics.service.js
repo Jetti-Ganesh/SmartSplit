@@ -22,9 +22,6 @@ export const fetchAnalytics = async (period = 'month', customRange = null) => {
         return response.data;
     } catch (error) {
         console.error('Error fetching analytics:', error);
-        if (error.response?.status === 401) {
-            throw { code: 'UNAUTHORIZED' };
-        }
         throw error;
     }
 };
