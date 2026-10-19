@@ -1,5 +1,5 @@
 import { useNavigate, useLocation, useOutletContext } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import '../styles/SettleUp.css'
 import { useState, useEffect } from 'react';
 import SettingsDrawer from '../components/SettingsDrawer';
@@ -7,6 +7,8 @@ import BottomNavbareM from '../components/BottomNavbareM';
 import { useGetGroupsQuery } from '../services/groupAPI';
 import { useGetBalancesQuery, useRecordSettlementMutation } from '../services/settleUpAPI';
 import { useNotification } from '../context/NotificationContext';
+import { fetchUserProfile } from '../services/profileSlice';
+import { settleDebtWallet } from '../services/walletSlice';
 
 function SettleUp() {
   const { isLoggedIn, user: currentUser } = useSelector((state) => state.auth);
@@ -16,6 +18,8 @@ function SettleUp() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const { isDark, toggleTheme } = useOutletContext();
   const { showNotification } = useNotification();
+  const dispatch = useDispatch();
+  const profileUser = useSelector((state) => state.profile.user);
 
   const { data: groupsResponse, isLoading: groupsLoading } = useGetGroupsQuery();
   const groups = groupsResponse?.data || [];
@@ -24,6 +28,12 @@ function SettleUp() {
   const [showQrModal, setShowQrModal] = useState(false);
   const [qrCodeUrl, setQrCodeUrl] = useState('');
   const [activeUpiDebt, setActiveUpiDebt] = useState(null);
+
+  useEffect(() => {
+    if (isLoggedIn) {
+      dispatch(fetchUserProfile());
+    }
+  }, [dispatch, isLoggedIn]);
 
   useEffect(() => {
     if (!selectedGroupId && groups.length > 0) {
@@ -94,6 +104,33 @@ function SettleUp() {
     } catch (error) {
       console.error('Failed to record settlement', error);
       showNotification(error?.data?.message || 'Unable to record settlement', 'error');
+    }
+  };
+
+  const handlePayViaWallet = async (debt) => {
+    const balance = profileUser?.walletBalance || 0;
+    if (balance < debt.amount) {
+      showNotification(`❌ Insufficient wallet balance (${fmt(balance)}). Please top up in your Profile.`, 'error');
+      return;
+    }
+
+    if (!window.confirm(`Are you sure you want to pay ${fmt(debt.amount)} to ${debt.toName || debt.to} via your Wallet?`)) {
+      return;
+    }
+
+    try {
+      await dispatch(settleDebtWallet({
+        groupId: selectedGroupId,
+        to: debt.to,
+        amount: debt.amount
+      })).unwrap();
+
+      showNotification(`👛 Paid ${fmt(debt.amount)} successfully via Wallet!`, 'success');
+      dispatch(fetchUserProfile());
+      await refetchBalances();
+    } catch (error) {
+      console.error('Wallet payment failed:', error);
+      showNotification(error || 'Failed to settle debt via wallet', 'error');
     }
   };
 
@@ -228,9 +265,14 @@ function SettleUp() {
                               </div>
                               <div className="debt-actions-prem">
                                 {isOutgoing && (
-                                  <button className="btn-pay-upi-prem" onClick={() => handlePayViaUpi(debt)}>
-                                    ⚡ UPI QR Pay
-                                  </button>
+                                  <>
+                                    <button className="btn-pay-upi-prem" onClick={() => handlePayViaUpi(debt)}>
+                                      ⚡ UPI QR Pay
+                                    </button>
+                                    <button className="btn-pay-wallet-prem" onClick={() => handlePayViaWallet(debt)}>
+                                      👛 Pay via Wallet
+                                    </button>
+                                  </>
                                 )}
                                 <button className="btn-mark-settled-prem" onClick={() => handleRecordSettlement(debt)} disabled={isRecording}>
                                   {isIncoming ? '✓ Mark Received' : '✓ Mark Paid'}

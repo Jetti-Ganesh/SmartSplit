@@ -20,6 +20,7 @@ exports.getProfile = async (req, res) => {
       user: {
         id: user._id,
         name: user.name,
+        username: user.username || null,
         email: user.email || null,
         phone: user.phone || null,
         avatar: user.avatar || '',
@@ -31,6 +32,7 @@ exports.getProfile = async (req, res) => {
         signupMethod: user.signupMethod,
         twoFactorEnabled: user.twoFactorEnabled || false,
         twoFactorMethod: user.twoFactorMethod || 'email',
+        walletBalance: user.walletBalance || 0,
       },
     });
   } catch (err) {
@@ -67,13 +69,14 @@ exports.verifyPhone = async (req, res) => {
       success: true,
       message: 'Phone number verified successfully.',
       user: {
-        id: user._id, name: user.name, email: user.email || null,
+        id: user._id, name: user.name, username: user.username || null, email: user.email || null,
         phone: user.phone, avatar: user.avatar, defaultUpi: user.defaultUpi,
         upiList: user.upiList, isVerified: user.isVerified,
         isEmailVerified: user.isEmailVerified, isPhoneVerified: user.isPhoneVerified,
         signupMethod: user.signupMethod,
         twoFactorEnabled: user.twoFactorEnabled || false,
         twoFactorMethod: user.twoFactorMethod || 'email',
+        walletBalance: user.walletBalance || 0,
       },
     });
   } catch (err) {
@@ -103,13 +106,14 @@ exports.verifyEmail = async (req, res) => {
       success: true,
       message: 'Email verified successfully.',
       user: {
-        id: user._id, name: user.name, email: user.email,
+        id: user._id, name: user.name, username: user.username || null, email: user.email,
         phone: user.phone || null, avatar: user.avatar, defaultUpi: user.defaultUpi,
         upiList: user.upiList, isVerified: user.isVerified,
         isEmailVerified: user.isEmailVerified, isPhoneVerified: user.isPhoneVerified,
         signupMethod: user.signupMethod,
         twoFactorEnabled: user.twoFactorEnabled || false,
         twoFactorMethod: user.twoFactorMethod || 'email',
+        walletBalance: user.walletBalance || 0,
       },
     });
   } catch (err) {
@@ -168,6 +172,7 @@ exports.updateProfile = async (req, res) => {
       user: {
         id: user._id,
         name: user.name,
+        username: user.username || null,
         email: user.email || null,
         phone: user.phone || null,
         avatar: user.avatar,
@@ -179,6 +184,7 @@ exports.updateProfile = async (req, res) => {
         signupMethod: user.signupMethod,
         twoFactorEnabled: user.twoFactorEnabled || false,
         twoFactorMethod: user.twoFactorMethod || 'email',
+        walletBalance: user.walletBalance || 0,
       },
     });
   } catch (err) {
@@ -209,4 +215,3 @@ exports.verifyContact = async (req, res) => {
     return res.status(500).json({ message: 'Failed to update verification.' });
   }
 };
-

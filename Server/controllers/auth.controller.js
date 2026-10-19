@@ -18,20 +18,24 @@ async function addNotificationToUser(userId, message, type = 'info') {
     { new: true }
   );
 }
-const mailer = require('../utils/mailer');
 // ── Login ─────────────────────────────────────────────
 exports.loginUser = async (req, res) => {
-  const { email, phone, password } = req.body;
+  const { username, email, phone, password } = req.body;
   try {
-    if ((!email && !phone) || !password)
+    if (!process.env.JWT_SECRET) throw new Error('JWT_SECRET must be configured.');
+
+    const identifier = String(username || email || phone || '').trim();
+    if (!identifier || !password)
       return res.status(400).json({ message: 'Credentials and password are required.' });
 
-    let user;
-    if (email) {
-      user = await User.findOne({ email });
+    let user = await User.findOne({ username: identifier.toLowerCase() });
+    if (!user && identifier.includes('@')) {
+      user = await User.findOne({ email: identifier.toLowerCase() });
     } else {
-      const normalized = phone.replace(/\s+/g, '').replace(/^(\+91|0)/, '');
-      user = await User.findOne({ phone: normalized });
+      const normalizedPhone = identifier.replace(/\s+/g, '').replace(/^(\+91|0)/, '');
+      if (!user && /^\d{10,}$/.test(normalizedPhone)) {
+        user = await User.findOne({ phone: normalizedPhone });
+      }
     }
 
     if (!user) return res.status(401).json({ message: 'Invalid credentials.' });
@@ -53,6 +57,7 @@ exports.loginUser = async (req, res) => {
       user: {
         id: user._id,
         name: user.name,
+        username: user.username,
         email: user.email,
         phone: user.phone,
         isEmailVerified: user.isEmailVerified,
@@ -61,94 +66,50 @@ exports.loginUser = async (req, res) => {
       },
     });
   } catch (err) {
+    console.error('Login error:', err);
     res.status(500).json({ message: 'Server error.' });
   }
 };
 
 // ── Sign Up ────────────────────────────────────────────
 exports.signUpUser = async (req, res) => {
-  const { name, email, phone, password, signupMethod } = req.body;
+  const { name, username, password } = req.body;
   try {
-    if (!name || !password)
-      return res.status(400).json({ message: 'Name and password are required.' });
+    if (!process.env.JWT_SECRET) throw new Error('JWT_SECRET must be configured.');
+
+    const normalizedName = String(name || '').trim();
+    const normalizedUsername = String(username || '').trim().toLowerCase();
+    if (!normalizedName || !normalizedUsername || typeof password !== 'string')
+      return res.status(400).json({ message: 'Name, username, and password are required.' });
+    if (!/^[a-z0-9_]{3,30}$/.test(normalizedUsername))
+      return res.status(400).json({ message: 'Username must be 3-30 characters using letters, numbers, or underscores.' });
     if (password.length < 6)
       return res.status(400).json({ message: 'Password must be at least 6 characters.' });
-    if (signupMethod === 'email' && !email)
-      return res.status(400).json({ message: 'Email is required.' });
-    if (signupMethod === 'phone' && !phone)
-      return res.status(400).json({ message: 'Phone number is required.' });
 
-    const identifier = signupMethod === 'email'
-      ? String(email).trim().toLowerCase()
-      : String(phone).replace(/\D/g, '').slice(-10);
-
-    const Otp = require('../models/otp.model');
-    let isVerified = false;
-
-    try {
-      const otpRecord = await Otp.findOne({ identifier, verified: true });
-      if (otpRecord) {
-        isVerified = true;
-        await Otp.deleteMany({ identifier });
-        console.log(`✅ MongoDB verified OTP found and cleared for signup identifier: ${identifier}`);
-      }
-    } catch (dbErr) {
-      console.error('⚠️ DB check for verified OTP failed:', dbErr.message);
-    }
-
-    if (!isVerified) {
-      if (req.session?.otpVerified && req.session.otpIdentifier === identifier) {
-        isVerified = true;
-        console.log(`✅ Session verified OTP found for signup identifier: ${identifier}`);
-      }
-    }
-
-    if (!isVerified) {
-      return res.status(400).json({ message: 'OTP not verified for this contact. Please verify before signing up.' });
-    }
-
-    // Check duplicates
-    if (email) {
-      const exists = await User.findOne({ email });
-      if (exists) return res.status(409).json({ message: 'Email already registered.' });
-    }
-    if (phone) {
-      const normalized = phone.replace(/\s+/g, '').replace(/^(\+91|0)/, '');
-      const exists = await User.findOne({ phone: normalized });
-      if (exists) return res.status(409).json({ message: 'Phone number already registered.' });
-    }
+    const exists = await User.findOne({ username: normalizedUsername });
+    if (exists) return res.status(409).json({ message: 'Username already registered.' });
 
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
     const userData = {
-      name,
+      name: normalizedName,
+      username: normalizedUsername,
       password: hashedPassword,
-      signupMethod: signupMethod || 'email',
+      signupMethod: 'username',
     };
-
-    if (signupMethod === 'email') {
-      userData.email = email;
-      userData.isEmailVerified = true;
-    } else {
-      userData.phone = phone.replace(/\s+/g, '').replace(/^(\+91|0)/, '');
-      userData.isPhoneVerified = true;
-    }
 
     const user = new User(userData);
     await user.save();
 
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
-    req.session.otp = null;
-    req.session.otpVerified = false;
-    req.session.otpIdentifier = null;
-    await mailer.sendWelcomeEmail(email , name); // Send welcome email with name as part before @
     res.status(201).json({
       message: 'Account created successfully.',
       token,
       user: {
         id: user._id,
         name: user.name,
+        username: user.username,
         email: user.email,
         phone: user.phone,
         isEmailVerified: user.isEmailVerified,
@@ -158,6 +119,9 @@ exports.signUpUser = async (req, res) => {
     });
   } catch (err) {
     console.error('Signup error:', err);
+    if (err.code === 11000 && err.keyPattern?.username) {
+      return res.status(409).json({ message: 'Username already registered.' });
+    }
     res.status(500).json({ message: err.message || 'Server error.' });
   }
 };
@@ -202,4 +166,3 @@ exports.disable2FA = async (req, res) => {
     return res.status(500).json({ message: 'Server error.' });
   }
 };
-

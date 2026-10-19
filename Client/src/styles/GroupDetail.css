@@ -1635,3 +1635,301 @@ body.light .enhanced-modal .close-btn {
 .premium-add-btn:active {
   transform: translateY(0);
 }
+
+/* =============================================
+   SETTLE UP MODAL PREMIUM STYLES FOR GROUP DETAIL
+   ============================================= */
+.settle-up-modal {
+  max-width: 500px !important;
+}
+
+.debts-list-premium-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+}
+
+.debt-item-premium-detail {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border-color);
+  transition: all 0.24s cubic-bezier(0.4, 0, 0.2, 1);
+  text-align: left;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.debt-item-premium-detail:hover {
+  transform: translateX(4px);
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(139, 92, 246, 0.2);
+}
+
+.debt-avatar-prem-detail {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #8b5cf6, #ff5252);
+  color: white;
+  font-weight: 700;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 4px 10px rgba(124, 77, 255, 0.2);
+}
+
+.debt-item-premium-detail.incoming .debt-avatar-prem-detail {
+  background: linear-gradient(135deg, #10b981, #00b0ff);
+  box-shadow: 0 4px 10px rgba(16, 185, 129, 0.2);
+}
+
+.debt-details-prem-detail {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.debt-desc-prem-detail {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-color);
+}
+
+.debt-meta-prem-detail {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.debt-actions-prem-detail {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+
+.btn-pay-upi-prem-detail {
+  background: linear-gradient(90deg, #8b5cf6, #7c3aed);
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 12px;
+  box-shadow: 0 4px 8px rgba(139, 92, 246, 0.2);
+  transition: all 0.2s ease;
+}
+
+.btn-pay-upi-prem-detail:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 12px rgba(139, 92, 246, 0.3);
+}
+
+.btn-pay-wallet-prem-detail {
+  background: linear-gradient(90deg, #ec4899, #d946ef);
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 12px;
+  box-shadow: 0 4px 8px rgba(236, 72, 153, 0.2);
+  transition: all 0.2s ease;
+}
+
+.btn-pay-wallet-prem-detail:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 12px rgba(236, 72, 153, 0.3);
+}
+
+.btn-mark-settled-prem-detail {
+  background: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-color);
+  padding: 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 12px;
+  transition: all 0.2s ease;
+}
+
+.btn-mark-settled-prem-detail:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: #10b981;
+}
+
+.debt-amount-prem-detail {
+  font-size: 16px;
+  font-weight: 800;
+  font-family: var(--font-display);
+}
+
+.incoming .debt-amount-prem-detail {
+  color: #10b981;
+}
+
+.outgoing .debt-amount-prem-detail {
+  color: #ef4444;
+}
+
+.empty-state-premium-detail {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 30px 10px;
+  text-align: center;
+  gap: 10px;
+}
+
+.empty-state-premium-detail h4 {
+  font-size: 16px;
+  margin: 0;
+  font-weight: 700;
+}
+
+.empty-state-premium-detail p {
+  font-size: 13px;
+  color: var(--text-muted);
+  max-width: 250px;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* UPI QR Modal styles matching SettleUp.css */
+.qr-modal-content {
+  background: linear-gradient(135deg, rgba(20, 20, 25, 0.98), rgba(10, 10, 15, 0.99));
+  border-radius: 28px;
+  width: min(90vw, 440px);
+  padding: 30px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(124, 77, 255, 0.16);
+  backdrop-filter: blur(20px);
+  color: white;
+  text-align: center;
+  position: relative;
+  margin: auto;
+}
+
+body.light .qr-modal-content {
+  background: white;
+  color: #0f172a;
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+.qr-modal-header {
+  position: relative;
+  margin-bottom: 24px;
+}
+
+.qr-modal-header h3 {
+  font-size: 20px;
+  font-weight: 800;
+  margin: 0;
+}
+
+.qr-modal-header p {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin: 6px 0 0;
+}
+
+.qr-code-wrapper {
+  width: 200px;
+  height: 200px;
+  margin: 0 auto 20px;
+  background: white;
+  border-radius: 20px;
+  padding: 16px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.upi-qr-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.qr-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(124, 77, 255, 0.1);
+  border-top-color: #8b5cf6;
+  border-radius: 50%;
+  animation: spin 1s infinite linear;
+}
+
+.qr-amount-pill {
+  display: inline-block;
+  font-size: 24px;
+  font-weight: 800;
+  background: rgba(124, 77, 255, 0.08);
+  color: #8b5cf6;
+  padding: 8px 20px;
+  border-radius: 16px;
+  margin-bottom: 16px;
+  font-family: var(--font-display);
+}
+
+.qr-instructions {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.6;
+  margin: 0 10px 24px;
+}
+
+.qr-buttons-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.btn-qr-success {
+  background: linear-gradient(90deg, #10b981, #059669);
+  color: white;
+  border: none;
+  padding: 14px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.22s ease;
+  box-shadow: 0 6px 16px rgba(16, 185, 129, 0.25);
+  width: 100%;
+}
+
+.btn-qr-success:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(16, 185, 129, 0.35);
+}
+
+.btn-qr-cancel {
+  background: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
+  padding: 12px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+}
+
+.btn-qr-cancel:hover {
+  color: var(--text-color);
+  background: rgba(255, 255, 255, 0.03);
+}

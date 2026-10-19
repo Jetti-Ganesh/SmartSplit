@@ -34,33 +34,6 @@
   font-size: 14px;
 }
 
-.google-btn {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  padding: 12px;
-  border: 1px solid var(--border); /* ✅ was #e0e0e0 */
-  border-radius: 10px;
-  background: var(--bg-card);      /* ✅ was #fff */
-  font-size: 15px;
-  font-weight: 500;
-  color: var(--text-primary);      /* ✅ was #333 */
-  cursor: pointer;
-  transition: background 0.2s, box-shadow 0.2s;
-}
-
-.google-btn:hover {
-  background: var(--bg-secondary);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-}
-
-.google-icon {
-  width: 20px;
-  height: 20px;
-}
-
 .divider {
   display: flex;
   align-items: center;

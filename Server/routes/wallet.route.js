@@ -5,13 +5,16 @@ const {
  getWalletTransactions,
  topUp,
  getSettlements,
-
-} = require('../controllers/settleUp.controller');
+ withdraw,
+ sendMoney
+} = require('../controllers/walletTransaction.controller.js');
 
 router.use(protect);
 
 router.get('/wallet', getWalletTransactions);
-router.post('wallet/topup', topUp);
-router.get('/settlements', getSettlements);
+router.post('/wallet/topup', topUp);
+router.post('/wallet/withdraw', withdraw);
+router.post('/wallet/send', sendMoney);
+router.post('/wallet/settle', getSettlements);
 
 module.exports = router;

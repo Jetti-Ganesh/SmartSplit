@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
+import { apiUrl } from '../services/api'
 import '../styles/Login-SignUp.css'
 axios.defaults.withCredentials = true;
 
@@ -64,7 +65,7 @@ function ForgotPassword() {
     setStep1Loading(true)
     try {
       const body = isEmail ? { email: id } : { phone: id }
-      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/forgot-password`, body)
+      const res = await axios.post(apiUrl('/api/forgot-password'), body)
       if (res.data.devOtp) setDevOtp(res.data.devOtp)
       setResendTimer(30)
       setStep(2)
@@ -82,7 +83,7 @@ function ForgotPassword() {
     try {
       const id = getIdentifier()
       const body = isEmail ? { email: id } : { phone: id }
-      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/forgot-password`, body)
+      const res = await axios.post(apiUrl('/api/forgot-password'), body)
       if (res.data.devOtp) setDevOtp(res.data.devOtp)
     } catch (err) {
       setStep2Error(err.response?.data?.message || 'Failed to resend OTP.')
@@ -95,7 +96,7 @@ function ForgotPassword() {
     if (!otp || otp.length < 6) return setStep2Error('Please enter the 6-digit OTP.')
     setStep2Loading(true)
     try {
-      await axios.post(`${import.meta.env.VITE_API_URL}/api/verify-reset-otp`, { otp })
+      await axios.post(apiUrl('/api/verify-reset-otp'), { otp })
       setDevOtp('')
       setStep(3)
     } catch (err) {
@@ -114,7 +115,7 @@ function ForgotPassword() {
 
     setStep3Loading(true)
     try {
-      await axios.post(`${import.meta.env.VITE_API_URL}/api/reset-password`, { newPassword, confirmPassword })
+      await axios.post(apiUrl('/api/reset-password'), { newPassword, confirmPassword })
       setStep3Success('🎉 Password reset! Redirecting to login...')
       setTimeout(() => navigate('/Login'), 2000)
     } catch (err) {

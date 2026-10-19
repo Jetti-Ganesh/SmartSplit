@@ -636,3 +636,21 @@ body.light .qr-modal-content {
     align-self: flex-end;
   }
 }
+
+.btn-pay-wallet-prem {
+  background: linear-gradient(90deg, #ec4899, #d946ef);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 13px;
+  box-shadow: 0 4px 10px rgba(236, 72, 153, 0.25);
+  transition: all 0.2s ease;
+}
+
+.btn-pay-wallet-prem:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(236, 72, 153, 0.35);
+}

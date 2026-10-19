@@ -10,10 +10,21 @@ import { useNavigate, useLocation, useOutletContext } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
 import { logout } from "../services/authSlice";
+import { apiUrl } from "../services/api";
 import { fetchUserProfile, updateUserProfile, clearSuccess } from "../services/profileSlice";
+import {
+  fetchWalletTransactions,
+  topUpWallet,
+  withdrawWallet,
+  sendMoneyWallet,
+  clearWalletError,
+  clearWalletSuccess
+} from "../services/walletSlice";
 import ThemeToggle from "../components/ThemeToggle";
 import BottomNavbareM from "../components/BottomNavbareM";
 import SettingsDrawer from "../components/SettingsDrawer";
+import { useNotification } from "../context/NotificationContext";
+import walletImg from "../assets/wallet_illustration.png";
 import "../styles/Profile.css";
 
 
@@ -340,7 +351,7 @@ function VerifyOtherModal({ profileUser, setShowVerifyPopup }) {
       }
 
       const payload = verifyType === 'phone' ? { phone: formattedInput } : { email: formattedInput };
-      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/send-otp`, payload, {
+      const res = await axios.post(apiUrl('/api/send-otp'), payload, {
         withCredentials: true
       });
 
@@ -368,7 +379,7 @@ function VerifyOtherModal({ profileUser, setShowVerifyPopup }) {
         email: verifyType === 'email' ? verifyInput.trim().toLowerCase() : undefined,
         phone: verifyType === 'phone' ? digits : undefined,
       };
-      await axios.post(`${import.meta.env.VITE_API_URL}/api/verify-otp`, verifyPayload, {
+      await axios.post(apiUrl('/api/verify-otp'), verifyPayload, {
         withCredentials: true
       });
 
@@ -382,7 +393,7 @@ function VerifyOtherModal({ profileUser, setShowVerifyPopup }) {
       // 2. Persist to DB using new PATCH /api/profile/verify-contact
       const token = localStorage.getItem('token');
       const res = await axios.patch(
-        `${import.meta.env.VITE_API_URL}/api/profile/verify-contact`,
+        apiUrl('/api/profile/verify-contact'),
         { type: verifyType, value: verifiedValue },
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -567,6 +578,83 @@ export default function ProfilePage() {
   const dispatch = useDispatch();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
+  // ── Wallet State ──────────────────────────────────────────
+  const { showNotification } = useNotification();
+  const [isWalletExpanded, setIsWalletExpanded] = useState(false);
+  const [showBalance, setShowBalance] = useState(true);
+  const [activeWalletModal, setActiveWalletModal] = useState(null); // 'topup' | 'send' | 'withdraw'
+  const [walletAmount, setWalletAmount] = useState('');
+  const [walletEmail, setWalletEmail] = useState('');
+  const [walletUpiId, setWalletUpiId] = useState('');
+
+  const {
+    transactions,
+    loading: walletLoading,
+    error: walletError,
+    success: walletSuccess,
+    successMessage: walletSuccessMessage
+  } = useSelector(state => state.wallet);
+
+  useEffect(() => {
+    dispatch(fetchWalletTransactions());
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (walletSuccess && walletSuccessMessage) {
+      showNotification(walletSuccessMessage, 'success');
+      dispatch(clearWalletSuccess());
+      setActiveWalletModal(null);
+      setWalletAmount('');
+      setWalletEmail('');
+      setWalletUpiId('');
+    }
+  }, [walletSuccess, walletSuccessMessage, dispatch, showNotification]);
+
+  useEffect(() => {
+    if (walletError) {
+      showNotification(walletError, 'error');
+      dispatch(clearWalletError());
+    }
+  }, [walletError, dispatch, showNotification]);
+
+  const handleTopUp = (e) => {
+    e.preventDefault();
+    const amount = parseFloat(walletAmount);
+    if (isNaN(amount) || amount <= 0) {
+      showNotification('Please enter a valid amount.', 'error');
+      return;
+    }
+    dispatch(topUpWallet({ amount }));
+  };
+
+  const handleSendMoney = (e) => {
+    e.preventDefault();
+    const amount = parseFloat(walletAmount);
+    if (!walletEmail.trim()) {
+      showNotification('Please enter a recipient email address.', 'error');
+      return;
+    }
+    if (isNaN(amount) || amount <= 0) {
+      showNotification('Please enter a valid amount.', 'error');
+      return;
+    }
+    dispatch(sendMoneyWallet({ email: walletEmail.trim(), amount }));
+  };
+
+  const handleWithdraw = (e) => {
+    e.preventDefault();
+    const amount = parseFloat(walletAmount);
+    if (!walletUpiId.trim()) {
+      showNotification('Please enter your UPI ID.', 'error');
+      return;
+    }
+    if (isNaN(amount) || amount <= 0) {
+      showNotification('Please enter a valid amount.', 'error');
+      return;
+    }
+    dispatch(withdrawWallet({ amount, upiId: walletUpiId.trim() }));
+  };
+
   // ── Verify modal state ──────────────────────────────────────
   const [verifyModal, setVerifyModal] = useState(null); // 'phone' | 'email' | null
   const [verifyInput, setVerifyInput] = useState('');
@@ -597,7 +685,7 @@ export default function ProfilePage() {
     setVerifyError(''); setVerifyLoading(true);
     try {
       const payload = verifyModal === 'phone' ? { phone: verifyInput } : { email: verifyInput };
-      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/send-otp`, payload,
+      const res = await axios.post(apiUrl('/api/send-otp'), payload,
         { withCredentials: true });
       setVerifyTimer(30);
       setVerifyStep(2);
@@ -616,14 +704,14 @@ export default function ProfilePage() {
         email: verifyModal === 'email' ? verifyInput.trim().toLowerCase() : undefined,
         phone: verifyModal === 'phone' ? verifyInput.replace(/\D/g, '').slice(-10) : undefined,
       };
-      await axios.post(`${import.meta.env.VITE_API_URL}/api/verify-otp`, verifyPayload,
+      await axios.post(apiUrl('/api/verify-otp'), verifyPayload,
         { withCredentials: true });
 
       // Then persist to DB via profile endpoint
       const token = localStorage.getItem('token');
       const endpoint = verifyModal === 'phone'
-        ? `${import.meta.env.VITE_API_URL}/api/profile/verify-phone`
-        : `${import.meta.env.VITE_API_URL}/api/profile/verify-email`;
+        ? apiUrl('/api/profile/verify-phone')
+        : apiUrl('/api/profile/verify-email');
       const payload = verifyModal === 'phone'
         ? { phone: verifyInput }
         : { email: verifyInput };
@@ -875,28 +963,114 @@ export default function ProfilePage() {
             );
           })()}
 
-          {/* ── 2. Statistics Bento Grid ── */}
-          <section className="stats-bento">
-            <div className="stat-card-premium">
-              <div className="stat-icon-wrap" style={{ color: '#00e5ff' }}>📊</div>
-              <div className="stat-value-premium">₹1.2L</div>
-              <div className="stat-label-premium">Total Volume</div>
+          {/* ── Wallet Card ── */}
+          <section className={`wallet-card-premium ${isWalletExpanded ? 'expanded' : ''}`}>
+            <div className="wallet-card-inner">
+              <div className="wallet-header">
+                <div className="wallet-title-group">
+                  <span className="wallet-title-icon">👛</span>
+                  <h2>My Wallet</h2>
+                </div>
+                <div className="wallet-more-actions">
+                  <button className="wallet-dots-btn">•••</button>
+                </div>
+              </div>
+
+              <div className="wallet-body">
+                <div className="wallet-balance-info">
+                  <div className="wallet-balance-label">
+                    <span>Total Balance</span>
+                    <button className="balance-toggle-btn" onClick={() => setShowBalance(!showBalance)}>
+                      {showBalance ? '👁️' : '👁️‍🗨️'}
+                    </button>
+                  </div>
+                  <div className="wallet-balance-amount">
+                    {showBalance ? (
+                      `₹ ${(displayUser.walletBalance || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}`
+                    ) : (
+                      '••••••'
+                    )}
+                  </div>
+                  <div className="wallet-trend">
+                    <span className="trend-positive">+₹ 1,250.50 (10.12%)</span> this month
+                  </div>
+                </div>
+                <div className="wallet-card-chip-group">
+                  <div className="emv-chip">
+                    <div className="chip-line horizontal"></div>
+                    <div className="chip-line vertical"></div>
+                  </div>
+                  <div className="contactless-icon">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="wallet-actions-row">
+                <button className="wallet-action-btn-circle" onClick={() => { setActiveWalletModal('topup'); setWalletAmount(''); }}>
+                  <div className="action-circle bg-purple">+</div>
+                  <span>Add Money</span>
+                </button>
+                <button className="wallet-action-btn-circle" onClick={() => { setActiveWalletModal('send'); setWalletAmount(''); setWalletEmail(''); }}>
+                  <div className="action-circle bg-blue">↗</div>
+                  <span>Send Money</span>
+                </button>
+                <button className="wallet-action-btn-circle" onClick={() => { setActiveWalletModal('withdraw'); setWalletAmount(''); setWalletUpiId(''); }}>
+                  <div className="action-circle bg-green">↓</div>
+                  <span>Withdraw</span>
+                </button>
+                <button className="wallet-action-btn-circle" onClick={() => setIsWalletExpanded(!isWalletExpanded)}>
+                  <div className="action-circle bg-orange">📋</div>
+                  <span>History</span>
+                </button>
+              </div>
             </div>
-            <div className="stat-card-premium">
-              <div className="stat-icon-wrap" style={{ color: '#10d9a0' }}>🤝</div>
-              <div className="stat-value-premium">92</div>
-              <div className="stat-label-premium">Fairness Score</div>
-            </div>
-            <div className="stat-card-premium">
-              <div className="stat-icon-wrap" style={{ color: '#7c3aed' }}>👥</div>
-              <div className="stat-value-premium">08</div>
-              <div className="stat-label-premium">Active Groups</div>
-            </div>
-            <div className="stat-card-premium">
-              <div className="stat-icon-wrap" style={{ color: '#f0b429' }}>⭐</div>
-              <div className="stat-value-premium">4.9</div>
-              <div className="stat-label-premium">Member Rating</div>
-            </div>
+
+            {/* Transaction History Expandable List */}
+            {isWalletExpanded && (
+              <div className="wallet-transactions-drawer">
+                <div className="drawer-header">
+                  <h3>Transaction History</h3>
+                  <span className="drawer-count">{transactions.length} items</span>
+                </div>
+                <div className="drawer-list scrollable">
+                  {transactions.length === 0 ? (
+                    <div className="drawer-empty-state">
+                      <span>📭</span>
+                      <p>No wallet transactions found.</p>
+                    </div>
+                  ) : (
+                    transactions.map((tx) => {
+                      const isCredit = tx.transactionType === 'credit';
+                      return (
+                        <div key={tx._id} className="tx-item">
+                          <div className={`tx-icon ${isCredit ? 'tx-credit' : 'tx-debit'}`}>
+                            {isCredit ? '↓' : '↑'}
+                          </div>
+                          <div className="tx-details">
+                            <span className="tx-desc">{tx.description}</span>
+                            <span className="tx-date">
+                              {new Date(tx.createdAt).toLocaleDateString(undefined, {
+                                month: 'short',
+                                day: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                              })}
+                            </span>
+                          </div>
+                          <span className={`tx-amount ${isCredit ? 'tx-credit-amt' : 'tx-debit-amt'}`}>
+                            {isCredit ? '+' : '-'}₹ {tx.amount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                          </span>
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+              </div>
+            )}
           </section>
 
           {/* ── 3. Information Grid ── */}
@@ -1136,6 +1310,127 @@ export default function ProfilePage() {
                 </div>
               </>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* ── Wallet Action Modals ── */}
+      {activeWalletModal === 'topup' && (
+        <div className="modal-overlay" onClick={() => setActiveWalletModal(null)}>
+          <div className="modal-sheet" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-handle" />
+            <div className="modal-title">Add Money to Wallet</div>
+            <form onSubmit={handleTopUp}>
+              <div className="modal-field" style={{ margin: '16px 0' }}>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', marginBottom: '8px', color: 'var(--text-main)' }}>Amount (₹)</label>
+                <input
+                  type="number"
+                  required
+                  min="1"
+                  className="pill-input"
+                  style={{ width: '100%', boxSizing: 'border-box' }}
+                  placeholder="Enter amount to add"
+                  value={walletAmount}
+                  onChange={(e) => setWalletAmount(e.target.value)}
+                />
+              </div>
+              <div className="modal-actions" style={{ display: 'flex', gap: '12px', marginTop: '24px' }}>
+                <button type="button" className="modal-btn modal-cancel" style={{ flex: 1, padding: '12px', borderRadius: '25px', border: '1px solid var(--border-color)', background: 'transparent', color: 'var(--text-main)', cursor: 'pointer', fontWeight: '600' }} onClick={() => setActiveWalletModal(null)}>
+                  Cancel
+                </button>
+                <button type="submit" className="modal-btn modal-save" style={{ flex: 1, padding: '12px', borderRadius: '25px', border: 'none', background: '#7c3aed', color: 'white', cursor: 'pointer', fontWeight: '600', boxShadow: '0 4px 12px rgba(124, 58, 237, 0.3)' }} disabled={walletLoading}>
+                  {walletLoading ? 'Processing...' : 'Confirm'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {activeWalletModal === 'send' && (
+        <div className="modal-overlay" onClick={() => setActiveWalletModal(null)}>
+          <div className="modal-sheet" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-handle" />
+            <div className="modal-title">Send Money (P2P Transfer)</div>
+            <form onSubmit={handleSendMoney}>
+              <div className="modal-field" style={{ margin: '16px 0' }}>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', marginBottom: '8px', color: 'var(--text-main)' }}>Recipient's Email Address</label>
+                <input
+                  type="email"
+                  required
+                  className="pill-input"
+                  style={{ width: '100%', boxSizing: 'border-box' }}
+                  placeholder="enter.recipient@email.com"
+                  value={walletEmail}
+                  onChange={(e) => setWalletEmail(e.target.value)}
+                />
+              </div>
+              <div className="modal-field" style={{ margin: '16px 0' }}>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', marginBottom: '8px', color: 'var(--text-main)' }}>Amount (₹)</label>
+                <input
+                  type="number"
+                  required
+                  min="1"
+                  className="pill-input"
+                  style={{ width: '100%', boxSizing: 'border-box' }}
+                  placeholder="Enter amount to send"
+                  value={walletAmount}
+                  onChange={(e) => setWalletAmount(e.target.value)}
+                />
+              </div>
+              <div className="modal-actions" style={{ display: 'flex', gap: '12px', marginTop: '24px' }}>
+                <button type="button" className="modal-btn modal-cancel" style={{ flex: 1, padding: '12px', borderRadius: '25px', border: '1px solid var(--border-color)', background: 'transparent', color: 'var(--text-main)', cursor: 'pointer', fontWeight: '600' }} onClick={() => setActiveWalletModal(null)}>
+                  Cancel
+                </button>
+                <button type="submit" className="modal-btn modal-save" style={{ flex: 1, padding: '12px', borderRadius: '25px', border: 'none', background: '#3b82f6', color: 'white', cursor: 'pointer', fontWeight: '600', boxShadow: '0 4px 12px rgba(59, 130, 246, 0.3)' }} disabled={walletLoading}>
+                  {walletLoading ? 'Sending...' : 'Send Money'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {activeWalletModal === 'withdraw' && (
+        <div className="modal-overlay" onClick={() => setActiveWalletModal(null)}>
+          <div className="modal-sheet" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-handle" />
+            <div className="modal-title">Withdraw Wallet Balance</div>
+            <form onSubmit={handleWithdraw}>
+              <div className="modal-field" style={{ margin: '16px 0' }}>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', marginBottom: '8px', color: 'var(--text-main)' }}>Destination UPI ID</label>
+                <input
+                  type="text"
+                  required
+                  className="pill-input"
+                  style={{ width: '100%', boxSizing: 'border-box' }}
+                  placeholder="yourname@upi"
+                  value={walletUpiId}
+                  onChange={(e) => setWalletUpiId(e.target.value)}
+                />
+              </div>
+              <div className="modal-field" style={{ margin: '16px 0' }}>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', marginBottom: '8px', color: 'var(--text-main)' }}>Amount (₹)</label>
+                <input
+                  type="number"
+                  required
+                  min="1"
+                  className="pill-input"
+                  style={{ width: '100%', boxSizing: 'border-box' }}
+                  placeholder="Enter amount to withdraw"
+                  value={walletAmount}
+                  onChange={(e) => setWalletAmount(e.target.value)}
+                />
+              </div>
+              <div className="modal-actions" style={{ display: 'flex', gap: '12px', marginTop: '24px' }}>
+                <button type="button" className="modal-btn modal-cancel" style={{ flex: 1, padding: '12px', borderRadius: '25px', border: '1px solid var(--border-color)', background: 'transparent', color: 'var(--text-main)', cursor: 'pointer', fontWeight: '600' }} onClick={() => setActiveWalletModal(null)}>
+                  Cancel
+                </button>
+                <button type="submit" className="modal-btn modal-save" style={{ flex: 1, padding: '12px', borderRadius: '25px', border: 'none', background: '#10b981', color: 'white', cursor: 'pointer', fontWeight: '600', boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)' }} disabled={walletLoading}>
+                  {walletLoading ? 'Processing...' : 'Withdraw'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

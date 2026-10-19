@@ -211,36 +211,6 @@
   font-size: 13px;
 }
 
-/* Google button */
-.google-btn {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  padding: 12px;
-  border: 1px solid var(--border);
-  border-radius: 30px;
-  background: var(--bg-card);
-  font-size: 15px;
-  font-weight: 500;
-  color: var(--text-primary);
-  cursor: pointer;
-  transition: all 0.3s ease;
-  margin-bottom: 4px;
-}
-
-.google-btn:hover {
-  background: var(--bg-primary);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
-  transform: translateY(-1px);
-}
-
-.google-icon {
-  width: 20px;
-  height: 20px;
-}
-
 /* Divider */
 .divider {
   display: flex;
@@ -309,6 +279,7 @@
 .pill-input.has-left-icon  { padding-left: 45px; }
 .pill-input.has-both-icons { padding-left: 45px; padding-right: 65px; }
 .pill-input.has-right-btn  { padding-left: 45px; padding-right: 65px; }
+.pill-input.password-input { padding-right: 70px; }
 
 .pill-input::placeholder { color: var(--text-muted); }
 
@@ -334,6 +305,7 @@
 .left-icon  { left: 18px; pointer-events: none; }
 .right-icon { right: 18px !important; left: auto !important; cursor: pointer; background: transparent; border: none; padding: 0; outline: none; width: 24px; height: 24px; }
 .right-icon:hover { color: #8b5cf6; }
+.right-icon.password-toggle { width: auto; min-width: 40px; }
 .input-wrapper:focus-within .left-icon { color: #8b5cf6; }
 
 .verify-btn-inside {

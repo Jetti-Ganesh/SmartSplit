@@ -1,46 +1,49 @@
-// db/db.js
 const mongoose = require('mongoose');
 const dns = require('dns');
-dns.setServers(['1.1.1.1','8.8.8.8']);
-const connectDB = async () => {
-  try {
-    await mongoose.connect(process.env.MONGO_URI); // ← no options needed
-    console.log('MongoDB connected');
-    
-    // Clean up any legacy email/phone records set to null or empty string so unique sparse index functions correctly
-    try {
-      const db = mongoose.connection.db;
-      
-      // Unset null/empty fields
-      await db.collection('users').updateMany({ email: null }, { $unset: { email: "" } });
-      await db.collection('users').updateMany({ email: "" }, { $unset: { email: "" } });
-      await db.collection('users').updateMany({ phone: null }, { $unset: { phone: "" } });
-      await db.collection('users').updateMany({ phone: "" }, { $unset: { phone: "" } });
 
-      // Drop old non-sparse unique indexes
-      try {
-        await db.collection('users').dropIndex('email_1');
-      } catch (e) {
-        
-      }
+dns.setServers(['1.1.1.1', '8.8.8.8']);
 
-      try {
-        await db.collection('users').dropIndex('phone_1');
-      } catch (e) {
-        
-      }
+let connectionPromise;
 
-      // Recreate indexes in Mongoose to make sure sparse is applied immediately
-      const User = require('../models/user.model');
-      await User.createIndexes();
+async function connectDB() {
+  if (mongoose.connection.readyState === 1) return;
+  if (mongoose.connection.readyState !== 2) connectionPromise = null;
 
-    } catch (cleanErr) {
-      console.warn('Non-blocking legacy db index cleanup warning:', cleanErr.message);
-    }
-  } catch (err) {
-    console.error('Database connection error:', err);
-    process.exit(1);
+  if (!process.env.MONGO_URI) {
+    throw new Error('MONGO_URI must be configured.');
   }
-};
+
+  if (!connectionPromise) {
+    connectionPromise = mongoose.connect(process.env.MONGO_URI).then(async () => {
+      console.log('MongoDB connected');
+
+      try {
+        const db = mongoose.connection.db;
+        await db.collection('users').updateMany({ email: null }, { $unset: { email: '' } });
+        await db.collection('users').updateMany({ email: '' }, { $unset: { email: '' } });
+        await db.collection('users').updateMany({ phone: null }, { $unset: { phone: '' } });
+        await db.collection('users').updateMany({ phone: '' }, { $unset: { phone: '' } });
+
+        for (const indexName of ['email_1', 'phone_1']) {
+          try {
+            await db.collection('users').dropIndex(indexName);
+          } catch (error) {
+            if (error.codeName !== 'IndexNotFound') throw error;
+          }
+        }
+
+        const User = require('../models/user.model');
+        await User.createIndexes();
+      } catch (cleanupError) {
+        console.warn('Non-blocking legacy database cleanup warning:', cleanupError.message);
+      }
+    }).catch((error) => {
+      connectionPromise = null;
+      throw error;
+    });
+  }
+
+  await connectionPromise;
+}
 
 module.exports = connectDB;

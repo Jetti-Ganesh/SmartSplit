@@ -5,12 +5,12 @@ const app = express();
 const cors = require('cors');
 const session = require('express-session');
 const MongoStore = require('connect-mongo').default; 
+const connectDB = require("./db/db");
 
 const loginRoutes = require("./routes/login.route");
 const signUpRoutes = require("./routes/signUp.route");
 const verifyUserRoutes = require("./routes/verifyUser.route");
 const groupRoutes = require("./routes/group.route");
-const googleRoutes = require("./routes/google.route");
 const profileRoutes = require("./routes/profile.route");
 const analyticsRoutes = require("./routes/analytics.routes");
 const expensesRoutes = require("./routes/expenses.route");
@@ -19,68 +19,72 @@ const notificationsRoutes = require("./routes/notifications.route");
 const settleUpRoutes = require("./routes/settlup.route"); // ← add this 
 const walletRoutes = require("./routes/wallet.route"); // ← add this
 
-app.use(session({
-  secret: "My_Secret",
-  resave: false,
-  saveUninitialized: true,
-  store: new MongoStore({
-    mongoUrl: process.env.MONGO_URI,  // ← USE YOUR MONGO DB
-    touchAfter: 24 * 3600  // Lazy session update
-  }),
-  cookie: {
-    secure: false,      // Must be false for non-HTTPS (localhost)
-    sameSite: 'lax',    // Works well for local development
-    httpOnly: true,
-    maxAge: 600000   // Prevents client-side JS from reading the cookie
-  } //session expires in 10mins
-}));
-const allowedOrigin = process.env.CLIENT_URL || 'http://localhost:5173';
+app.set('trust proxy', 1);
 
-app.use(cors({
-  origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps, curl, postman)
-    if (!origin) return callback(null, true);
-
-    // Normalize both by stripping any trailing slash
-    const normalizedOrigin = origin.replace(/\/$/, "");
-    const normalizedAllowed = allowedOrigin.replace(/\/$/, "");
-
-    if (
-      normalizedOrigin === normalizedAllowed ||
-      normalizedOrigin === 'http://localhost:5173' ||
-      normalizedOrigin === 'http://localhost:5000'
-    ) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  credentials: true
-}));
-
-// Increase JSON payload limit to handle base64 images (up to 5MB)
 app.use(express.json({ limit: '5mb' }));
 app.use(express.urlencoded({ limit: '5mb', extended: true }));
+
+let sessionMiddleware;
+
+app.use('/api', async (req, res, next) => {
+  try {
+    await connectDB();
+
+    if (!sessionMiddleware) {
+      const sessionSecret = process.env.SESSION_SECRET || process.env.JWT_SECRET;
+      if (!sessionSecret) {
+        throw new Error('SESSION_SECRET or JWT_SECRET must be configured.');
+      }
+
+      sessionMiddleware = session({
+        secret: sessionSecret,
+        resave: false,
+        saveUninitialized: false,
+        store: MongoStore.create({
+          mongoUrl: process.env.MONGO_URI,
+          touchAfter: 24 * 3600
+        }),
+        cookie: {
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'lax',
+          httpOnly: true,
+          maxAge: 600000
+        }
+      });
+    }
+
+    const requestOrigin = req.get('origin');
+    const allowedOrigins = [
+      process.env.CLIENT_URL,
+      `https://${req.get('host')}`,
+      `http://${req.get('host')}`,
+      'http://localhost:5173',
+      'http://localhost:5000'
+    ].filter(Boolean).map((origin) => origin.replace(/\/$/, ''));
+
+    cors({
+      origin: !requestOrigin || allowedOrigins.includes(requestOrigin.replace(/\/$/, '')),
+      credentials: true
+    })(req, res, (corsError) => {
+      if (corsError) return next(corsError);
+      sessionMiddleware(req, res, next);
+    });
+  } catch (error) {
+    next(error);
+  }
+});
 
 app.use("/api/", loginRoutes);
 app.use("/api/", signUpRoutes);
 app.use("/api/", verifyUserRoutes);
 app.use("/api/", groupRoutes);
-app.use("/api/", googleRoutes);
 app.use("/api/profile", profileRoutes);
 app.use("/api/", analyticsRoutes);
 app.use("/api/", expensesRoutes);
 app.use("/api/", forgotPasswordRoutes);
 app.use("/api/", notificationsRoutes);
 app.use("/api/settlements", settleUpRoutes);
-app.use("/api/wallet", walletRoutes);
-
-const path = require('path');
-app.use(express.static(path.join(__dirname, '..', 'Client', 'dist')));
-
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, '..', 'Client', 'dist', 'index.html'));
-});
+app.use("/api/", walletRoutes);
 
 // Global Error Handler Middleware (must be last)
 app.use((err, req, res, next) => {

@@ -23,7 +23,7 @@ const settlementSchema = new mongoose.Schema({
   },
   method: {
     type: String,
-    enum: ['upi', 'cash', 'bank_transfer', 'other'],
+    enum: ['upi', 'cash', 'bank_transfer', 'wallet', 'other'],
     default: 'upi'
   },
   upiTransactionId: String,

@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const userSchema = new mongoose.Schema(
   {
     name: { type: String, required: true, trim: true },
+    username: { type: String, trim: true, lowercase: true, minlength: 3, maxlength: 30 },
     email: { type: String, lowercase: true, trim: true },
     phone: { type: String, trim: true },
     password: { type: String, required: true },
@@ -11,7 +12,7 @@ const userSchema = new mongoose.Schema(
     upiList: { type: [String], default: [] },
     isEmailVerified: { type: Boolean, default: false },
     isPhoneVerified: { type: Boolean, default: false },
-    signupMethod: { type: String, enum: ['email', 'phone', 'google'], default: 'email' },
+    signupMethod: { type: String, enum: ['username', 'email', 'phone', 'google'], default: 'email' },
     twoFactorEnabled: { type: Boolean, default: false },
     twoFactorMethod: { type: String, enum: ['email', 'phone'], default: 'email' },
     notifications: [
@@ -34,6 +35,7 @@ const userSchema = new mongoose.Schema(
 // Sparse unique indexes — null values are ignored, but non-null must be unique
 userSchema.index({ email: 1 }, { unique: true, sparse: true });
 userSchema.index({ phone: 1 }, { unique: true, sparse: true });
+userSchema.index({ username: 1 }, { unique: true, sparse: true });
 
 // Pre-validate hook to clean up empty/null values so sparse unique index works
 userSchema.pre('validate', function () {
@@ -45,10 +47,10 @@ userSchema.pre('validate', function () {
   }
 });
 
-// At least one of email or phone must exist
+// Legacy accounts may use email or phone; new accounts use usernames.
 userSchema.pre('save', function () {
-  if (!this.email && !this.phone) {
-    throw new Error('User must have either email or phone.');
+  if (!this.username && !this.email && !this.phone) {
+    throw new Error('User must have a username, email, or phone number.');
   }
 });
 

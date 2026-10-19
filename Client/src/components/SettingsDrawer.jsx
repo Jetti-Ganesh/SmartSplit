@@ -285,8 +285,8 @@ const SettingsDrawer = ({ isOpen, onClose, isDark, toggleTheme }) => {
             <div className="settings-section">
               <h3>Account</h3>
               <div className="settings-item">
-                <span className="settings-label">Email</span>
-                <span className="settings-value">{user.email || profileUser?.email}</span>
+                <span className="settings-label">Username</span>
+                <span className="settings-value">{user.username || profileUser?.username || user.email || profileUser?.email || '—'}</span>
               </div>
             </div>
           )}

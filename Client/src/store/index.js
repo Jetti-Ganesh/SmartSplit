@@ -5,6 +5,7 @@ import { groupAPI } from '../services/groupAPI';
 import { expenseAPI } from '../services/expenseAPI';
 import { settleUpAPI } from '../services/settleUpAPI';
 import profileReducer from '../services/profileSlice';
+import walletReducer from '../services/walletSlice';
 
 export const store = configureStore({
   reducer: {
@@ -14,6 +15,7 @@ export const store = configureStore({
     [expenseAPI.reducerPath]: expenseAPI.reducer,
     [settleUpAPI.reducerPath]: settleUpAPI.reducer,
     profile: profileReducer,
+    wallet: walletReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(groupAPI.middleware, expenseAPI.middleware, settleUpAPI.middleware),

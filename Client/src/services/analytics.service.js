@@ -1,6 +1,7 @@
 import axios from 'axios';
+import { apiUrl } from './api';
 
-const API_URL = `${import.meta.env.VITE_API_URL}/api/analytics`;
+const API_URL = apiUrl('/api/analytics');
 
 export const fetchAnalytics = async (period = 'month', customRange = null) => {
     try {

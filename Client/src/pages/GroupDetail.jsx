@@ -1,9 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import '../styles/GroupDetail.css';
 import { useAddMemberMutation } from '../services/groupAPI';
 import { useCreateExpenseMutation, useGetExpensesQuery } from '../services/expenseAPI';
+import { useGetBalancesQuery, useRecordSettlementMutation } from '../services/settleUpAPI';
+import { fetchUserProfile } from '../services/profileSlice';
+import { settleDebtWallet } from '../services/walletSlice';
 import BottomNavbareM from '../components/BottomNavbareM';
 import SettingsDrawer from '../components/SettingsDrawer';
 import { useOutletContext } from 'react-router-dom';
@@ -25,11 +28,17 @@ function GroupDetail() {
   const { isDark, toggleTheme } = useOutletContext();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const { user: loggedInUser } = useSelector(state => state.auth);
+  const dispatch = useDispatch();
+  const profileUser = useSelector((state) => state.profile.user);
 
   const [addMemberFn, { isLoading: isAddingMember }] = useAddMemberMutation();
   const [addExpenseFn, { isLoading: isCreatingExpense }] = useCreateExpenseMutation();
   const { data: expensesRes, isLoading: isLoadingExpenses } = useGetExpensesQuery(groupId);
   const { showNotification } = useNotification();
+  const { data: balancesResponse, refetch: refetchBalances } = useGetBalancesQuery(groupId, { skip: !groupId });
+  const [recordSettlement, { isLoading: isRecording }] = useRecordSettlementMutation();
+
+  const debts = balancesResponse?.data?.balances || [];
 
   // Try to get group from state, otherwise provide a fallback or fetch it
   const group = location.state?.group || {
@@ -46,6 +55,10 @@ function GroupDetail() {
   const [showAddMemberModal, setShowAddMemberModal] = useState(false);
   const [showAddExpenseModal, setShowAddExpenseModal] = useState(false);
   const [expandedExpenseId, setExpandedExpenseId] = useState(null);
+  const [showSettleModal, setShowSettleModal] = useState(false);
+  const [showQrModal, setShowQrModal] = useState(false);
+  const [qrCodeUrl, setQrCodeUrl] = useState('');
+  const [activeUpiDebt, setActiveUpiDebt] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState('Food');
   const [memberTab, setMemberTab] = useState('email'); // 'email' | 'invite'
   const [splitType, setSplitType] = useState('Equally');
@@ -67,6 +80,78 @@ function GroupDetail() {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [expandedExpenseId]);
+
+  useEffect(() => {
+    if (loggedInUser) {
+      dispatch(fetchUserProfile());
+    }
+  }, [dispatch, loggedInUser]);
+
+  const fmt = (v) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(v);
+
+  const handlePayViaUpi = (debt) => {
+    const recipientName = debt.toName || debt.to;
+    const upiUrl = `upi://pay?pa=9848247279-2@axl&pn=${encodeURIComponent(recipientName)}&am=${debt.amount}&cu=INR`;
+    const qrCodeImage = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(upiUrl)}&color=8b5cf6`;
+    
+    setQrCodeUrl(qrCodeImage);
+    setActiveUpiDebt(debt);
+    setShowQrModal(true);
+    showNotification('📱 Opening secure UPI QR Code scanner!', 'info');
+  };
+
+  const handleRecordSettlement = async (debt) => {
+    const payload = {
+      groupId,
+      to: debt.to,
+      amount: debt.amount,
+      method: 'upi',
+      notes: debt.toName ? `Settled with ${debt.toName}` : 'Settled debt',
+    };
+
+    if (debt.from !== loggedInUser?._id) {
+      payload.from = debt.from;
+    }
+
+    try {
+      await recordSettlement(payload).unwrap();
+      showNotification(`✅ Settlement of ${fmt(debt.amount)} recorded!`, 'success');
+      await refetchBalances();
+      if (showQrModal) {
+        setShowQrModal(false);
+      }
+    } catch (error) {
+      console.error('Failed to record settlement', error);
+      showNotification(error?.data?.message || 'Unable to record settlement', 'error');
+    }
+  };
+
+  const handlePayViaWallet = async (debt) => {
+    const balance = profileUser?.walletBalance || 0;
+    if (balance < debt.amount) {
+      showNotification(`❌ Insufficient wallet balance (${fmt(balance)}). Please top up in your Profile.`, 'error');
+      return;
+    }
+
+    if (!window.confirm(`Are you sure you want to pay ${fmt(debt.amount)} to ${debt.toName || debt.to} via your Wallet?`)) {
+      return;
+    }
+
+    try {
+      await dispatch(settleDebtWallet({
+        groupId,
+        to: debt.to,
+        amount: debt.amount
+      })).unwrap();
+
+      showNotification(`👛 Paid ${fmt(debt.amount)} successfully via Wallet!`, 'success');
+      dispatch(fetchUserProfile());
+      await refetchBalances();
+    } catch (error) {
+      console.error('Wallet payment failed:', error);
+      showNotification(error || 'Failed to settle debt via wallet', 'error');
+    }
+  };
 
   const handleBack = () => {
     navigate('/groups');
@@ -154,6 +239,14 @@ function GroupDetail() {
     }
   };
 
+  const youOwe = debts
+    .filter((debt) => debt.from === loggedInUser?._id)
+    .reduce((sum, debt) => sum + debt.amount, 0);
+  const youAreOwed = debts
+    .filter((debt) => debt.to === loggedInUser?._id)
+    .reduce((sum, debt) => sum + debt.amount, 0);
+  const groupDebts = debts.filter(debt => debt.from === loggedInUser?._id || debt.to === loggedInUser?._id);
+
   return (
     <>
       {/* ── MOBILE TOP BAR ── */}
@@ -196,8 +289,8 @@ function GroupDetail() {
       {/* Balance Card */}
       <div className="balance-summary-card">
         <p>YOUR BALANCE</p>
-        <h2 className={group.userBalance.owing > 0 ? 'text-owe' : group.userBalance.owed > 0 ? 'text-owed' : ''}>
-          {group.userBalance.owed > 0 ? `You owe ₹${group.userBalance.owed}` : group.userBalance.owing > 0 ? `You are owed ₹${group.userBalance.owing}` : 'Settled Up'}
+        <h2 className={youOwe > 0 ? 'text-owe' : youAreOwed > 0 ? 'text-owed' : ''}>
+          {youOwe > 0 ? `You owe ₹${youOwe}` : youAreOwed > 0 ? `You are owed ₹${youAreOwed}` : 'Settled Up'}
         </h2>
       </div>
 
@@ -207,10 +300,10 @@ function GroupDetail() {
           <div className="action-icon icon-expense">💰</div>
           <span>Add Expense</span>
         </button>
-        {/* <button className="action-card">
+        <button className="action-card" onClick={() => setShowSettleModal(true)}>
           <div className="action-icon icon-settle">⚖️</div>
           <span>Settle Up</span>
-        </button> */}
+        </button>
         <button className="action-card" onClick={() => setShowAddMemberModal(true)}>
           <div className="action-icon icon-member">👥</div>
           <span>Add Member</span>
@@ -575,6 +668,128 @@ function GroupDetail() {
 
                 </div>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Settle Up Modal */}
+      {showSettleModal && (
+        <div className="modal-overlay" onClick={() => setShowSettleModal(false)}>
+          <div className="add-member-modal enhanced-modal settle-up-modal" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>Settle Up Balances</h2>
+              <p className="modal-subtitle">Pay your dues or verify incoming settlements</p>
+              <button className="close-btn" onClick={() => setShowSettleModal(false)}>×</button>
+            </div>
+
+            <div className="modal-content scrollable-content" style={{ padding: '20px 24px 24px' }}>
+              <div className="debts-list-premium-detail">
+                {groupDebts.length === 0 ? (
+                  <div className="empty-state-premium-detail">
+                    <span className="empty-icon-prem">🎉</span>
+                    <h4>All Settled Up!</h4>
+                    <p>No outstanding balances or payments remaining in this group.</p>
+                  </div>
+                ) : (
+                  groupDebts.map((debt, index) => {
+                    const isOutgoing = debt.from === loggedInUser?._id;
+                    const isIncoming = debt.to === loggedInUser?._id;
+                    const label = isOutgoing
+                      ? `You owe ${debt.toName || debt.to}`
+                      : `${debt.fromName || debt.from} owes you`;
+                    
+                    const initials = (isOutgoing ? (debt.toName || 'U') : (debt.fromName || 'U'))
+                      .split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+
+                    return (
+                      <div 
+                        key={index} 
+                        className={`debt-item-premium-detail ${isIncoming ? 'incoming' : 'outgoing'}`}
+                      >
+                        <div className="debt-avatar-prem-detail">
+                          {initials}
+                        </div>
+                        <div className="debt-details-prem-detail">
+                          <div className="debt-desc-prem-detail">{label}</div>
+                          <div className="debt-meta-prem-detail">
+                            {isOutgoing 
+                              ? `Your wallet: ${fmt(profileUser?.walletBalance || 0)}` 
+                              : 'Verify and mark when received'
+                            }
+                          </div>
+                          <div className="debt-actions-prem-detail">
+                            {isOutgoing && (
+                              <>
+                                <button className="btn-pay-upi-prem-detail" onClick={() => handlePayViaUpi(debt)}>
+                                  ⚡ UPI Pay
+                                </button>
+                                <button className="btn-pay-wallet-prem-detail" onClick={() => handlePayViaWallet(debt)}>
+                                  👛 Wallet Pay
+                                </button>
+                              </>
+                            )}
+                            <button 
+                              className="btn-mark-settled-prem-detail" 
+                              onClick={() => handleRecordSettlement(debt)} 
+                              disabled={isRecording}
+                            >
+                              {isIncoming ? '✓ Received' : '✓ Paid Cash'}
+                            </button>
+                          </div>
+                        </div>
+                        <div className="debt-amount-prem-detail">{fmt(debt.amount)}</div>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* UPI QR Modal (within GroupDetail) */}
+      {showQrModal && activeUpiDebt && (
+        <div className="modal-overlay" onClick={() => setShowQrModal(false)} style={{ zIndex: 1100 }}>
+          <div className="qr-modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="qr-modal-header">
+              <h3>Secure UPI Settlement</h3>
+              <p>Scan to pay {activeUpiDebt.toName || activeUpiDebt.to} instantly</p>
+              <button className="close-btn" onClick={() => setShowQrModal(false)}>×</button>
+            </div>
+            
+            <div className="qr-modal-body">
+              <div className="qr-code-wrapper">
+                {qrCodeUrl ? (
+                  <img src={qrCodeUrl} alt="UPI QR Code" className="upi-qr-image" />
+                ) : (
+                  <div className="qr-spinner"></div>
+                )}
+              </div>
+              
+              <div className="qr-details-area">
+                <div className="qr-amount-pill">{fmt(activeUpiDebt.amount)}</div>
+                <p className="qr-instructions">
+                  Scan this QR code using any UPI app (GPay, PhonePe, Paytm, BHIM) on your mobile phone to transfer the funds directly.
+                </p>
+              </div>
+
+              <div className="qr-buttons-wrapper">
+                <button 
+                  className="btn-qr-success" 
+                  onClick={() => handleRecordSettlement(activeUpiDebt)}
+                  disabled={isRecording}
+                >
+                  ✓ Transfer Successful, Record Now
+                </button>
+                <button 
+                  className="btn-qr-cancel" 
+                  onClick={() => setShowQrModal(false)}
+                >
+                  Cancel Payment
+                </button>
+              </div>
             </div>
           </div>
         </div>
