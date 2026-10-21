@@ -1,6 +1,5 @@
 import { useOutletContext, useNavigate, useLocation } from "react-router-dom";
 import "../styles/Dashboard.css";
-import SettingsDrawer from "../components/SettingsDrawer";
 import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { useGetGroupsQuery } from "../services/groupAPI";
@@ -242,13 +241,6 @@ export default function Dashboard() {
       </main>
 
       {/* ── MOBILE BOTTOM NAV ── */}
-
-      <SettingsDrawer 
-        isOpen={isSettingsOpen} 
-        onClose={() => setIsSettingsOpen(false)} 
-        isDark={isDark} 
-        toggleTheme={toggleTheme} 
-      />
     </div>
   );
 }

@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { useCreateGroupMutation, useGetGroupsQuery, useJoinGroupMutation } from '../services/groupAPI';
-import SettingsDrawer from '../components/SettingsDrawer';
 import { useOutletContext } from 'react-router-dom';
 import { useNotification } from '../context/NotificationContext';
 import '../styles/Groups.css';
@@ -336,13 +335,6 @@ function Groups() {
       {/* ── MOBILE BOTTOM NAV ── */}
 
     </div>
-
-      <SettingsDrawer 
-        isOpen={isSettingsOpen} 
-        onClose={() => setIsSettingsOpen(false)} 
-        isDark={isDark} 
-        toggleTheme={toggleTheme} 
-      />
     </>
   );
 }

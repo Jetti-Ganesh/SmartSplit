@@ -4,7 +4,6 @@ import { fetchAnalytics } from '../services/analytics.service';
 import TrendChart from '../components/activity/TrendChart';
 import CategoryDonut from '../components/activity/CategoryDonut';
 import SpendHeatmap from '../components/activity/SpendHeatmap';
-import SettingsDrawer from '../components/SettingsDrawer';
 import '../styles/Activity.css';
 
 // Chevron icon
@@ -443,14 +442,6 @@ export default function Activity() {
           </>
         )}
       </main>
-
-
-      <SettingsDrawer
-        isOpen={isSettingsOpen}
-        onClose={() => setIsSettingsOpen(false)}
-        isDark={isDark}
-        toggleTheme={toggleTheme}
-      />
     </div>
   );
 }

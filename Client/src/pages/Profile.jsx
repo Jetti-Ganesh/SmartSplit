@@ -21,7 +21,6 @@ import {
   clearWalletSuccess
 } from "../services/walletSlice";
 import ThemeToggle from "../components/ThemeToggle";
-import SettingsDrawer from "../components/SettingsDrawer";
 import { useNotification } from "../context/NotificationContext";
 import walletImg from "../assets/wallet_illustration.png";
 import "../styles/Profile.css";
@@ -1227,13 +1226,6 @@ export default function ProfilePage() {
           setShowVerifyPopup={setShowVerifyPopup}
         />
       )}
-
-      <SettingsDrawer 
-        isOpen={isSettingsOpen} 
-        onClose={() => setIsSettingsOpen(false)} 
-        isDark={isDark} 
-        toggleTheme={toggleTheme} 
-      />
 
       {/* ── Verify Phone/Email Modal ── */}
       {verifyModal && (
