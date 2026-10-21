@@ -10,7 +10,8 @@
 }
 @media (max-width: 768px) {
   .activity-page {
-    padding-top: 0;
+    padding-top: calc(var(--mobile-navbar-height, 64px) + 16px);
+    padding-bottom: 90px;
   }
 }
 

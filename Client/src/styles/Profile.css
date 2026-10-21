@@ -364,8 +364,10 @@ body.light {
 
 @media (max-width: 768px) {
   .profile-main {
+    padding-top: calc(var(--mobile-navbar-height, 64px) + 12px);
     margin-top: 0;
-    padding: 0;
+    padding-left: 0;
+    padding-right: 0;
   }
 }
 

@@ -618,6 +618,20 @@ body.light .qr-modal-content {
 }
 
 @media (max-width: 768px) {
+  .settle-up-shell {
+    padding: calc(var(--mobile-navbar-height, 64px) + 16px) 14px 90px !important;
+  }
+
+  .section-header-settle {
+    padding: 20px 18px;
+    border-radius: 20px;
+    margin-bottom: 24px;
+  }
+
+  .section-title-custom {
+    font-size: clamp(1.6rem, 6vw, 2.2rem);
+  }
+
   .settle-content-split {
     flex-direction: column;
   }

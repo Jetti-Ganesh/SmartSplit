@@ -445,15 +445,15 @@ const Navbar = ({ isDark, toggleTheme }) => {
             )}
           </div>
         </div>
-
-        {/* Backdrop for mobile drawer */}
-        {mobileMenuOpen && (
-          <div
-            className="nav-drawer-backdrop"
-            onClick={() => setMobileMenuOpen(false)}
-          />
-        )}
       </header>
+
+      {/* Backdrop for mobile drawer */}
+      {mobileMenuOpen && (
+        <div
+          className="nav-drawer-backdrop"
+          onClick={() => setMobileMenuOpen(false)}
+        />
+      )}
 
       {/* Settings Drawer */}
       <SettingsDrawer

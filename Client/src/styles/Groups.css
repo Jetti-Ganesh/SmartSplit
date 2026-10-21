@@ -304,8 +304,32 @@
 /* Responsive */
 @media (max-width: 768px) {
   .groups-container {
-    padding-top: 20px;
+    padding-top: calc(var(--mobile-navbar-height, 64px) + 20px);
+    padding-left: 16px;
+    padding-right: 16px;
     padding-bottom: 90px;
+  }
+
+  .groups-header {
+    padding: 20px 18px;
+    border-radius: 20px;
+    margin-bottom: 24px;
+  }
+
+  .header-text h1 {
+    font-size: clamp(1.8rem, 6vw, 2.4rem);
+  }
+
+  .add-group-btn {
+    width: 100%;
+    justify-content: center;
+    padding: 12px 18px;
+  }
+
+  .balance-cards {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    margin-bottom: 30px;
   }
 
   .groups-header {

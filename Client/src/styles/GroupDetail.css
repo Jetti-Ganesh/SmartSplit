@@ -414,7 +414,7 @@
 /* Responsive Layout Adjustments */
 @media (max-width: 640px) {
   .group-detail-container {
-    padding-top: 20px;
+    padding-top: calc(var(--mobile-navbar-height, 64px) + 16px);
     padding-bottom: 90px;
   }
 

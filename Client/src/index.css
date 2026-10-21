@@ -7,10 +7,14 @@
   --card-bg: #161b24;
   --border-color: #2a3147;
   --primary: #f0b429;
-  --navbar-height: 72px;
+  --navbar-height: 68px;
+  --mobile-navbar-height: 62px;
   
   --card-bg-rgb: 22, 27, 36;
   --text-color-rgb: 232, 237, 245;
+
+  --safe-area-top: env(safe-area-inset-top, 0px);
+  --safe-area-bottom: env(safe-area-inset-bottom, 16px);
 }
 
 body.light {
@@ -24,8 +28,12 @@ body.light {
   --text-color-rgb: 26, 32, 53;
 }
 
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
 body {
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background-color: var(--bg-color);
@@ -34,6 +42,7 @@ body {
   padding: 0;
   overflow-x: hidden;
   width: 100%;
+  -webkit-tap-highlight-color: transparent;
 }
 
 /* Smooth scrolling */
@@ -42,78 +51,21 @@ html {
   overflow-x: hidden;
   width: 100%;
 }
+
+/* Ensure buttons have comfortable mobile touch targets & manipulation */
+button, a, input, select, textarea {
+  touch-action: manipulation;
+}
+
 /* Responsive Sidebar Hide */
-@media (max-width: 768px) {
+@media (max-width: 900px) {
   .sidebar {
     display: none !important;
   }
 }
 
-/* Global Mobile Top Bar */
-.mobile-top-bar { display: none; }
-
-@media (max-width: 768px) {
-  .mobile-top-bar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 10px 1.2rem;
-    background: rgba(13, 17, 23, 0.8);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border-bottom: 1px solid var(--border-color);
-    position: sticky;
-    top: 0;
-    z-index: 101;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-    margin-bottom: 20px;
-  }
-
-  body.light .mobile-top-bar {
-    background: rgba(244, 246, 251, 0.8);
-    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.05);
-  }
-
-  .mobile-top-logo {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    cursor: pointer;
-    user-select: none;
-  }
-
-  .mobile-top-logo .logo-icon {
-    font-size: 1.2rem;
-    filter: drop-shadow(0 0 8px #00e5ff);
-  }
-
-  .mobile-top-logo span:last-child {
-    font-family: 'Syne', sans-serif;
-    font-weight: 800;
-    font-size: 1.2rem;
-    background: linear-gradient(135deg, #00e5ff, #7c3aed);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    letter-spacing: -0.5px;
-  }
-
-  .mobile-top-settings {
-    background: var(--card-bg);
-    border: 1px solid var(--border-color);
-    width: 40px;
-    height: 40px;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.2rem;
-    cursor: pointer;
-    color: var(--text-color);
-    transition: all 0.2s ease;
-  }
-
-  .mobile-top-settings:active {
-    transform: scale(0.9);
-  }
+/* Global Mobile Top Bar Suppression (Single Unified Navbar) */
+.mobile-top-bar,
+.mobile-bottom-nav {
+  display: none !important;
 }

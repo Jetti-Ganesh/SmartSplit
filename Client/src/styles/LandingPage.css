@@ -156,13 +156,7 @@ body.dark .mobile-nav-dropdown {
   font-weight: 600;
 }
 
-@media (max-width: 768px) {
-  .mobile-top-bar { display: flex; }
-}
 
-@media (max-width: 480px) {
-  .mobile-top-bar { padding: 0 16px; }
-}
 
 @media (max-width: 768px) {
   .section-header {
