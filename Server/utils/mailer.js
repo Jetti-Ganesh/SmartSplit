@@ -31,15 +31,7 @@ const transporter = nodemailer.createTransport({
   socketTimeout: 10000
 });
 
-// Test SMTP connection
-transporter.verify((error, success) => {
-  if (error) {
-    console.error('❌ SMTP Email Config Error:', error.message);
-  }
-  else {
-    console.log('✅ SMTP Email Service Ready!');
-  }
-});
+// SMTP is validated on-demand when sending emails.
 
 const sendEmail = async (mailOptions) => {
   if (!EMAIL_USER || !EMAIL_PASS) {

@@ -1,4 +1,14 @@
 {
+  "name": "smartsplit-server",
+  "version": "1.0.0",
+  "private": true,
+  "main": "api/index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "engines": {
+    "node": ">=18.x"
+  },
   "dependencies": {
     "bcryptjs": "^3.0.3",
     "connect-mongo": "^6.0.0",
