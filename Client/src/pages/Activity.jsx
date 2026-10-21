@@ -118,14 +118,8 @@ export default function Activity() {
 
   return (
     <div className="dashboard-shell activity-page">
-      {/* ── MOBILE TOP BAR ── */}
-      <div className="mobile-top-bar">
-        <div className="mobile-top-logo" onClick={() => navigate('/Dashboard')} style={{ cursor: 'pointer' }}>
-          <span className="logo-icon">⚡</span>
-          <span>SplitSmart</span>
-        </div>
-        <button className="mobile-top-settings" onClick={() => setIsSettingsOpen(true)}>⚙️</button>
-      </div>
+      
+      
 
       <main className="main-content">
         {/* Page Header */}

@@ -135,16 +135,8 @@ function SettleUp() {
 
   return (
     <div className="dashboard-shell">
-      {/* ── MOBILE TOP BAR ── */}
-      <div className="mobile-top-bar">
-        <div className="mobile-top-logo" onClick={() => navigate('/Dashboard')}>
-          <span className="logo-icon">⚡</span>
-          <span>SplitSmart</span>
-        </div>
-        <button className="mobile-top-settings" onClick={() => setIsSettingsOpen(true)}>
-          ⚙️
-        </button>
-      </div>
+      
+      
 
       <main className="main-content settle-up-shell">
         <div className="dash-section">

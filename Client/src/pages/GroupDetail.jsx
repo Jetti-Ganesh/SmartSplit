@@ -248,16 +248,8 @@ function GroupDetail() {
 
   return (
     <>
-      {/* ── MOBILE TOP BAR ── */}
-      <div className="mobile-top-bar">
-        <div className="mobile-top-logo" onClick={() => navigate("/")}>
-          <span className="logo-icon">⚡</span>
-          <span>SplitSmart</span>
-        </div>
-        <button className="mobile-top-settings" onClick={() => setIsSettingsOpen(true)}>
-          ⚙️
-        </button>
-      </div>
+      
+      
 
       {/* Group detail container */}
       <div className="group-detail-container">

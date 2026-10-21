@@ -33,17 +33,8 @@ function Settings(){
     return (
         <div className="dashboard-shell">
 
-           {/* ── SIDEBAR (desktop only) ──────────────────────────────────── */}
-      {/* ── MOBILE TOP BAR ────────────────────────────────────────── */}
-      <div className="mobile-top-bar">
-        <div className="mobile-top-logo" onClick={() => navigate("/")}>
-          <span className="logo-icon">⚡</span>
-          <span>SplitSmart</span>
-        </div>
-        <button className="mobile-top-settings" onClick={() => navigate("/Settings")}>
-          ⚙️
-        </button>
-      </div>
+           
+      
 
 
 

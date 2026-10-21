@@ -830,15 +830,7 @@ export default function ProfilePage() {
     <div className="dashboard-shell">
 
       {/* ── MOBILE TOP BAR ────────────────────────────────────────── */}
-      <div className="mobile-top-bar">
-        <div className="mobile-top-logo" onClick={() => navigate("/Dashboard")}>
-          <span className="logo-icon">⚡</span>
-          <span>SplitSmart</span>
-        </div>
-        <button className="mobile-top-settings" onClick={() => setIsSettingsOpen(true)}>
-          ⚙️
-        </button>
-      </div>
+      
 
       {/* ── Status Messages ────────────────────────────────────────── */}
       {loading && (

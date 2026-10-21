@@ -57,7 +57,6 @@ function SignUp() {
 
   return (
     <>
-      <MobileTopBar isDark={isDark ?? false} toggleTheme={toggleTheme ?? (() => {})} showHamburger={false} />
       <div className="split-container">
         <div className="login-card">
           <div className="login-left">

@@ -127,12 +127,7 @@ function ForgotPassword() {
 
   return (
     <>
-      <div className="mobile-top-bar">
-        <div className="mobile-top-logo" onClick={() => navigate("/")}>
-          <span className="logo-icon">⚡</span>
-          <span>SplitSmart</span>
-        </div>
-      </div>
+      
 
       <div className="split-container">
         <div className="login-card" style={{ maxWidth: 520, flexDirection: 'column' }}>

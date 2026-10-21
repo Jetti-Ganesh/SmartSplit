@@ -183,9 +183,7 @@ body.light .nav-item.active {
 }
 
 /* Hide mobile top bar by default (desktop) */
-.mobile-top-bar {
-  display: none;
-}
+.mobile-top-bar { display: none !important; }
 
 /* =============================================
    MAIN CONTENT
@@ -836,25 +834,9 @@ body.light .create-group-btn:hover {
   /* =============================================
      MOBILE TOP BAR
      ============================================= */
-  .mobile-top-bar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 10px 1.2rem;
-    background: rgba(13, 17, 23, 0.8);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border-bottom: 1px solid var(--border);
-    position: sticky;
-    top: 0;
-    z-index: 101;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-  }
+  .mobile-top-bar { display: none !important; }
 
-  body.light .mobile-top-bar {
-    background: rgba(244, 246, 251, 0.8);
-    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.05);
-  }
+  body.light .mobile-top-bar { display: none !important; }
 
   .mobile-top-logo {
     display: flex;
