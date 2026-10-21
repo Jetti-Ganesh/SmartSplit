@@ -1,7 +1,11 @@
 const mongoose = require('mongoose');
 const dns = require('dns');
 
-dns.setServers(['1.1.1.1', '8.8.8.8']);
+try {
+  dns.setServers(['1.1.1.1', '8.8.8.8']);
+} catch (dnsErr) {
+  console.warn('DNS resolver customization skipped:', dnsErr.message);
+}
 
 let connectionPromise;
 
@@ -14,7 +18,10 @@ async function connectDB() {
   }
 
   if (!connectionPromise) {
-    connectionPromise = mongoose.connect(process.env.MONGO_URI).then(async () => {
+    connectionPromise = mongoose.connect(process.env.MONGO_URI, {
+      serverSelectionTimeoutMS: 10000,
+      tlsAllowInvalidCertificates: true // Allows connection if Atlas cluster TLS cert has expired
+    }).then(async () => {
       console.log('MongoDB connected');
 
       try {

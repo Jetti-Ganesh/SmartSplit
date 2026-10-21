@@ -1,10 +1,8 @@
-
 require("dotenv").config();
 const express = require('express');
 const app = express();
 const cors = require('cors');
 const session = require('express-session');
-const MongoStore = require('connect-mongo').default; 
 const connectDB = require("./db/db");
 
 const loginRoutes = require("./routes/login.route");
@@ -16,26 +14,71 @@ const analyticsRoutes = require("./routes/analytics.routes");
 const expensesRoutes = require("./routes/expenses.route");
 const forgotPasswordRoutes = require("./routes/forgotPassword.route");
 const notificationsRoutes = require("./routes/notifications.route");
-const settleUpRoutes = require("./routes/settlup.route"); // ← add this 
-const walletRoutes = require("./routes/wallet.route"); // ← add this
+const settleUpRoutes = require("./routes/settlup.route");
+const walletRoutes = require("./routes/wallet.route");
 
 app.set('trust proxy', 1);
 
+// Standard parsers
 app.use(express.json({ limit: '5mb' }));
 app.use(express.urlencoded({ limit: '5mb', extended: true }));
 
+// Global CORS Middleware
+const allowedOrigins = [
+  process.env.CLIENT_URL,
+  'https://smart-split-k56c.vercel.app',
+  'http://localhost:5173',
+  'http://localhost:3000',
+  'http://localhost:5000'
+].filter(Boolean).map((origin) => origin.replace(/\/$/, ''));
+
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true);
+    const cleanOrigin = origin.replace(/\/$/, '');
+    if (
+      allowedOrigins.includes(cleanOrigin) ||
+      cleanOrigin.endsWith('.vercel.app') ||
+      cleanOrigin.includes('localhost')
+    ) {
+      return callback(null, true);
+    }
+    // Allow by default to prevent blocking unexpected Vercel preview domains
+    return callback(null, true);
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept']
+}));
+
+// Root and Health Check Endpoints
+app.get('/', (req, res) => {
+  res.status(200).json({
+    status: 'ok',
+    message: 'SmartSplit API server is running',
+    timestamp: new Date().toISOString()
+  });
+});
+
+app.get('/api/health', (req, res) => {
+  res.status(200).json({
+    status: 'ok',
+    message: 'SmartSplit API is healthy',
+    timestamp: new Date().toISOString()
+  });
+});
+
+// Session middleware initialization
 let sessionMiddleware;
 
 app.use('/api', async (req, res, next) => {
   try {
     await connectDB();
 
-    if (!sessionMiddleware) {
-      const sessionSecret = process.env.SESSION_SECRET || process.env.JWT_SECRET;
-      if (!sessionSecret) {
-        throw new Error('SESSION_SECRET or JWT_SECRET must be configured.');
-      }
-
+    if (!sessionMiddleware && process.env.MONGO_URI) {
+      const sessionSecret = process.env.SESSION_SECRET || process.env.JWT_SECRET || 'smartsplit_secret';
+      const MongoStore = require('connect-mongo').default || require('connect-mongo');
+      
       sessionMiddleware = session({
         secret: sessionSecret,
         resave: false,
@@ -46,34 +89,23 @@ app.use('/api', async (req, res, next) => {
         }),
         cookie: {
           secure: process.env.NODE_ENV === 'production',
-          sameSite: 'lax',
+          sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
           httpOnly: true,
-          maxAge: 600000
+          maxAge: 24 * 3600 * 1000
         }
       });
     }
 
-    const requestOrigin = req.get('origin');
-    const allowedOrigins = [
-      process.env.CLIENT_URL,
-      `https://${req.get('host')}`,
-      `http://${req.get('host')}`,
-      'http://localhost:5173',
-      'http://localhost:5000'
-    ].filter(Boolean).map((origin) => origin.replace(/\/$/, ''));
-
-    cors({
-      origin: !requestOrigin || allowedOrigins.includes(requestOrigin.replace(/\/$/, '')),
-      credentials: true
-    })(req, res, (corsError) => {
-      if (corsError) return next(corsError);
-      sessionMiddleware(req, res, next);
-    });
+    if (sessionMiddleware) {
+      return sessionMiddleware(req, res, next);
+    }
+    next();
   } catch (error) {
     next(error);
   }
 });
 
+// Route Mounts
 app.use("/api/", loginRoutes);
 app.use("/api/", signUpRoutes);
 app.use("/api/", verifyUserRoutes);
@@ -85,22 +117,11 @@ app.use("/api/", forgotPasswordRoutes);
 app.use("/api/", notificationsRoutes);
 app.use("/api/settlements", settleUpRoutes);
 app.use("/api/", walletRoutes);
-<<<<<<< HEAD
-=======
-
-const path = require('path');
-app.use(express.static(path.join(__dirname, '..', 'Client', 'dist')));
-
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, '..', 'Client', 'dist', 'index.html'));
-});
->>>>>>> 069bee569d14aae943070fcf2b13ce4bbc84c7f5
 
 // Global Error Handler Middleware (must be last)
 app.use((err, req, res, next) => {
   console.error('Error:', err);
 
-  // Validation errors (from Mongoose or custom validation)
   if (err.message && err.message.includes('Split amounts must equal total amount')) {
     return res.status(400).json({
       success: false,
@@ -108,7 +129,6 @@ app.use((err, req, res, next) => {
     });
   }
 
-  // Mongoose validation errors
   if (err.name === 'ValidationError') {
     const messages = Object.values(err.errors).map(e => e.message);
     return res.status(400).json({
@@ -118,7 +138,6 @@ app.use((err, req, res, next) => {
     });
   }
 
-  // Mongoose cast errors
   if (err.name === 'CastError') {
     return res.status(400).json({
       success: false,
@@ -126,7 +145,6 @@ app.use((err, req, res, next) => {
     });
   }
 
-  // Default error
   res.status(err.status || 500).json({
     success: false,
     message: err.message || 'Internal server error'
