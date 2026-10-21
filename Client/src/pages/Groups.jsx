@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { useCreateGroupMutation, useGetGroupsQuery, useJoinGroupMutation } from '../services/groupAPI';
-import BottomNavbareM from '../components/BottomNavbareM';
 import SettingsDrawer from '../components/SettingsDrawer';
 import { useOutletContext } from 'react-router-dom';
 import { useNotification } from '../context/NotificationContext';
@@ -343,7 +342,6 @@ function Groups() {
       )}
 
       {/* ── MOBILE BOTTOM NAV ── */}
-      <BottomNavbareM />
 
     </div>
 

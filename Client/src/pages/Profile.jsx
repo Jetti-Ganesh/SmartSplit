@@ -21,7 +21,6 @@ import {
   clearWalletSuccess
 } from "../services/walletSlice";
 import ThemeToggle from "../components/ThemeToggle";
-import BottomNavbareM from "../components/BottomNavbareM";
 import SettingsDrawer from "../components/SettingsDrawer";
 import { useNotification } from "../context/NotificationContext";
 import walletImg from "../assets/wallet_illustration.png";
@@ -1217,7 +1216,6 @@ export default function ProfilePage() {
 
 
     {/* bottom navbar */}
-    <BottomNavbareM />
 
       {/* ── Modals (rendered outside main so they overlay everything) ── */}
       {modal === "edit" && (

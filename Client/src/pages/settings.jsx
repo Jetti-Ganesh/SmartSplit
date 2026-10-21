@@ -1,7 +1,6 @@
 import { useNavigate, useLocation, useOutletContext } from 'react-router-dom';
 import '../styles/Settings.css'
 import ThemeToggle from '../components/ThemeToggle';
-import BottomNavbareM from '../components/BottomNavbareM';
 import { useState, useEffect } from 'react';
 
 
@@ -91,7 +90,6 @@ function Settings(){
 
 
         {/* ── MOBILE BOTTOM NAV ───────────────────────────────────────── */}
-      <BottomNavbareM />
         </div>
     )
 }   

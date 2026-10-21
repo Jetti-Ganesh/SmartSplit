@@ -3,7 +3,6 @@ import { useNavigate, useOutletContext } from 'react-router-dom'
 import { useDispatch } from 'react-redux'
 import { loginSuccess } from '../services/authSlice'
 import { apiUrl } from '../services/api'
-import MobileTopBar from '../components/MobileTopBar'
 import { useNotification } from '../context/NotificationContext'
 import '../styles/Login-SignUp.css'
 

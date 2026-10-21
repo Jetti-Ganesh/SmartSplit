@@ -1,6 +1,5 @@
 import { useOutletContext, useNavigate, useLocation } from "react-router-dom";
 import "../styles/Dashboard.css";
-import BottomNavbareM from "../components/BottomNavbareM";
 import SettingsDrawer from "../components/SettingsDrawer";
 import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
@@ -251,7 +250,6 @@ export default function Dashboard() {
       </main>
 
       {/* ── MOBILE BOTTOM NAV ── */}
-      <BottomNavbareM />
 
       <SettingsDrawer 
         isOpen={isSettingsOpen} 

@@ -7,7 +7,6 @@ import { useCreateExpenseMutation, useGetExpensesQuery } from '../services/expen
 import { useGetBalancesQuery, useRecordSettlementMutation } from '../services/settleUpAPI';
 import { fetchUserProfile } from '../services/profileSlice';
 import { settleDebtWallet } from '../services/walletSlice';
-import BottomNavbareM from '../components/BottomNavbareM';
 import SettingsDrawer from '../components/SettingsDrawer';
 import { useOutletContext } from 'react-router-dom';
 import { useNotification } from '../context/NotificationContext';
@@ -796,7 +795,6 @@ function GroupDetail() {
       )}
 
       {/* ── MOBILE BOTTOM NAV ── */}
-      <BottomNavbareM />
 
     </div>
 

@@ -3,7 +3,6 @@ import { useSelector, useDispatch } from 'react-redux';
 import '../styles/SettleUp.css'
 import { useState, useEffect } from 'react';
 import SettingsDrawer from '../components/SettingsDrawer';
-import BottomNavbareM from '../components/BottomNavbareM';
 import { useGetGroupsQuery } from '../services/groupAPI';
 import { useGetBalancesQuery, useRecordSettlementMutation } from '../services/settleUpAPI';
 import { useNotification } from '../context/NotificationContext';
@@ -368,7 +367,6 @@ function SettleUp() {
         </div>
       )}
 
-      <BottomNavbareM />
 
       <SettingsDrawer
         isOpen={isSettingsOpen}

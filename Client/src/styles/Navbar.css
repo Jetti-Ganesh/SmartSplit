@@ -7,8 +7,8 @@
   --bg-primary: #0a0e17;
   --bg-secondary: #121826;
   --bg-card: rgba(255, 255, 255, 0.04);
-  --nav-bg: rgba(10, 14, 23, 0.75);
-  --nav-bg-scrolled: rgba(10, 14, 23, 0.88);
+  --nav-bg: rgba(10, 14, 23, 0.8);
+  --nav-bg-scrolled: rgba(10, 14, 23, 0.92);
   --nav-border: rgba(255, 255, 255, 0.08);
   --nav-border-scrolled: rgba(255, 255, 255, 0.12);
   --nav-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.25);
@@ -36,8 +36,8 @@ body.light {
   --bg-primary: #f8fafc;
   --bg-secondary: #ffffff;
   --bg-card: rgba(0, 0, 0, 0.03);
-  --nav-bg: rgba(255, 255, 255, 0.8);
-  --nav-bg-scrolled: rgba(255, 255, 255, 0.92);
+  --nav-bg: rgba(255, 255, 255, 0.85);
+  --nav-bg-scrolled: rgba(255, 255, 255, 0.95);
   --nav-border: rgba(0, 0, 0, 0.06);
   --nav-border-scrolled: rgba(0, 0, 0, 0.1);
   --nav-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
@@ -62,10 +62,10 @@ body.light {
   right: 0;
   height: 68px;
   background: var(--nav-bg);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
   border-bottom: 1px solid var(--nav-border);
-  z-index: 1000;
+  z-index: 10000;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   align-items: center;
@@ -377,10 +377,17 @@ body.light .icon-action-btn:hover {
 }
 
 /* ==========================================================================
-   Mobile Hamburger Toggle
+   Mobile Controls (Theme Toggle + Hamburger)
    ========================================================================== */
 .nav-mobile-trigger {
   display: none;
+  align-items: center;
+  gap: 8px;
+}
+
+.mobile-header-theme {
+  display: flex;
+  align-items: center;
 }
 
 .hamburger-toggle {
@@ -443,7 +450,7 @@ body.light .icon-action-btn:hover {
   opacity: 0;
   pointer-events: none;
   transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease;
-  z-index: 999;
+  z-index: 9999;
 }
 
 .nav-mobile-drawer.is-open {
@@ -453,7 +460,7 @@ body.light .icon-action-btn:hover {
 }
 
 .mobile-drawer-inner {
-  padding: 1.5rem;
+  padding: 1.25rem 1.5rem;
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
@@ -531,19 +538,9 @@ body.light .icon-action-btn:hover {
 .mobile-drawer-footer {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
   padding-top: 1rem;
   border-top: 1px solid var(--nav-border);
-}
-
-.mobile-theme-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-family: var(--font-ui);
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: var(--text-secondary);
 }
 
 .mobile-auth-actions {
@@ -586,15 +583,16 @@ body.light .icon-action-btn:hover {
   top: 68px;
   background: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(4px);
-  z-index: 998;
+  z-index: 9998;
 }
 
 /* ==========================================================================
    Responsive Breakpoints
    ========================================================================== */
 @media (max-width: 900px) {
-  .nav-menu-desktop {
-    display: none;
+  .nav-menu-desktop,
+  .nav-actions-desktop {
+    display: none !important;
   }
 
   .nav-mobile-trigger {
@@ -604,26 +602,9 @@ body.light .icon-action-btn:hover {
   .nav-mobile-drawer {
     display: block;
   }
-
-  .user-action-cluster .user-display-name {
-    display: none;
-  }
-
-  .user-profile-pill {
-    padding: 4px;
-  }
 }
 
 @media (max-width: 768px) {
-  /* On pages with dedicated mobile top bar (Landing/Login/Signup), avoid duplicate headers */
-  body:has(.mtb-bar) .smart-navbar {
-    display: none;
-  }
-
-  .nav-actions-desktop {
-    display: none;
-  }
-
   .nav-container {
     padding: 0 1rem;
   }
